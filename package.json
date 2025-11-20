@@ -1,0 +1,13 @@
+{
+  "name": "soulful-sessions",
+  "version": "1.0.0",
+  "description": "Chrome Extension that combines productivity and fun game",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Soulful Sessions",
+  "description": "Chrome Extension that combines productivity and fun game into a chimera product, made using Kiro",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "soul_shepherd.png"
+  }
+}
