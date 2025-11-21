@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Task Completion Auto-Commit",
+  "description": "Automatically stages all files and commits with message 'Task: <spec name>/<task number>' whenever a task in a spec is marked as completed",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      ".kiro/**/*.md",
+      ".kiro/**/*.json",
+      ".kiro/**/*.txt"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A task has been completed in a spec. Please: 1) Identify the spec name and task number that was just completed, 2) Stage all files using 'git add .', 3) Commit with the message format 'Task: <spec-name>/<task-number>' (example: 'Task: soul-shepherd-game/3')"
+  }
+}

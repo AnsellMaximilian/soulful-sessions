@@ -31,7 +31,7 @@
   - Add session validation to prevent multiple concurrent sessions
   - _Requirements: 1.1, 1.4, 12.2, 12.3_
 
-- [ ] 5. Implement RewardCalculator module
+- [x] 5. Implement RewardCalculator module
 
   - Create RewardCalculator class with calculateRewards method
   - Implement Soul Insight formula: sessionDuration _ 10 _ (1 + spirit \* 0.1)
