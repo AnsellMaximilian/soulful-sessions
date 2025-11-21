@@ -50,7 +50,7 @@
   - Create level threshold formula: 100 \* (level ^ 1.5)
   - _Requirements: 3.1, 3.2, 3.3, 9.1, 9.2, 9.3_
 
-- [ ] 7. Implement IdleCollector module
+- [x] 7. Implement IdleCollector module
 
   - Create IdleCollector class with collectIdleSouls and calculateIdleRate methods
   - Implement idle collection formula: 1 soul per 5 minutes _ (1 + soulflow _ 0.1)

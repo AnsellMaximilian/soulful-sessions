@@ -4,7 +4,9 @@
 
 import { StateManager } from "./StateManager";
 import { SessionManager } from "./SessionManager";
+import { IdleCollector } from "./IdleCollector";
 import { GameState, Message, SessionState } from "./types";
+import { FORMULAS } from "./constants";
 
 // ============================================================================
 // Global State
@@ -12,6 +14,7 @@ import { GameState, Message, SessionState } from "./types";
 
 let stateManager: StateManager;
 let sessionManager: SessionManager;
+let idleCollector: IdleCollector;
 
 // ============================================================================
 // Service Worker Lifecycle
@@ -23,14 +26,18 @@ let sessionManager: SessionManager;
 chrome.runtime.onInstalled.addListener(async (details) => {
   console.log("[Background] Extension installed:", details.reason);
 
-  // Initialize StateManager and SessionManager
+  // Initialize StateManager, SessionManager, and IdleCollector
   stateManager = new StateManager();
   sessionManager = new SessionManager();
+  idleCollector = new IdleCollector();
 
   try {
     // Load or create initial state
     await stateManager.loadState();
     console.log("[Background] State initialized successfully");
+
+    // Set up idle collection alarm (every 5 minutes)
+    await setupIdleCollectionAlarm();
 
     // Request notification permission
     if (details.reason === "install") {
@@ -49,17 +56,23 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 chrome.runtime.onStartup.addListener(async () => {
   console.log("[Background] Extension starting up");
 
-  // Initialize StateManager and SessionManager
+  // Initialize StateManager, SessionManager, and IdleCollector
   stateManager = new StateManager();
   sessionManager = new SessionManager();
+  idleCollector = new IdleCollector();
 
   try {
     // Load existing state
     await stateManager.loadState();
     console.log("[Background] State loaded on startup");
 
+    // Set up idle collection alarm (every 5 minutes)
+    await setupIdleCollectionAlarm();
+
+    // Collect any idle souls accumulated while browser was closed
+    await handleIdleCollectionAlarm();
+
     // TODO: Check for missed alarms/timers (Phase 2)
-    // TODO: Resume idle collection (Phase 4)
   } catch (error) {
     console.error("[Background] Failed to load state on startup:", error);
   }
@@ -85,6 +98,10 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     sessionManager = new SessionManager();
   }
 
+  if (!idleCollector) {
+    idleCollector = new IdleCollector();
+  }
+
   switch (alarm.name) {
     case "soulShepherd_sessionEnd":
       await handleSessionAlarm();
@@ -96,10 +113,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       break;
 
     case "soulShepherd_idleCollection":
-      // TODO: Implement in Task 7
-      console.log(
-        "[Background] Idle collection alarm fired (not yet implemented)"
-      );
+      await handleIdleCollectionAlarm();
       break;
 
     default:
@@ -127,6 +141,85 @@ async function handleSessionAlarm(): Promise<void> {
     await handleEndSession();
   } catch (error) {
     console.error("[Background] Error handling session alarm:", error);
+  }
+}
+
+/**
+ * Set up periodic idle collection alarm (every 5 minutes)
+ */
+async function setupIdleCollectionAlarm(): Promise<void> {
+  try {
+    // Clear any existing idle collection alarm
+    await chrome.alarms.clear("soulShepherd_idleCollection");
+
+    // Create periodic alarm (every 5 minutes)
+    await chrome.alarms.create("soulShepherd_idleCollection", {
+      periodInMinutes: FORMULAS.IDLE_COLLECTION_INTERVAL,
+    });
+
+    console.log(
+      `[Background] Idle collection alarm set up (every ${FORMULAS.IDLE_COLLECTION_INTERVAL} minutes)`
+    );
+  } catch (error) {
+    console.error(
+      "[Background] Failed to set up idle collection alarm:",
+      error
+    );
+  }
+}
+
+/**
+ * Handle idle collection alarm
+ */
+async function handleIdleCollectionAlarm(): Promise<void> {
+  console.log("[Background] Idle collection alarm fired");
+
+  try {
+    const currentState = stateManager.getState();
+    const { lastCollectionTime, accumulatedSouls } =
+      currentState.progression.idleState;
+    const soulflow = currentState.player.stats.soulflow;
+
+    // Collect idle souls
+    const { soulsCollected, embersEarned, newCollectionTime } =
+      idleCollector.collectIdleSouls(lastCollectionTime, soulflow);
+
+    // Update state with new collection time and rewards
+    await stateManager.updateState({
+      progression: {
+        ...currentState.progression,
+        idleState: {
+          lastCollectionTime: newCollectionTime,
+          accumulatedSouls: accumulatedSouls + soulsCollected,
+        },
+      },
+      player: {
+        ...currentState.player,
+        soulEmbers: currentState.player.soulEmbers + embersEarned,
+      },
+      statistics: {
+        ...currentState.statistics,
+        totalIdleSoulsCollected:
+          currentState.statistics.totalIdleSoulsCollected + soulsCollected,
+        totalSoulEmbersEarned:
+          currentState.statistics.totalSoulEmbersEarned + embersEarned,
+      },
+    });
+
+    console.log(
+      `[Background] Idle collection complete: ${soulsCollected} souls, ${embersEarned} embers`
+    );
+
+    // Broadcast idle collection to all clients
+    broadcastMessage({
+      type: "IDLE_SOULS_COLLECTED",
+      payload: {
+        soulsCollected,
+        embersEarned,
+      },
+    });
+  } catch (error) {
+    console.error("[Background] Error handling idle collection alarm:", error);
   }
 }
 
