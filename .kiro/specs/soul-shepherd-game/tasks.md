@@ -402,7 +402,7 @@
   - Write test for stat upgrade purchase
   - _Requirements: 1.1, 1.2, 1.4, 2.5, 3.2, 3.3, 6.3, 7.3, 8.2, 9.2, 12.1_
 
-- [ ] 41. Perform manual testing
+- [x] 41. Perform manual testing
 
   - Install extension in Chrome and verify initial state
   - Complete full session and verify all calculations
