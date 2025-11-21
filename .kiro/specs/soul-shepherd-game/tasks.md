@@ -41,7 +41,7 @@
   - Calculate boss damage: spirit _ sessionDuration _ 0.5
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 3.2_
 
-- [ ] 6. Implement ProgressionManager module
+- [x] 6. Implement ProgressionManager module
 
   - Create ProgressionManager class with damageBoss, getCurrentBoss, unlockNextBoss methods
   - Implement boss Resolve reduction and defeat detection
