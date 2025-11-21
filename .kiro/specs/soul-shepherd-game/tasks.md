@@ -7,7 +7,7 @@
   - Create constants file with Stubborn Soul catalog and game formulas
   - _Requirements: 1.1, 2.1, 3.1, 4.1_
 
-- [ ] 2. Implement StateManager and storage persistence
+- [x] 2. Implement StateManager and storage persistence
 
   - Create StateManager class with loadState, saveState, getState, and updateState methods
   - Implement default state initialization for new users
@@ -15,7 +15,7 @@
   - Implement error handling with retry logic for storage operations
   - _Requirements: 1.1, 2.1, 3.4, 4.5_
 
-- [ ] 3. Create Background Service Worker skeleton
+- [-] 3. Create Background Service Worker skeleton
 
   - Set up background.ts file with service worker lifecycle
   - Initialize StateManager on extension install/startup
