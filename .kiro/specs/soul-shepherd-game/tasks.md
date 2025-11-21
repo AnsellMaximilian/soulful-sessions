@@ -59,7 +59,7 @@
   - Persist lastCollectionTime to handle browser restarts
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 8. Create basic Popup UI structure
+- [x] 8. Create basic Popup UI structure
 
   - Create popup.html with container divs for different view states
   - Create popup.css with base styles and layout (400x600px)
@@ -415,6 +415,7 @@
   - _Requirements: All requirements_
 
 - [ ] 42. Performance optimization
+
   - Profile popup load time (target < 100ms)
   - Profile background worker memory usage (target < 50MB)
   - Profile storage operation timing (target < 50ms)

@@ -2,10 +2,196 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Soulful Sessions</title>
+    <title>Soul Shepherd</title>
+    <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>Soulful Sessions</h1>
+    <!-- Idle View: Default state when no session is active -->
+    <div id="idle-view" class="view">
+      <div class="character-container">
+        <img
+          id="character-sprite"
+          src="soul_shepherd.png"
+          alt="Soul Shepherd"
+          class="character"
+        />
+      </div>
+
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-label">Spirit:</span>
+          <span id="stat-spirit" class="stat-value">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Harmony:</span>
+          <span id="stat-harmony" class="stat-value">5%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Soulflow:</span>
+          <span id="stat-soulflow" class="stat-value">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Level:</span>
+          <span id="stat-level" class="stat-value">1</span>
+        </div>
+      </div>
+
+      <div class="currency-panel">
+        <div class="currency-item">
+          <span class="currency-label">Soul Insight:</span>
+          <div class="xp-bar-container">
+            <div id="xp-bar" class="xp-bar"></div>
+            <span id="xp-text" class="xp-text">0 / 100</span>
+          </div>
+        </div>
+        <div class="currency-item">
+          <span class="currency-label">Soul Embers:</span>
+          <span id="soul-embers" class="currency-value">0</span>
+        </div>
+      </div>
+
+      <div class="boss-card">
+        <h3 id="boss-name" class="boss-name">The Restless Athlete</h3>
+        <p id="boss-backstory" class="boss-backstory">Loading...</p>
+        <div class="resolve-bar-container">
+          <div id="resolve-bar" class="resolve-bar"></div>
+          <span id="resolve-text" class="resolve-text">100 / 100</span>
+        </div>
+      </div>
+
+      <div class="session-controls">
+        <label for="task-selector" class="control-label">Task:</label>
+        <select id="task-selector" class="task-selector">
+          <option value="">Select a task...</option>
+        </select>
+
+        <label for="duration-input" class="control-label"
+          >Duration (minutes):</label
+        >
+        <input
+          id="duration-input"
+          type="number"
+          min="5"
+          max="120"
+          value="25"
+          class="duration-input"
+        />
+
+        <button id="start-session-btn" class="primary-button">
+          Start Focus Session
+        </button>
+      </div>
+    </div>
+
+    <!-- Focus Session View: Minimal view during active session -->
+    <div id="focus-session-view" class="view hidden">
+      <div class="focus-message-container">
+        <p class="focus-message">
+          Soul Shepherd is communing with a Stubborn Soul. Stay focused.
+        </p>
+        <p id="time-remaining" class="time-remaining"></p>
+      </div>
+    </div>
+
+    <!-- Reward View: Displayed after session completion -->
+    <div id="reward-view" class="view hidden">
+      <div class="reward-container">
+        <h2 class="reward-title">Ritual Complete</h2>
+
+        <div class="reward-item">
+          <span class="reward-label">Soul Insight Earned:</span>
+          <span id="reward-soul-insight" class="reward-value">0</span>
+        </div>
+
+        <div class="reward-item">
+          <span class="reward-label">Soul Embers Earned:</span>
+          <span id="reward-soul-embers" class="reward-value">0</span>
+        </div>
+
+        <div class="reward-item">
+          <span class="reward-label">Boss Damage Dealt:</span>
+          <span id="reward-boss-damage" class="reward-value">0</span>
+        </div>
+
+        <div class="reward-item">
+          <span class="reward-label">Boss Resolve Remaining:</span>
+          <span id="reward-boss-resolve" class="reward-value">0</span>
+        </div>
+
+        <div id="critical-indicator" class="critical-indicator hidden">
+          ⚡ Critical Hit! ⚡
+        </div>
+
+        <div id="compromise-warning" class="compromise-warning hidden">
+          ⚠️ Session Compromised - Reduced Rewards
+        </div>
+
+        <div class="time-breakdown">
+          <div class="time-item">
+            <span class="time-label">Active Time:</span>
+            <span id="active-time" class="time-value">0m</span>
+          </div>
+          <div class="time-item">
+            <span class="time-label">Idle Time:</span>
+            <span id="idle-time" class="time-value">0m</span>
+          </div>
+        </div>
+
+        <button id="continue-break-btn" class="primary-button">
+          Continue to Break
+        </button>
+      </div>
+    </div>
+
+    <!-- Break View: Full game UI during break period -->
+    <div id="break-view" class="view hidden">
+      <div class="character-container">
+        <img
+          id="break-character-sprite"
+          src="soul_shepherd.png"
+          alt="Soul Shepherd"
+          class="character"
+        />
+      </div>
+
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-label">Spirit:</span>
+          <span id="break-stat-spirit" class="stat-value">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Harmony:</span>
+          <span id="break-stat-harmony" class="stat-value">5%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Soulflow:</span>
+          <span id="break-stat-soulflow" class="stat-value">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Level:</span>
+          <span id="break-stat-level" class="stat-value">1</span>
+        </div>
+      </div>
+
+      <div class="boss-card">
+        <h3 id="break-boss-name" class="boss-name">The Restless Athlete</h3>
+        <p id="break-boss-backstory" class="boss-backstory">Loading...</p>
+        <div class="resolve-bar-container">
+          <div id="break-resolve-bar" class="resolve-bar"></div>
+          <span id="break-resolve-text" class="resolve-text">100 / 100</span>
+        </div>
+      </div>
+
+      <div class="break-timer">
+        <span class="break-label">Break Time Remaining:</span>
+        <span id="break-countdown" class="break-countdown">5:00</span>
+      </div>
+
+      <button id="start-next-session-btn" class="primary-button">
+        Start Next Session
+      </button>
+    </div>
+
     <script src="dist/popup.js"></script>
   </body>
 </html>
