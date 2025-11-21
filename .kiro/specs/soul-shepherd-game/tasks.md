@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [-] 1. Set up core infrastructure and data models
+- [x] 1. Set up core infrastructure and data models
 
   - Update manifest.json with all required permissions (storage, alarms, idle, webNavigation, tabs, declarativeNetRequest, notifications)
   - Create TypeScript interfaces for all data models (GameState, PlayerState, ProgressionState, TaskState, SettingsState, StatisticsState)

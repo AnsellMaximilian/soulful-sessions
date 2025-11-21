@@ -6,5 +6,26 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": "soul_shepherd.png"
-  }
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "idle",
+    "webNavigation",
+    "tabs",
+    "declarativeNetRequest",
+    "notifications"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"],
+      "run_at": "document_start"
+    }
+  ]
 }
