@@ -14,6 +14,7 @@
     "webNavigation",
     "tabs",
     "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
     "notifications"
   ],
   "host_permissions": ["<all_urls>"],
@@ -26,6 +27,13 @@
       "matches": ["<all_urls>"],
       "js": ["dist/content.js"],
       "run_at": "document_start"
+    }
+  ],
+  "options_page": "options.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html", "dist/blocked.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

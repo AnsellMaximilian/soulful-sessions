@@ -1,67 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Soul Shepherd</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
-  <body>
+  <body role="application" aria-label="Soul Shepherd Game Interface">
+    <!-- Content Souls Container (for animations during break) -->
+    <div
+      id="content-souls-container"
+      class="content-souls-container"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Idle Collection Counter (shown when animations disabled) -->
+    <div
+      id="idle-collection-counter"
+      class="idle-collection-counter"
+      style="display: none"
+      role="status"
+      aria-live="polite"
+      aria-label="Content Souls Collection Counter"
+    >
+      <span class="counter-label">Content Souls</span>
+      <span id="idle-counter-value" class="counter-value">0</span>
+    </div>
+
+    <!-- Soul Embers Increment Notification -->
+    <div
+      id="embers-increment"
+      class="embers-increment"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
     <!-- Idle View: Default state when no session is active -->
-    <div id="idle-view" class="view">
+    <div id="idle-view" class="view" role="main" aria-label="Idle View">
       <div class="character-container">
         <img
           id="character-sprite"
           src="soul_shepherd.png"
-          alt="Soul Shepherd"
+          alt="Soul Shepherd character sprite"
           class="character"
         />
       </div>
 
-      <div class="stats-panel">
+      <div class="stats-panel" role="region" aria-label="Player Statistics">
         <div class="stat-item">
-          <span class="stat-label">Spirit:</span>
-          <span id="stat-spirit" class="stat-value">1</span>
+          <span class="stat-label" id="spirit-label">Spirit:</span>
+          <span
+            id="stat-spirit"
+            class="stat-value"
+            aria-labelledby="spirit-label"
+            >1</span
+          >
         </div>
         <div class="stat-item">
-          <span class="stat-label">Harmony:</span>
-          <span id="stat-harmony" class="stat-value">5%</span>
+          <span class="stat-label" id="harmony-label">Harmony:</span>
+          <span
+            id="stat-harmony"
+            class="stat-value"
+            aria-labelledby="harmony-label"
+            >5%</span
+          >
         </div>
         <div class="stat-item">
-          <span class="stat-label">Soulflow:</span>
-          <span id="stat-soulflow" class="stat-value">1</span>
+          <span class="stat-label" id="soulflow-label">Soulflow:</span>
+          <span
+            id="stat-soulflow"
+            class="stat-value"
+            aria-labelledby="soulflow-label"
+            >1</span
+          >
         </div>
         <div class="stat-item">
-          <span class="stat-label">Level:</span>
-          <span id="stat-level" class="stat-value">1</span>
+          <span class="stat-label" id="level-label">Level:</span>
+          <span id="stat-level" class="stat-value" aria-labelledby="level-label"
+            >1</span
+          >
         </div>
       </div>
 
-      <div class="currency-panel">
+      <div
+        class="currency-panel"
+        role="region"
+        aria-label="Currency and Experience"
+      >
         <div class="currency-item">
           <span class="currency-label">Soul Insight:</span>
-          <div class="xp-bar-container">
+          <div
+            class="xp-bar-container"
+            role="progressbar"
+            aria-label="Soul Insight progress to next level"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
             <div id="xp-bar" class="xp-bar"></div>
             <span id="xp-text" class="xp-text">0 / 100</span>
           </div>
         </div>
         <div class="currency-item">
-          <span class="currency-label">Soul Embers:</span>
-          <span id="soul-embers" class="currency-value">0</span>
+          <span class="currency-label" id="embers-label">Soul Embers:</span>
+          <span
+            id="soul-embers"
+            class="currency-value"
+            aria-labelledby="embers-label"
+            >0</span
+          >
         </div>
       </div>
 
-      <div class="boss-card">
+      <div class="boss-card" role="region" aria-label="Current Stubborn Soul">
         <h3 id="boss-name" class="boss-name">The Restless Athlete</h3>
         <p id="boss-backstory" class="boss-backstory">Loading...</p>
-        <div class="resolve-bar-container">
+        <div
+          class="resolve-bar-container"
+          role="progressbar"
+          aria-label="Boss Resolve remaining"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="100"
+        >
           <div id="resolve-bar" class="resolve-bar"></div>
           <span id="resolve-text" class="resolve-text">100 / 100</span>
         </div>
       </div>
 
-      <div class="session-controls">
+      <div
+        class="session-controls"
+        role="form"
+        aria-label="Start Focus Session"
+      >
         <label for="task-selector" class="control-label">Task:</label>
-        <select id="task-selector" class="task-selector">
+        <select
+          id="task-selector"
+          class="task-selector"
+          aria-label="Select task to work on"
+          aria-required="false"
+        >
           <option value="">Select a task...</option>
         </select>
 
@@ -75,119 +154,420 @@
           max="120"
           value="25"
           class="duration-input"
+          aria-label="Session duration in minutes"
+          aria-required="true"
         />
 
-        <button id="start-session-btn" class="primary-button">
+        <button
+          id="start-session-btn"
+          class="primary-button"
+          aria-label="Start focus session"
+        >
           Start Focus Session
         </button>
       </div>
     </div>
 
     <!-- Focus Session View: Minimal view during active session -->
-    <div id="focus-session-view" class="view hidden">
+    <div
+      id="focus-session-view"
+      class="view hidden"
+      role="main"
+      aria-label="Focus Session in Progress"
+    >
       <div class="focus-message-container">
-        <p class="focus-message">
+        <p class="focus-message" role="status" aria-live="polite">
           Soul Shepherd is communing with a Stubborn Soul. Stay focused.
         </p>
-        <p id="time-remaining" class="time-remaining"></p>
+        <p
+          id="time-remaining"
+          class="time-remaining"
+          role="timer"
+          aria-live="off"
+          aria-atomic="true"
+        ></p>
       </div>
     </div>
 
     <!-- Reward View: Displayed after session completion -->
-    <div id="reward-view" class="view hidden">
+    <div
+      id="reward-view"
+      class="view hidden"
+      role="main"
+      aria-label="Session Rewards"
+    >
       <div class="reward-container">
         <h2 class="reward-title">Ritual Complete</h2>
 
-        <div class="reward-item">
-          <span class="reward-label">Soul Insight Earned:</span>
-          <span id="reward-soul-insight" class="reward-value">0</span>
+        <div class="reward-item" role="group" aria-label="Soul Insight earned">
+          <span class="reward-label" id="insight-earned-label"
+            >Soul Insight Earned:</span
+          >
+          <span
+            id="reward-soul-insight"
+            class="reward-value"
+            aria-labelledby="insight-earned-label"
+            >0</span
+          >
         </div>
 
-        <div class="reward-item">
-          <span class="reward-label">Soul Embers Earned:</span>
-          <span id="reward-soul-embers" class="reward-value">0</span>
+        <div class="reward-xp-container">
+          <span class="reward-xp-label">Soul Insight Progress:</span>
+          <div
+            class="reward-xp-bar-container"
+            role="progressbar"
+            aria-label="Soul Insight progress to next level"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div id="reward-xp-bar" class="reward-xp-bar"></div>
+            <span id="reward-xp-text" class="reward-xp-text">0 / 100</span>
+          </div>
         </div>
 
-        <div class="reward-item">
-          <span class="reward-label">Boss Damage Dealt:</span>
-          <span id="reward-boss-damage" class="reward-value">0</span>
+        <div class="reward-item" role="group" aria-label="Soul Embers earned">
+          <span class="reward-label" id="embers-earned-label"
+            >Soul Embers Earned:</span
+          >
+          <span
+            id="reward-soul-embers"
+            class="reward-value"
+            aria-labelledby="embers-earned-label"
+            >0</span
+          >
         </div>
 
-        <div class="reward-item">
-          <span class="reward-label">Boss Resolve Remaining:</span>
-          <span id="reward-boss-resolve" class="reward-value">0</span>
+        <div class="reward-item" role="group" aria-label="Boss damage dealt">
+          <span class="reward-label" id="boss-damage-label"
+            >Boss Damage Dealt:</span
+          >
+          <span
+            id="reward-boss-damage"
+            class="reward-value"
+            aria-labelledby="boss-damage-label"
+            >0</span
+          >
         </div>
 
-        <div id="critical-indicator" class="critical-indicator hidden">
+        <div
+          class="reward-item"
+          role="group"
+          aria-label="Boss resolve remaining"
+        >
+          <span class="reward-label" id="boss-resolve-label"
+            >Boss Resolve Remaining:</span
+          >
+          <span
+            id="reward-boss-resolve"
+            class="reward-value"
+            aria-labelledby="boss-resolve-label"
+            >0</span
+          >
+        </div>
+
+        <div
+          id="critical-indicator"
+          class="critical-indicator hidden"
+          role="status"
+          aria-live="polite"
+        >
           ⚡ Critical Hit! ⚡
         </div>
 
-        <div id="compromise-warning" class="compromise-warning hidden">
+        <div
+          id="compromise-warning"
+          class="compromise-warning hidden"
+          role="alert"
+          aria-live="assertive"
+        >
           ⚠️ Session Compromised - Reduced Rewards
         </div>
 
-        <div class="time-breakdown">
+        <div
+          class="time-breakdown"
+          role="region"
+          aria-label="Session time breakdown"
+        >
           <div class="time-item">
-            <span class="time-label">Active Time:</span>
-            <span id="active-time" class="time-value">0m</span>
+            <span class="time-label" id="active-time-label">Active Time:</span>
+            <span
+              id="active-time"
+              class="time-value"
+              aria-labelledby="active-time-label"
+              >0m</span
+            >
           </div>
           <div class="time-item">
-            <span class="time-label">Idle Time:</span>
-            <span id="idle-time" class="time-value">0m</span>
+            <span class="time-label" id="idle-time-label">Idle Time:</span>
+            <span
+              id="idle-time"
+              class="time-value"
+              aria-labelledby="idle-time-label"
+              >0m</span
+            >
           </div>
         </div>
 
-        <button id="continue-break-btn" class="primary-button">
+        <button
+          id="continue-break-btn"
+          class="primary-button"
+          aria-label="Continue to break period"
+        >
           Continue to Break
         </button>
       </div>
     </div>
 
     <!-- Break View: Full game UI during break period -->
-    <div id="break-view" class="view hidden">
+    <div
+      id="break-view"
+      class="view hidden"
+      role="main"
+      aria-label="Break Period"
+    >
       <div class="character-container">
         <img
           id="break-character-sprite"
           src="soul_shepherd.png"
-          alt="Soul Shepherd"
+          alt="Soul Shepherd character sprite"
           class="character"
         />
       </div>
 
-      <div class="stats-panel">
-        <div class="stat-item">
-          <span class="stat-label">Spirit:</span>
-          <span id="break-stat-spirit" class="stat-value">1</span>
+      <div
+        class="stats-panel"
+        role="region"
+        aria-label="Player Statistics with Upgrade Options"
+      >
+        <div class="stat-item-upgrade">
+          <div class="stat-info">
+            <span class="stat-label" id="break-spirit-label">Spirit:</span>
+            <span
+              id="break-stat-spirit"
+              class="stat-value"
+              aria-labelledby="break-spirit-label"
+              >1</span
+            >
+          </div>
+          <div
+            class="upgrade-buttons"
+            role="group"
+            aria-label="Spirit upgrade options"
+          >
+            <button
+              id="allocate-spirit-btn"
+              class="skill-point-button"
+              aria-label="Allocate skill point to Spirit"
+            >
+              <span class="skill-point-icon" aria-hidden="true">★</span>
+            </button>
+            <button
+              id="upgrade-spirit-btn"
+              class="upgrade-button"
+              aria-label="Upgrade Spirit with Soul Embers"
+            >
+              <span class="upgrade-icon" aria-hidden="true">⬆</span>
+              <span
+                id="upgrade-spirit-cost"
+                class="upgrade-cost"
+                aria-label="Cost: 10 Soul Embers"
+                >10</span
+              >
+            </button>
+          </div>
+        </div>
+        <div class="stat-item-upgrade">
+          <div class="stat-info">
+            <span class="stat-label" id="break-harmony-label">Harmony:</span>
+            <span
+              id="break-stat-harmony"
+              class="stat-value"
+              aria-labelledby="break-harmony-label"
+              >5%</span
+            >
+          </div>
+          <div
+            class="upgrade-buttons"
+            role="group"
+            aria-label="Harmony upgrade options"
+          >
+            <button
+              id="allocate-harmony-btn"
+              class="skill-point-button"
+              aria-label="Allocate skill point to Harmony"
+            >
+              <span class="skill-point-icon" aria-hidden="true">★</span>
+            </button>
+            <button
+              id="upgrade-harmony-btn"
+              class="upgrade-button"
+              aria-label="Upgrade Harmony with Soul Embers"
+            >
+              <span class="upgrade-icon" aria-hidden="true">⬆</span>
+              <span
+                id="upgrade-harmony-cost"
+                class="upgrade-cost"
+                aria-label="Cost: 10 Soul Embers"
+                >10</span
+              >
+            </button>
+          </div>
+        </div>
+        <div class="stat-item-upgrade">
+          <div class="stat-info">
+            <span class="stat-label" id="break-soulflow-label">Soulflow:</span>
+            <span
+              id="break-stat-soulflow"
+              class="stat-value"
+              aria-labelledby="break-soulflow-label"
+              >1</span
+            >
+          </div>
+          <div
+            class="upgrade-buttons"
+            role="group"
+            aria-label="Soulflow upgrade options"
+          >
+            <button
+              id="allocate-soulflow-btn"
+              class="skill-point-button"
+              aria-label="Allocate skill point to Soulflow"
+            >
+              <span class="skill-point-icon" aria-hidden="true">★</span>
+            </button>
+            <button
+              id="upgrade-soulflow-btn"
+              class="upgrade-button"
+              aria-label="Upgrade Soulflow with Soul Embers"
+            >
+              <span class="upgrade-icon" aria-hidden="true">⬆</span>
+              <span
+                id="upgrade-soulflow-cost"
+                class="upgrade-cost"
+                aria-label="Cost: 10 Soul Embers"
+                >10</span
+              >
+            </button>
+          </div>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Harmony:</span>
-          <span id="break-stat-harmony" class="stat-value">5%</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Soulflow:</span>
-          <span id="break-stat-soulflow" class="stat-value">1</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Level:</span>
-          <span id="break-stat-level" class="stat-value">1</span>
+          <span class="stat-label" id="break-level-label">Level:</span>
+          <span
+            id="break-stat-level"
+            class="stat-value"
+            aria-labelledby="break-level-label"
+            >1</span
+          >
         </div>
       </div>
 
-      <div class="boss-card">
+      <div
+        class="skill-points-panel"
+        role="status"
+        aria-live="polite"
+        aria-label="Available skill points"
+      >
+        <span class="skill-points-label" id="skill-points-label"
+          >Available Skill Points:</span
+        >
+        <span
+          id="skill-points-value"
+          class="skill-points-value"
+          aria-labelledby="skill-points-label"
+          >0</span
+        >
+      </div>
+
+      <div class="currency-panel" role="region" aria-label="Currency">
+        <div class="currency-item">
+          <span class="currency-label" id="break-embers-label"
+            >Soul Embers:</span
+          >
+          <span
+            id="break-soul-embers"
+            class="currency-value"
+            aria-labelledby="break-embers-label"
+            >0</span
+          >
+        </div>
+      </div>
+
+      <div class="boss-card" role="region" aria-label="Current Stubborn Soul">
         <h3 id="break-boss-name" class="boss-name">The Restless Athlete</h3>
         <p id="break-boss-backstory" class="boss-backstory">Loading...</p>
-        <div class="resolve-bar-container">
+        <div
+          class="resolve-bar-container"
+          role="progressbar"
+          aria-label="Boss Resolve remaining"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="100"
+        >
           <div id="break-resolve-bar" class="resolve-bar"></div>
           <span id="break-resolve-text" class="resolve-text">100 / 100</span>
         </div>
       </div>
 
-      <div class="break-timer">
+      <div
+        class="break-timer"
+        role="timer"
+        aria-live="off"
+        aria-label="Break time remaining"
+      >
         <span class="break-label">Break Time Remaining:</span>
         <span id="break-countdown" class="break-countdown">5:00</span>
       </div>
 
-      <button id="start-next-session-btn" class="primary-button">
+      <!-- Cosmetics Shop -->
+      <div class="shop-section" role="region" aria-label="Cosmetics Shop">
+        <h3 class="shop-title">Soul Shepherd's Shop</h3>
+
+        <div class="shop-tabs" role="tablist" aria-label="Shop categories">
+          <button
+            id="themes-tab"
+            class="shop-tab active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="themes-shop"
+          >
+            Themes
+          </button>
+          <button
+            id="sprites-tab"
+            class="shop-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="sprites-shop"
+          >
+            Sprites
+          </button>
+        </div>
+
+        <div
+          id="themes-shop"
+          class="shop-content"
+          role="tabpanel"
+          aria-labelledby="themes-tab"
+        >
+          <div id="themes-list" class="cosmetics-list"></div>
+        </div>
+
+        <div
+          id="sprites-shop"
+          class="shop-content hidden"
+          role="tabpanel"
+          aria-labelledby="sprites-tab"
+        >
+          <div id="sprites-list" class="cosmetics-list"></div>
+        </div>
+      </div>
+
+      <button
+        id="start-next-session-btn"
+        class="primary-button"
+        aria-label="Start next focus session"
+      >
         Start Next Session
       </button>
     </div>

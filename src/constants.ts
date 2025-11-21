@@ -196,6 +196,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
   animationsEnabled: true,
   notificationsEnabled: true,
   soundVolume: 0.5,
+  showSessionTimer: true,
 };
 
 export const DEFAULT_STATISTICS: StatisticsState = {
@@ -214,6 +215,8 @@ export const DEFAULT_STATISTICS: StatisticsState = {
 // Validation Constants
 // ============================================================================
 
+export const CURRENT_STATE_VERSION = 1; // Increment when schema changes
+
 export const VALIDATION = {
   MIN_SESSION_DURATION: 5, // Minutes
   MAX_SESSION_DURATION: 120, // Minutes
@@ -231,3 +234,141 @@ export const UI = {
   POPUP_HEIGHT: 600,
   ANIMATION_DURATION: 300, // Milliseconds
 };
+
+// ============================================================================
+// Cosmetic Catalog
+// ============================================================================
+
+export interface CosmeticTheme {
+  id: string;
+  name: string;
+  description: string;
+  cost: number; // Soul Embers
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    backgroundGradient: string;
+  };
+}
+
+export interface CosmeticSprite {
+  id: string;
+  name: string;
+  description: string;
+  cost: number; // Soul Embers
+  imagePath: string;
+}
+
+export const COSMETIC_THEMES: CosmeticTheme[] = [
+  {
+    id: "default",
+    name: "Twilight Veil",
+    description: "The classic Soul Shepherd aesthetic",
+    cost: 0,
+    colors: {
+      primary: "#667eea",
+      secondary: "#764ba2",
+      accent: "#4fc3f7",
+      background: "#1a1a2e",
+      backgroundGradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+    },
+  },
+  {
+    id: "crimson-dusk",
+    name: "Crimson Dusk",
+    description: "A fiery theme for passionate shepherds",
+    cost: 100,
+    colors: {
+      primary: "#ff6b6b",
+      secondary: "#ee5a6f",
+      accent: "#ffd93d",
+      background: "#2d1b1b",
+      backgroundGradient: "linear-gradient(135deg, #2d1b1b 0%, #3d1f1f 100%)",
+    },
+  },
+  {
+    id: "emerald-grove",
+    name: "Emerald Grove",
+    description: "A natural theme for peaceful souls",
+    cost: 150,
+    colors: {
+      primary: "#51cf66",
+      secondary: "#37b24d",
+      accent: "#94d82d",
+      background: "#1a2e1a",
+      backgroundGradient: "linear-gradient(135deg, #1a2e1a 0%, #1f3d1f 100%)",
+    },
+  },
+  {
+    id: "golden-dawn",
+    name: "Golden Dawn",
+    description: "A radiant theme for enlightened guides",
+    cost: 200,
+    colors: {
+      primary: "#ffd700",
+      secondary: "#ffed4e",
+      accent: "#ffa94d",
+      background: "#2e2a1a",
+      backgroundGradient: "linear-gradient(135deg, #2e2a1a 0%, #3d361f 100%)",
+    },
+  },
+  {
+    id: "midnight-ocean",
+    name: "Midnight Ocean",
+    description: "A deep theme for contemplative shepherds",
+    cost: 250,
+    colors: {
+      primary: "#339af0",
+      secondary: "#1c7ed6",
+      accent: "#74c0fc",
+      background: "#1a1e2e",
+      backgroundGradient: "linear-gradient(135deg, #1a1e2e 0%, #1f2d3d 100%)",
+    },
+  },
+  {
+    id: "violet-dream",
+    name: "Violet Dream",
+    description: "A mystical theme for spiritual guides",
+    cost: 300,
+    colors: {
+      primary: "#9775fa",
+      secondary: "#845ef7",
+      accent: "#d0bfff",
+      background: "#221a2e",
+      backgroundGradient: "linear-gradient(135deg, #221a2e 0%, #2d1f3d 100%)",
+    },
+  },
+];
+
+export const COSMETIC_SPRITES: CosmeticSprite[] = [
+  {
+    id: "default",
+    name: "Classic Shepherd",
+    description: "The original Soul Shepherd appearance",
+    cost: 0,
+    imagePath: "soul_shepherd.png",
+  },
+  {
+    id: "hooded-guide",
+    name: "Hooded Guide",
+    description: "A mysterious shepherd cloaked in shadows",
+    cost: 150,
+    imagePath: "soul_shepherd.png", // Using default for now
+  },
+  {
+    id: "radiant-guardian",
+    name: "Radiant Guardian",
+    description: "A shepherd emanating gentle light",
+    cost: 200,
+    imagePath: "soul_shepherd.png", // Using default for now
+  },
+  {
+    id: "ethereal-wanderer",
+    name: "Ethereal Wanderer",
+    description: "A shepherd who walks between worlds",
+    cost: 250,
+    imagePath: "soul_shepherd.png", // Using default for now
+  },
+];

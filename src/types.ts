@@ -150,6 +150,7 @@ export interface SettingsState {
   animationsEnabled: boolean; // Default: true
   notificationsEnabled: boolean; // Default: true
   soundVolume: number; // 0-1, default: 0.5
+  showSessionTimer: boolean; // Default: true - Show remaining time during focus sessions
 }
 
 // ============================================================================
@@ -173,6 +174,7 @@ export interface StatisticsState {
 // ============================================================================
 
 export interface GameState {
+  version: number; // Schema version for migrations
   player: PlayerState;
   session: SessionState | null;
   break: BreakState | null;

@@ -15,6 +15,7 @@ async function testStateManager() {
     console.log("\n1. Testing loadState()...");
     const state = await stateManager.loadState();
     console.log("✓ State loaded:", state);
+    console.assert(state.version === 1, "Default version should be 1");
     console.assert(state.player.level === 1, "Default level should be 1");
     console.assert(state.player.soulEmbers === 0, "Default embers should be 0");
     console.assert(state.session === null, "Default session should be null");
@@ -63,6 +64,7 @@ async function testStateManager() {
     console.log("\n5. Testing state validation...");
     await chrome.storage.local.set({
       soulShepherdGameState: {
+        version: 1,
         player: { level: "invalid" }, // Invalid type
         // Missing other required fields
       },
@@ -78,6 +80,126 @@ async function testStateManager() {
       repairedState.settings !== undefined,
       "Missing settings should be added"
     );
+
+    // Test 6: State migration (version 0 to version 1)
+    console.log("\n6. Testing state migration...");
+    await chrome.storage.local.set({
+      soulShepherdGameState: {
+        // No version field (version 0)
+        player: {
+          level: 5,
+          soulEmbers: 250,
+          soulInsight: 500,
+          soulInsightToNextLevel: 1000,
+          stats: { spirit: 3, harmony: 0.15, soulflow: 2 },
+          skillPoints: 2,
+          cosmetics: {
+            ownedThemes: ["default"],
+            ownedSprites: ["default"],
+            activeTheme: "default",
+            activeSprite: "default",
+          },
+        },
+        session: null,
+        break: null,
+        progression: {
+          currentBossIndex: 1,
+          currentBossResolve: 150,
+          defeatedBosses: [0],
+          idleState: {
+            lastCollectionTime: Date.now(),
+            accumulatedSouls: 5,
+          },
+        },
+        tasks: { goals: [], nextId: 1 },
+        settings: {
+          defaultSessionDuration: 25,
+          defaultBreakDuration: 5,
+          autoStartNextSession: false,
+          idleThreshold: 120,
+          strictMode: false,
+          discouragedSites: [],
+          blockedSites: [],
+          animationsEnabled: true,
+          notificationsEnabled: true,
+          soundVolume: 0.5,
+          showSessionTimer: true,
+        },
+        statistics: {
+          totalSessions: 10,
+          totalFocusTime: 250,
+          currentStreak: 3,
+          longestStreak: 5,
+          lastSessionDate: "2024-01-01",
+          bossesDefeated: 1,
+          totalSoulInsightEarned: 500,
+          totalSoulEmbersEarned: 250,
+          totalIdleSoulsCollected: 20,
+        },
+      },
+    });
+    const migratedStateManager = new StateManager();
+    const migratedState = await migratedStateManager.loadState();
+    console.log("✓ State migrated from v0 to v1");
+    console.assert(
+      migratedState.version === 1,
+      "Migrated state should have version 1"
+    );
+    console.assert(
+      migratedState.player.level === 5,
+      "Player data should be preserved"
+    );
+    console.assert(
+      migratedState.player.soulEmbers === 250,
+      "Player embers should be preserved"
+    );
+    console.assert(
+      migratedState.progression.currentBossIndex === 1,
+      "Progression should be preserved"
+    );
+    console.assert(
+      migratedState.statistics.totalSessions === 10,
+      "Statistics should be preserved"
+    );
+
+    // Test 7: Critical corruption and backup
+    console.log("\n7. Testing critical corruption and backup...");
+    await chrome.storage.local.set({
+      soulShepherdGameState: {
+        version: 1,
+        // All major sections missing or invalid
+        player: null,
+        progression: "invalid",
+        settings: undefined,
+        statistics: 123,
+      },
+    });
+    const corruptedStateManager = new StateManager();
+    const resetState = await corruptedStateManager.loadState();
+    console.log("✓ Critically corrupted state reset to defaults");
+    console.assert(
+      resetState.version === 1,
+      "Reset state should have current version"
+    );
+    console.assert(
+      resetState.player.level === 1,
+      "Reset state should have default player"
+    );
+
+    // Check if backup was created
+    const backup = await corruptedStateManager.getBackupState();
+    console.assert(backup !== null, "Backup should be created");
+    console.assert(
+      typeof backup?.timestamp === "number",
+      "Backup should have timestamp"
+    );
+    console.log("✓ Backup created successfully");
+
+    // Test 8: Get state version
+    console.log("\n8. Testing getStateVersion()...");
+    const version = stateManager.getStateVersion();
+    console.assert(version === 1, "Current version should be 1");
+    console.log("✓ State version retrieved");
 
     console.log("\n=== All tests passed! ===");
   } catch (error) {

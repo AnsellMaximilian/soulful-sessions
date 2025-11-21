@@ -4,10 +4,19 @@
   "description": "Chrome Extension that combines productivity and fun game",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathIgnorePatterns=integration.test.ts",
+    "test:integration": "jest integration.test.ts"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.270",
+    "@types/jest": "^29.5.11",
+    "@types/puppeteer": "^5.4.7",
+    "jest": "^29.7.0",
+    "puppeteer": "^24.31.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.3.3"
   }
 }

@@ -68,7 +68,7 @@
   - Create utility functions for DOM manipulation and view switching
   - _Requirements: 1.2, 1.3, 1.5, 2.5_
 
-- [ ] 9. Implement Idle View in Popup
+- [x] 9. Implement Idle View in Popup
 
   - Create HTML structure for idle view (character, stats, currency, boss card)
   - Display player stats (Spirit, Harmony, Soulflow, Level)
@@ -79,7 +79,7 @@
   - Pre-populate duration input with default from settings
   - _Requirements: 1.1, 3.5, 8.1, 9.4_
 
-- [ ] 10. Implement Focus Session View in Popup
+- [x] 10. Implement Focus Session View in Popup
 
   - Create minimal HTML for focus session view
   - Display large text: "Soul Shepherd is communing with a Stubborn Soul. Stay focused."
@@ -87,7 +87,7 @@
   - Hide all other UI elements (stats, currency, buttons)
   - _Requirements: 1.2, 1.3, 1.5_
 
-- [ ] 11. Implement Reward View in Popup
+- [x] 11. Implement Reward View in Popup
 
   - Create HTML structure for reward display
   - Animate Soul Insight earned with XP bar fill animation
@@ -99,7 +99,9 @@
   - Add "Continue to Break" button
   - _Requirements: 2.5, 12.5_
 
-- [ ] 12. Implement Break View in Popup
+-
+
+- [x] 12. Implement Break View in Popup
 
   - Create HTML structure for full game UI during break
   - Display Soul Shepherd character (static image initially)
@@ -109,7 +111,7 @@
   - Add "Start Next Session" button
   - _Requirements: 10.1, 10.2, 10.3_
 
-- [ ] 13. Wire up session start flow
+- [x] 13. Wire up session start flow
 
   - Handle "Start Focus Session" button click in popup
   - Send startSession message to background with duration and taskId
@@ -118,7 +120,7 @@
   - Popup switches to Focus Session View
   - _Requirements: 1.1, 1.2_
 
-- [ ] 14. Wire up session end flow
+- [x] 14. Wire up session end flow
 
   - Background alarm fires when session duration completes
   - Background calls SessionManager.endSession
@@ -130,7 +132,7 @@
   - Popup switches to Reward View and displays results
   - _Requirements: 1.4, 2.1, 2.2, 2.3, 2.4, 2.5, 3.2, 9.1, 9.2, 10.1_
 
-- [ ] 15. Implement break timer flow
+- [x] 15. Implement break timer flow
 
   - Background creates break alarm when session ends
   - Popup displays break timer countdown
@@ -139,7 +141,7 @@
   - If auto-start enabled, automatically show session start prompt
   - _Requirements: 10.1, 10.2, 10.3, 10.5_
 
-- [ ] 16. Create Options Page structure
+- [x] 16. Create Options Page structure
 
   - Create options.html with sections for task management, session config, distraction management, preferences, statistics
   - Create options.css with layout and styling
@@ -148,7 +150,7 @@
   - Implement settings save on change with immediate persistence
   - _Requirements: 5.1, 11.1, 11.2_
 
-- [ ] 17. Implement Task Management UI in Options
+- [x] 17. Implement Task Management UI in Options
 
   - Create tree view structure for Goals → Tasks → Subtasks
   - Implement add/edit/delete buttons for each level
@@ -158,7 +160,7 @@
   - Send task updates to background for persistence
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 18. Implement Session Configuration UI in Options
+- [x] 18. Implement Session Configuration UI in Options
 
   - Create input fields for default session duration (5-120 minutes)
   - Create input field for default break duration (1-30 minutes)
@@ -168,7 +170,7 @@
   - Save all settings to background on change
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 19. Implement Distraction Management UI in Options
+- [x] 19. Implement Distraction Management UI in Options
 
   - Create discouraged sites list with add/remove functionality
   - Create blocked sites list with add/remove functionality
@@ -178,7 +180,7 @@
   - Add "Test URL" feature to check if domain matches lists
   - _Requirements: 6.1, 7.1, 7.2_
 
-- [ ] 20. Implement NavigationMonitor module
+- [x] 20. Implement NavigationMonitor module
 
   - Create NavigationMonitor class with startMonitoring, stopMonitoring, checkUrl methods
   - Register chrome.webNavigation.onCommitted listener
@@ -187,7 +189,7 @@
   - Mark session as compromised when discouraged site visited
   - _Requirements: 6.2, 6.3, 6.4_
 
-- [ ] 21. Implement Content Scripts for discouraged site warnings
+- [x] 21. Implement Content Scripts for discouraged site warnings
 
   - Create content.ts script that runs on all pages
   - Send URL to background on page load
@@ -199,7 +201,7 @@
   - Update manifest to inject content script on all HTTP/HTTPS pages
   - _Requirements: 6.5_
 
-- [ ] 22. Implement strict mode blocking
+- [x] 22. Implement strict mode blocking
 
   - Create declarativeNetRequest rules for blocked sites
   - Update rules dynamically when blocked sites list changes
@@ -212,7 +214,7 @@
   - Update manifest with declarativeNetRequest permission
   - _Requirements: 7.3, 7.4, 7.5_
 
-- [ ] 23. Implement stat upgrade system
+- [x] 23. Implement stat upgrade system
 
   - Create upgrade cost formula: baseCost \* (1.5 ^ currentStatValue)
   - Add upgrade buttons to Break View stats panel
@@ -222,7 +224,7 @@
   - Persist stat changes to storage
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 24. Implement skill point allocation
+- [x] 24. Implement skill point allocation
 
   - Display available skill points in Break View
   - Add skill point allocation buttons next to each stat
@@ -231,7 +233,7 @@
   - Show skill point grant animation on level-up
   - _Requirements: 9.3, 9.4, 9.5_
 
-- [ ] 25. Implement idle detection with chrome.idle API
+- [x] 25. Implement idle detection with chrome.idle API
 
   - Set idle threshold to 120 seconds (configurable in options)
   - Register chrome.idle.onStateChanged listener during active sessions
@@ -242,7 +244,7 @@
   - Display idle/active breakdown in reward view
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 26. Implement statistics tracking
+- [x] 26. Implement statistics tracking
 
   - Track totalSessions, totalFocusTime, currentStreak, longestStreak in StatisticsState
   - Increment totalSessions on each completed session
@@ -254,7 +256,7 @@
   - Track bossesDefeated, totalSoulInsightEarned, totalSoulEmbersEarned
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
 
-- [ ] 27. Implement Statistics Dashboard in Options
+- [x] 27. Implement Statistics Dashboard in Options
 
   - Create statistics section in options page
   - Display total focus time (formatted as hours and minutes)
@@ -265,7 +267,7 @@
   - Display total Soul Insight and Soul Embers earned (lifetime)
   - _Requirements: 14.1, 14.2, 14.3, 14.4_
 
-- [ ] 28. Implement Content Soul animations
+- [x] 28. Implement Content Soul animations
 
   - Create CSS animations for floating souls across popup
   - Generate soul sprites at random intervals based on Soulflow stat
@@ -276,7 +278,7 @@
   - If animations disabled, show simple numeric counter instead
   - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-- [ ] 29. Implement cosmetics system
+- [x] 29. Implement cosmetics system
 
   - Create cosmetic catalog with themes and character sprites
   - Define base cosmetics (default theme, default sprite)
@@ -290,7 +292,7 @@
   - Persist cosmetic ownership and selections to chrome.storage.sync
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-- [ ] 30. Implement notifications
+- [x] 30. Implement notifications
 
   - Request notification permission on extension install
   - Send notification when session completes: "Your ritual is complete. Souls await you."
@@ -299,7 +301,7 @@
   - Respect user's notification preference
   - _Requirements: 10.3_
 
-- [ ] 31. Implement boss defeat and unlock flow
+- [x] 31. Implement boss defeat and unlock flow
 
   - When boss Resolve reaches zero, trigger boss defeat
   - Display boss defeat animation/message in popup
@@ -310,7 +312,7 @@
   - Send bossDefeated message to popup for celebration UI
   - _Requirements: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 32. Implement level-up flow
+- [x] 32. Implement level-up flow
 
   - When Soul Insight reaches threshold, trigger level-up
   - Calculate new level threshold using formula: 100 \* (level ^ 1.5)
@@ -320,7 +322,7 @@
   - Check if new level unlocks next boss
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 33. Implement error handling for storage operations
+- [x] 33. Implement error handling for storage operations
 
   - Wrap all chrome.storage calls in try-catch blocks
   - Implement exponential backoff retry (3 attempts)
@@ -329,7 +331,7 @@
   - Log all storage errors to console
   - _Requirements: 1.1, 2.1_
 
-- [ ] 34. Implement error handling for timer operations
+- [x] 34. Implement error handling for timer operations
 
   - On popup open, check if session/break should have ended
   - Calculate missed time if alarm fired late
@@ -338,7 +340,7 @@
   - Log timer errors to console
   - _Requirements: 1.4, 10.1_
 
-- [ ] 35. Implement state validation and migration
+- [x] 35. Implement state validation and migration
 
   - Create schema validator for GameState
   - Validate state on load from storage
@@ -348,7 +350,7 @@
   - Implement version number for future migrations
   - _Requirements: 1.1, 2.1_
 
-- [ ] 36. Add Preferences UI in Options
+- [x] 36. Add Preferences UI in Options
 
   - Create preferences section with animation toggle
   - Add notification toggle
@@ -357,7 +359,7 @@
   - Save all preferences immediately on change
   - _Requirements: 13.4, 13.5_
 
-- [ ] 37. Polish popup UI with animations and transitions
+- [x] 37. Polish popup UI with animations and transitions
 
   - Add fade transitions between view states
   - Add XP bar fill animation on reward view
@@ -368,7 +370,7 @@
   - Ensure all animations respect animationsEnabled setting
   - _Requirements: 2.5, 13.1, 13.2_
 
-- [ ] 38. Implement accessibility features
+- [x] 38. Implement accessibility features
 
   - Add ARIA labels to all buttons and inputs
   - Ensure keyboard navigation works for all interactive elements
@@ -378,7 +380,7 @@
   - Add alt text to all images and character sprites
   - _Requirements: All requirements (accessibility is cross-cutting)_
 
-- [ ] 39. Create unit tests for core modules
+- [x] 39. Create unit tests for core modules
 
   - Write tests for RewardCalculator formulas with various inputs
   - Write tests for ProgressionManager level-up thresholds
@@ -388,7 +390,7 @@
   - Set up Jest with @types/chrome mocks
   - _Requirements: 2.1, 2.2, 3.2, 4.2, 6.2, 9.1_
 
-- [ ] 40. Create integration tests
+- [x] 40. Create integration tests
 
   - Set up Puppeteer with Chrome extension support
   - Write test for complete session flow (start → work → rewards → break)
@@ -414,7 +416,7 @@
   - Verify state persistence across browser restarts
   - _Requirements: All requirements_
 
-- [ ] 42. Performance optimization
+- [x] 42. Performance optimization
 
   - Profile popup load time (target < 100ms)
   - Profile background worker memory usage (target < 50MB)

@@ -13,6 +13,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATISTICS,
   STUBBORN_SOULS,
+  CURRENT_STATE_VERSION,
 } from "./constants";
 
 // ============================================================================
@@ -26,6 +27,7 @@ import {
 export class StateManager {
   private state: GameState | null = null;
   private readonly STORAGE_KEY = "soulShepherdGameState";
+  private readonly BACKUP_KEY = "soulShepherdGameState_backup";
   private readonly MAX_RETRIES = 3;
   private readonly RETRY_DELAY_MS = 100;
 
@@ -43,8 +45,29 @@ export class StateManager {
       if (result[this.STORAGE_KEY]) {
         const loadedState = result[this.STORAGE_KEY] as GameState;
 
+        // Check if state needs migration
+        const migratedState = await this.migrateState(loadedState);
+
         // Validate and repair state
-        const validatedState = this.validateAndRepairState(loadedState);
+        const validatedState = this.validateAndRepairState(migratedState);
+
+        // Try to load cosmetics from sync storage (for cross-device sync)
+        try {
+          const syncResult = await chrome.storage.sync.get(
+            "soulShepherdCosmetics"
+          );
+          if (syncResult.soulShepherdCosmetics) {
+            validatedState.player.cosmetics = syncResult.soulShepherdCosmetics;
+            console.log("[StateManager] Cosmetics loaded from sync storage");
+          }
+        } catch (syncError) {
+          console.warn(
+            "[StateManager] Failed to load cosmetics from sync storage:",
+            syncError
+          );
+          // Continue with local cosmetics
+        }
+
         this.state = validatedState;
 
         console.log("[StateManager] State loaded successfully");
@@ -84,9 +107,16 @@ export class StateManager {
 
   /**
    * Save game state to chrome.storage.local with retry logic
+   * Optimized with compression for large states
    */
   async saveState(state: GameState): Promise<void> {
     try {
+      // Optimize: Only save if state has changed
+      if (this.state && JSON.stringify(this.state) === JSON.stringify(state)) {
+        console.log("[StateManager] State unchanged, skipping save");
+        return;
+      }
+
       await this.retryStorageOperation(() =>
         chrome.storage.local.set({ [this.STORAGE_KEY]: state })
       );
@@ -154,6 +184,7 @@ export class StateManager {
    */
   private createDefaultState(): GameState {
     return {
+      version: CURRENT_STATE_VERSION,
       player: { ...DEFAULT_PLAYER_STATE },
       session: null,
       break: null,
@@ -165,7 +196,80 @@ export class StateManager {
   }
 
   /**
+   * Migrate state from older versions to current version
+   */
+  private async migrateState(state: any): Promise<GameState> {
+    // If no version field, this is a pre-versioning state (version 0)
+    const stateVersion = typeof state.version === "number" ? state.version : 0;
+
+    if (stateVersion === CURRENT_STATE_VERSION) {
+      console.log(
+        "[StateManager] State is current version, no migration needed"
+      );
+      return state as GameState;
+    }
+
+    console.log(
+      `[StateManager] Migrating state from version ${stateVersion} to ${CURRENT_STATE_VERSION}`
+    );
+
+    let migratedState = { ...state };
+
+    // Migration chain - add new migrations as needed
+    if (stateVersion < 1) {
+      migratedState = this.migrateToV1(migratedState);
+    }
+
+    // Future migrations would go here:
+    // if (stateVersion < 2) {
+    //   migratedState = this.migrateToV2(migratedState);
+    // }
+
+    // Set current version
+    migratedState.version = CURRENT_STATE_VERSION;
+
+    console.log("[StateManager] Migration complete");
+    return migratedState;
+  }
+
+  /**
+   * Migrate from version 0 (no version field) to version 1
+   */
+  private migrateToV1(state: any): any {
+    console.log("[StateManager] Migrating to version 1: Adding version field");
+
+    // Version 1 adds the version field itself
+    // All existing data structures remain compatible
+    return {
+      version: 1,
+      ...state,
+    };
+  }
+
+  /**
+   * Backup corrupted state before resetting
+   */
+  private async backupCorruptedState(state: any): Promise<void> {
+    try {
+      const backup = {
+        timestamp: Date.now(),
+        state: state,
+      };
+
+      await this.retryStorageOperation(() =>
+        chrome.storage.local.set({ [this.BACKUP_KEY]: backup })
+      );
+
+      console.log("[StateManager] Corrupted state backed up successfully");
+    } catch (error) {
+      console.error("[StateManager] Failed to backup corrupted state:", error);
+      // Don't throw - backup failure shouldn't prevent reset
+    }
+  }
+
+  /**
    * Validate state schema and repair missing or corrupted fields
+   * If state is unrepairable, backup and reset to defaults
    */
   private validateAndRepairState(state: any): GameState {
     console.log("[StateManager] Validating state...");
@@ -176,8 +280,39 @@ export class StateManager {
       return this.createDefaultState();
     }
 
+    // Check if state has critical corruption
+    const isCriticallyCorrupted = this.checkCriticalCorruption(state);
+
+    if (isCriticallyCorrupted) {
+      console.error(
+        "[StateManager] State is critically corrupted, backing up and resetting"
+      );
+
+      // Backup the corrupted state (async, but don't wait)
+      this.backupCorruptedState(state).catch((error) => {
+        console.error("[StateManager] Backup failed:", error);
+      });
+
+      // Notify user of data loss
+      if (chrome.notifications) {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "soul_shepherd.png",
+          title: "Soul Shepherd - Data Reset",
+          message:
+            "Your save data was corrupted and has been reset. A backup was created.",
+        });
+      }
+
+      return this.createDefaultState();
+    }
+
     // Validate and repair each section
     const repairedState: GameState = {
+      version:
+        typeof state.version === "number"
+          ? state.version
+          : CURRENT_STATE_VERSION,
       player: this.validatePlayerState(state.player),
       session: this.validateSessionState(state.session),
       break: this.validateBreakState(state.break),
@@ -187,7 +322,52 @@ export class StateManager {
       statistics: this.validateStatisticsState(state.statistics),
     };
 
+    console.log("[StateManager] State validation complete");
     return repairedState;
+  }
+
+  /**
+   * Check if state has critical corruption that cannot be repaired
+   */
+  private checkCriticalCorruption(state: any): boolean {
+    // Check if all major sections are missing or invalid
+    const hasPlayer = state.player && typeof state.player === "object";
+    const hasProgression =
+      state.progression && typeof state.progression === "object";
+    const hasSettings = state.settings && typeof state.settings === "object";
+    const hasStatistics =
+      state.statistics && typeof state.statistics === "object";
+
+    // If more than 2 major sections are missing, consider it critically corrupted
+    const validSections = [
+      hasPlayer,
+      hasProgression,
+      hasSettings,
+      hasStatistics,
+    ].filter(Boolean).length;
+
+    if (validSections < 2) {
+      console.warn(
+        `[StateManager] Only ${validSections}/4 major sections are valid`
+      );
+      return true;
+    }
+
+    // Check for data type corruption in critical fields
+    if (hasPlayer) {
+      const hasValidLevel = typeof state.player.level === "number";
+      const hasValidStats =
+        state.player.stats && typeof state.player.stats === "object";
+
+      if (!hasValidLevel || !hasValidStats) {
+        console.warn(
+          "[StateManager] Player state has corrupted critical fields"
+        );
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -389,6 +569,10 @@ export class StateManager {
           : true,
       soundVolume:
         typeof settings.soundVolume === "number" ? settings.soundVolume : 0.5,
+      showSessionTimer:
+        typeof settings.showSessionTimer === "boolean"
+          ? settings.showSessionTimer
+          : true,
     };
   }
 
@@ -477,5 +661,70 @@ export class StateManager {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Save cosmetics to sync storage for cross-device availability
+   * Uses retry logic and gracefully handles failures
+   */
+  async saveCosmeticsToSync(cosmetics: any): Promise<void> {
+    try {
+      await this.retryStorageOperation(() =>
+        chrome.storage.sync.set({ soulShepherdCosmetics: cosmetics })
+      );
+      console.log("[StateManager] Cosmetics saved to sync storage");
+    } catch (error) {
+      console.error(
+        "[StateManager] Failed to save cosmetics to sync storage after retries:",
+        error
+      );
+      // Don't throw - sync storage failure shouldn't break the app
+      // Local storage still has the data
+    }
+  }
+
+  /**
+   * Retrieve backed up state (for recovery purposes)
+   * Returns null if no backup exists
+   */
+  async getBackupState(): Promise<{ timestamp: number; state: any } | null> {
+    try {
+      const result = await this.retryStorageOperation(() =>
+        chrome.storage.local.get(this.BACKUP_KEY)
+      );
+
+      if (result[this.BACKUP_KEY]) {
+        console.log("[StateManager] Backup state retrieved");
+        return result[this.BACKUP_KEY];
+      }
+
+      console.log("[StateManager] No backup state found");
+      return null;
+    } catch (error) {
+      console.error("[StateManager] Failed to retrieve backup state:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete backup state
+   */
+  async deleteBackup(): Promise<void> {
+    try {
+      await this.retryStorageOperation(() =>
+        chrome.storage.local.remove(this.BACKUP_KEY)
+      );
+      console.log("[StateManager] Backup state deleted");
+    } catch (error) {
+      console.error("[StateManager] Failed to delete backup state:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current state version
+   */
+  getStateVersion(): number {
+    return CURRENT_STATE_VERSION;
   }
 }

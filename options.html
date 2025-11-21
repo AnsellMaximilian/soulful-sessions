@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Soul Shepherd - Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <img src="soul_shepherd.png" alt="Soul Shepherd" class="header-icon" />
+        <h1>Soul Shepherd Options</h1>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="Options navigation">
+        <button
+          class="tab-button active"
+          data-tab="tasks"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tasks-section"
+        >
+          Task Management
+        </button>
+        <button
+          class="tab-button"
+          data-tab="session"
+          role="tab"
+          aria-selected="false"
+          aria-controls="session-section"
+        >
+          Session Config
+        </button>
+        <button
+          class="tab-button"
+          data-tab="distraction"
+          role="tab"
+          aria-selected="false"
+          aria-controls="distraction-section"
+        >
+          Distraction Management
+        </button>
+        <button
+          class="tab-button"
+          data-tab="preferences"
+          role="tab"
+          aria-selected="false"
+          aria-controls="preferences-section"
+        >
+          Preferences
+        </button>
+        <button
+          class="tab-button"
+          data-tab="statistics"
+          role="tab"
+          aria-selected="false"
+          aria-controls="statistics-section"
+        >
+          Statistics
+        </button>
+      </nav>
+
+      <main>
+        <!-- Task Management Section -->
+        <section
+          id="tasks-section"
+          class="tab-content active"
+          role="tabpanel"
+          aria-labelledby="tasks-tab"
+        >
+          <h2 id="tasks-tab">Task Management</h2>
+          <p class="section-description">
+            Organize your work into goals, tasks, and subtasks. Select what to
+            focus on during sessions.
+          </p>
+
+          <div class="task-management">
+            <div class="task-toolbar">
+              <button
+                id="add-goal-btn"
+                class="btn btn-primary"
+                aria-label="Add new goal"
+              >
+                + Add Goal
+              </button>
+            </div>
+
+            <div
+              id="goals-container"
+              class="goals-container"
+              role="list"
+              aria-label="Goals list"
+            >
+              <!-- Goals will be dynamically inserted here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Session Configuration Section -->
+        <section
+          id="session-section"
+          class="tab-content"
+          role="tabpanel"
+          aria-labelledby="session-tab"
+        >
+          <h2 id="session-tab">Session Configuration</h2>
+          <p class="section-description">
+            Customize your focus session and break durations to match your
+            workflow.
+          </p>
+
+          <div class="settings-group">
+            <div class="setting-item">
+              <label for="default-session-duration">
+                Default Session Duration (minutes)
+                <span class="help-text">5-120 minutes</span>
+              </label>
+              <input
+                type="number"
+                id="default-session-duration"
+                min="5"
+                max="120"
+                value="25"
+                aria-label="Default session duration in minutes, between 5 and 120"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="setting-item">
+              <label for="default-break-duration">
+                Default Break Duration (minutes)
+                <span class="help-text">1-30 minutes</span>
+              </label>
+              <input
+                type="number"
+                id="default-break-duration"
+                min="1"
+                max="30"
+                value="5"
+                aria-label="Default break duration in minutes, between 1 and 30"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="setting-item">
+              <label for="auto-start-next">
+                <input
+                  type="checkbox"
+                  id="auto-start-next"
+                  aria-label="Auto-start next session after break"
+                />
+                Auto-start next session after break
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label for="idle-threshold">
+                Idle Detection Sensitivity (seconds)
+                <span class="help-text">Time before session pauses</span>
+              </label>
+              <input
+                type="number"
+                id="idle-threshold"
+                min="30"
+                max="600"
+                value="120"
+                aria-label="Idle detection sensitivity in seconds, between 30 and 600"
+                aria-required="true"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Distraction Management Section -->
+        <section
+          id="distraction-section"
+          class="tab-content"
+          role="tabpanel"
+          aria-labelledby="distraction-tab"
+        >
+          <h2 id="distraction-tab">Distraction Management</h2>
+          <p class="section-description">
+            Configure which sites trigger warnings or get blocked during focus
+            sessions.
+          </p>
+
+          <div class="settings-group">
+            <div class="site-list-section">
+              <h3>Discouraged Sites</h3>
+              <p class="help-text">
+                These sites will show a gentle warning during focus sessions and
+                reduce rewards if visited.
+              </p>
+
+              <div
+                class="site-input-group"
+                role="group"
+                aria-label="Add discouraged site"
+              >
+                <input
+                  type="text"
+                  id="discouraged-site-input"
+                  placeholder="example.com"
+                  aria-label="Enter domain to discourage"
+                />
+                <button
+                  id="add-discouraged-site-btn"
+                  class="btn btn-secondary"
+                  aria-label="Add discouraged site"
+                >
+                  Add
+                </button>
+              </div>
+              <div
+                id="discouraged-site-error"
+                class="input-error"
+                style="display: none"
+                role="alert"
+                aria-live="assertive"
+              ></div>
+
+              <ul
+                id="discouraged-sites-list"
+                class="site-list"
+                role="list"
+                aria-label="Discouraged sites"
+              >
+                <!-- Discouraged sites will be listed here -->
+              </ul>
+            </div>
+
+            <div class="site-list-section">
+              <h3>Strict Mode</h3>
+              <div class="setting-item">
+                <label for="strict-mode">
+                  <input
+                    type="checkbox"
+                    id="strict-mode"
+                    aria-label="Enable strict mode to hard-block specified sites"
+                  />
+                  Enable Strict Mode
+                  <span class="help-text"
+                    >Hard-block specified sites during focus sessions</span
+                  >
+                </label>
+              </div>
+
+              <div
+                id="blocked-sites-container"
+                class="blocked-sites-container"
+                style="display: none"
+                aria-hidden="true"
+              >
+                <h3>Blocked Sites</h3>
+                <p class="help-text">
+                  These sites will be completely blocked during focus sessions
+                  when strict mode is enabled.
+                </p>
+
+                <div
+                  class="site-input-group"
+                  role="group"
+                  aria-label="Add blocked site"
+                >
+                  <input
+                    type="text"
+                    id="blocked-site-input"
+                    placeholder="example.com"
+                    aria-label="Enter domain to block"
+                  />
+                  <button
+                    id="add-blocked-site-btn"
+                    class="btn btn-secondary"
+                    aria-label="Add blocked site"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div
+                  id="blocked-site-error"
+                  class="input-error"
+                  style="display: none"
+                  role="alert"
+                  aria-live="assertive"
+                ></div>
+
+                <ul
+                  id="blocked-sites-list"
+                  class="site-list"
+                  role="list"
+                  aria-label="Blocked sites"
+                >
+                  <!-- Blocked sites will be listed here -->
+                </ul>
+              </div>
+            </div>
+
+            <div class="site-list-section">
+              <h3>Test URL</h3>
+              <p class="help-text">
+                Check if a URL matches your discouraged or blocked site lists.
+              </p>
+
+              <div class="site-input-group" role="group" aria-label="Test URL">
+                <input
+                  type="text"
+                  id="test-url-input"
+                  placeholder="https://example.com/page"
+                  aria-label="Enter URL to test"
+                />
+                <button
+                  id="test-url-btn"
+                  class="btn btn-secondary"
+                  aria-label="Test URL"
+                >
+                  Test
+                </button>
+              </div>
+              <div
+                id="test-url-result"
+                class="test-result"
+                style="display: none"
+                role="status"
+                aria-live="polite"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Preferences Section -->
+        <section
+          id="preferences-section"
+          class="tab-content"
+          role="tabpanel"
+          aria-labelledby="preferences-tab"
+        >
+          <h2 id="preferences-tab">Preferences</h2>
+          <p class="section-description">
+            Customize your Soul Shepherd experience.
+          </p>
+
+          <div class="settings-group">
+            <div class="setting-item">
+              <label for="animations-enabled">
+                <input
+                  type="checkbox"
+                  id="animations-enabled"
+                  checked
+                  aria-label="Enable Content Soul animations and visual effects"
+                />
+                Enable animations
+                <span class="help-text"
+                  >Show Content Soul animations and visual effects</span
+                >
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label for="notifications-enabled">
+                <input
+                  type="checkbox"
+                  id="notifications-enabled"
+                  checked
+                  aria-label="Receive notifications when sessions and breaks end"
+                />
+                Enable notifications
+                <span class="help-text"
+                  >Receive notifications when sessions and breaks end</span
+                >
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label for="show-session-timer">
+                <input
+                  type="checkbox"
+                  id="show-session-timer"
+                  checked
+                  aria-label="Display remaining time during focus sessions"
+                />
+                Show session timer
+                <span class="help-text"
+                  >Display remaining time during focus sessions</span
+                >
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label for="sound-volume">
+                Sound Volume
+                <span class="help-text">0-100%</span>
+              </label>
+              <input
+                type="range"
+                id="sound-volume"
+                min="0"
+                max="100"
+                value="50"
+                aria-label="Sound volume"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="50"
+              />
+              <span id="volume-display" aria-live="polite">50%</span>
+            </div>
+
+            <div class="setting-item">
+              <label for="theme-selector">
+                Theme
+                <span class="help-text">Customize your visual experience</span>
+              </label>
+              <select
+                id="theme-selector"
+                class="theme-selector"
+                aria-label="Select theme"
+              >
+                <!-- Themes will be populated dynamically -->
+              </select>
+              <div
+                id="theme-preview"
+                class="theme-preview"
+                role="region"
+                aria-label="Theme preview"
+              >
+                <!-- Theme preview will be shown here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section
+          id="statistics-section"
+          class="tab-content"
+          role="tabpanel"
+          aria-labelledby="statistics-tab"
+        >
+          <h2 id="statistics-tab">Statistics</h2>
+          <p class="section-description">
+            Track your productivity journey with Soul Shepherd.
+          </p>
+
+          <div class="stats-grid" role="list" aria-label="Statistics">
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-total-sessions"
+                aria-label="Total sessions completed"
+              >
+                0
+              </div>
+              <div class="stat-label">Total Sessions</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-total-time"
+                aria-label="Total focus time"
+              >
+                0h 0m
+              </div>
+              <div class="stat-label">Total Focus Time</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-current-streak"
+                aria-label="Current streak"
+              >
+                0
+              </div>
+              <div class="stat-label">Current Streak</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-longest-streak"
+                aria-label="Longest streak"
+              >
+                0
+              </div>
+              <div class="stat-label">Longest Streak</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-bosses-defeated"
+                aria-label="Bosses defeated"
+              >
+                0
+              </div>
+              <div class="stat-label">Bosses Defeated</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-current-level"
+                aria-label="Current level"
+              >
+                1
+              </div>
+              <div class="stat-label">Current Level</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-total-insight"
+                aria-label="Total Soul Insight earned"
+              >
+                0
+              </div>
+              <div class="stat-label">Total Soul Insight</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-total-embers"
+                aria-label="Total Soul Embers earned"
+              >
+                0
+              </div>
+              <div class="stat-label">Total Soul Embers</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div class="stat-value" id="stat-spirit" aria-label="Spirit stat">
+                1
+              </div>
+              <div class="stat-label">Spirit</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-harmony"
+                aria-label="Harmony stat"
+              >
+                0.05
+              </div>
+              <div class="stat-label">Harmony</div>
+            </div>
+
+            <div class="stat-card" role="listitem">
+              <div
+                class="stat-value"
+                id="stat-soulflow"
+                aria-label="Soulflow stat"
+              >
+                1
+              </div>
+              <div class="stat-label">Soulflow</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modal Dialogs -->
+    <!-- Goal Modal -->
+    <div
+      id="goal-modal"
+      class="modal"
+      role="dialog"
+      aria-labelledby="goal-modal-title"
+      aria-modal="true"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="goal-modal-title">Add Goal</h3>
+          <button
+            class="modal-close"
+            id="goal-modal-close"
+            aria-label="Close dialog"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="goal-name">Goal Name *</label>
+            <input
+              type="text"
+              id="goal-name"
+              placeholder="e.g., Complete Project X"
+              required
+              aria-required="true"
+              aria-label="Goal name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="goal-description">Description</label>
+            <textarea
+              id="goal-description"
+              rows="3"
+              placeholder="Optional description of this goal"
+              aria-label="Goal description"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            id="goal-modal-cancel"
+            aria-label="Cancel and close dialog"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            id="goal-modal-save"
+            aria-label="Save goal"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div
+      id="task-modal"
+      class="modal"
+      role="dialog"
+      aria-labelledby="task-modal-title"
+      aria-modal="true"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="task-modal-title">Add Task</h3>
+          <button
+            class="modal-close"
+            id="task-modal-close"
+            aria-label="Close dialog"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="task-name">Task Name *</label>
+            <input
+              type="text"
+              id="task-name"
+              placeholder="e.g., Research requirements"
+              required
+              aria-required="true"
+              aria-label="Task name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-description">Description</label>
+            <textarea
+              id="task-description"
+              rows="3"
+              placeholder="Optional description of this task"
+              aria-label="Task description"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            id="task-modal-cancel"
+            aria-label="Cancel and close dialog"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            id="task-modal-save"
+            aria-label="Save task"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtask Modal -->
+    <div
+      id="subtask-modal"
+      class="modal"
+      role="dialog"
+      aria-labelledby="subtask-modal-title"
+      aria-modal="true"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="subtask-modal-title">Add Subtask</h3>
+          <button
+            class="modal-close"
+            id="subtask-modal-close"
+            aria-label="Close dialog"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="subtask-name">Subtask Name *</label>
+            <input
+              type="text"
+              id="subtask-name"
+              placeholder="e.g., Review documentation"
+              required
+              aria-required="true"
+              aria-label="Subtask name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="subtask-duration">Estimated Duration (minutes)</label>
+            <input
+              type="number"
+              id="subtask-duration"
+              min="5"
+              max="120"
+              value="25"
+              placeholder="25"
+              aria-label="Estimated duration in minutes, between 5 and 120"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            id="subtask-modal-cancel"
+            aria-label="Cancel and close dialog"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            id="subtask-modal-save"
+            aria-label="Save subtask"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="dist/options.js"></script>
+  </body>
+</html>
