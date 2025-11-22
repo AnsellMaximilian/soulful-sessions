@@ -192,7 +192,7 @@ function sendMessage(message: Message): Promise<any> {
 async function requestState(): Promise<GameState> {
   try {
     const response = await sendMessage({ type: "GET_STATE" });
-    return response.state;
+    return response.data || response;
   } catch (error) {
     console.error("Failed to request state:", error);
     throw error;

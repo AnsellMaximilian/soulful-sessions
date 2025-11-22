@@ -19,8 +19,7 @@
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "dist/background.js",
-    "type": "module"
+    "service_worker": "dist/background.js"
   },
   "content_scripts": [
     {
@@ -32,7 +31,7 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html", "dist/blocked.js"],
+      "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js"],
       "matches": ["<all_urls>"]
     }
   ]
