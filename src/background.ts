@@ -348,6 +348,19 @@ async function handleMessage(
     await stateManager.loadState();
   }
 
+  // Ensure other managers are initialized
+  if (!sessionManager) {
+    sessionManager = new SessionManager();
+  }
+
+  if (!idleCollector) {
+    idleCollector = new IdleCollector();
+  }
+
+  if (!navigationMonitor) {
+    navigationMonitor = new NavigationMonitor();
+  }
+
   // Route message to appropriate handler
   switch (message.type) {
     case "GET_STATE":
