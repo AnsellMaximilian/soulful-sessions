@@ -1,8 +1,8 @@
 {
   "enabled": true,
   "name": "Task Completion Auto-Commit",
-  "description": "Automatically stages all files, commits with message 'Task: <spec name>/<task number>', and updates task anchor file to trigger next task",
-  "version": "2",
+  "description": "Automatically stages all files and commits with message 'Task: <spec name>/<task number>' whenever a task in a spec is marked as completed",
+  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [
@@ -13,6 +13,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A task has been completed in a spec. Please: 1) Identify the spec name and task number that was just completed, 2) Stage all files using 'git add .', 3) Commit with the message format 'Task: <spec-name>/<task-number>' (example: 'Task: soul-shepherd-game/3'), 4) Create or update the file '.kiro/task-anchor.json' with the following structure: {\"spec\": \"<spec-name>\", \"completedTask\": <task-number>, \"timestamp\": \"<ISO timestamp>\", \"commitMessage\": \"Task: <spec-name>/<task-number>\"}"
+    "prompt": "A task has been completed in a spec. Please: 1) Identify the spec name and task number that was just completed, 2) Stage all files using 'git add .', 3) Commit with the message format 'Task: <spec-name>/<task-number>' (example: 'Task: soul-shepherd-game/3')"
   }
 }
