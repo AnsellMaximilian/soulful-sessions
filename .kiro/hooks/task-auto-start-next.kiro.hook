@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Auto-Start Next Task",
+  "description": "Automatically starts the next task in the same spec when task anchor file is updated by the completion hook",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      ".kiro/task-anchor.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The task anchor file has been updated, indicating a task was just completed. Please: 1) Read '.kiro/task-anchor.json' to identify the spec name and completed task number, 2) Open the tasks.md file for that spec (located at '.kiro/specs/<spec-name>/tasks.md'), 3) Find the next task after the completed one, 4) Mark that next task as 'in-progress' by updating its status in the tasks.md file. If there are no more tasks in the spec, respond with 'All tasks completed for this spec!'"
+  }
+}
