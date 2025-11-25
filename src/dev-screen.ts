@@ -8,6 +8,7 @@ import { FORMULAS, STUBBORN_SOULS } from "./constants";
 import {
   SessionState,
   PlayerStats,
+  PlayerState,
   StubbornSoul,
   SessionResult,
 } from "./types";
@@ -296,15 +297,34 @@ class SimulationEngine {
         totalCriticalHits++;
       }
       
-      // Update cumulative Soul Insight and check for level-ups
+      // Update cumulative Soul Insight and check for level-ups using ProgressionManager
       cumulativeSoulInsight += sessionResult.soulInsight;
       
-      // Check for level-ups
-      let levelThreshold = this.progressionManager.calculateLevelThreshold(currentLevel);
-      while (cumulativeSoulInsight >= levelThreshold) {
-        currentLevel++;
-        totalSkillPoints += FORMULAS.SKILL_POINTS_PER_LEVEL;
-        levelThreshold = this.progressionManager.calculateLevelThreshold(currentLevel);
+      // Use ProgressionManager.addExperience to check for level-ups
+      const mockPlayerState: PlayerState = {
+        level: currentLevel,
+        soulInsight: cumulativeSoulInsight - sessionResult.soulInsight, // Previous cumulative
+        soulInsightToNextLevel: this.progressionManager.calculateLevelThreshold(currentLevel),
+        soulEmbers: 0,
+        skillPoints: 0,
+        stats: config.playerStats,
+        cosmetics: {
+          ownedThemes: [],
+          ownedSprites: [],
+          activeTheme: "default",
+          activeSprite: "default",
+        },
+      };
+      
+      const levelResult = this.progressionManager.addExperience(
+        sessionResult.soulInsight,
+        mockPlayerState
+      );
+      
+      // Update level and skill points if leveled up
+      if (levelResult.leveledUp) {
+        currentLevel = levelResult.newLevel;
+        totalSkillPoints += levelResult.skillPointsGranted;
       }
       
       // Update boss damage
@@ -584,8 +604,45 @@ class UIController {
    * Handle quick level button click
    */
   handleQuickLevelClick(level: number): void {
-    // Implementation will be added in task 6.3
-    console.log(`Quick level ${level} clicked - not yet implemented`);
+    // Set simulation character level to button value
+    this.levelInput.value = level.toString();
+    
+    // Calculate Soul Insight threshold using ProgressionManager.calculateLevelThreshold
+    const progressionManager = new ProgressionManager();
+    const soulInsightThreshold = progressionManager.calculateLevelThreshold(level - 1);
+    this.soulInsightInput.value = soulInsightThreshold.toString();
+    
+    // Update boss dropdown to show appropriate bosses for level
+    this.updateBossDropdownForLevel(level);
+    
+    // Preserve all other parameters (stats, duration, count, compromised)
+    // No need to do anything - they remain unchanged
+  }
+
+  /**
+   * Update boss dropdown to show only bosses unlocked at the given level
+   */
+  private updateBossDropdownForLevel(level: number): void {
+    // Clear and repopulate boss dropdown
+    this.bossSelect.innerHTML = "";
+    
+    STUBBORN_SOULS.forEach((boss, index) => {
+      // Only show bosses that are unlocked at this level
+      if (boss.unlockLevel <= level) {
+        const option = document.createElement("option");
+        option.value = index.toString();
+        option.textContent = `${boss.name} (Resolve: ${boss.initialResolve}, Level ${boss.unlockLevel})`;
+        this.bossSelect.appendChild(option);
+      }
+    });
+    
+    // If no bosses are available (shouldn't happen for level >= 1), show first boss
+    if (this.bossSelect.options.length === 0) {
+      const option = document.createElement("option");
+      option.value = "0";
+      option.textContent = `${STUBBORN_SOULS[0].name} (Resolve: ${STUBBORN_SOULS[0].initialResolve}, Level ${STUBBORN_SOULS[0].unlockLevel})`;
+      this.bossSelect.appendChild(option);
+    }
   }
 
   /**

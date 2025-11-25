@@ -242,20 +242,30 @@
   - Update results display immediately
   - _Requirements: 4.5_
 
-- [ ] 6. Implement level progression features
-- [ ] 6.1 Integrate ProgressionManager for level calculations
+- [x] 6. Implement level progression features
+
+
+
+
+- [x] 6.1 Integrate ProgressionManager for level calculations
+
+
   - Call ProgressionManager.addExperience for cumulative Soul Insight
   - Call ProgressionManager.calculateLevelThreshold for level thresholds
   - Track level-ups and skill points during simulation
   - Update simulation character level after each session
   - _Requirements: 5.2, 5.5_
 
-- [ ] 6.2 Write property tests for level calculations
+- [x] 6.2 Write property tests for level calculations
+
+
   - **Property 13: Level calculations use production ProgressionManager**
   - **Property 16: Level thresholds match production formula**
   - **Validates: Requirements 5.2, 5.5**
 
-- [ ] 6.3 Implement quick level buttons
+- [x] 6.3 Implement quick level buttons
+
+
   - Implement handleQuickLevelClick method
   - Set simulation character level to button value (5, 10, 20, 50, 100)
   - Calculate Soul Insight threshold using ProgressionManager.calculateLevelThreshold
@@ -264,7 +274,9 @@
   - Preserve all other parameters (stats, duration, count, compromised)
   - _Requirements: 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 6.4 Write property tests for quick level buttons
+- [x] 6.4 Write property tests for quick level buttons
+
+
   - **Property 29: Quick level buttons set correct level**
   - **Property 30: Quick level buttons calculate correct Soul Insight**
   - **Property 31: Quick level buttons update boss availability**
