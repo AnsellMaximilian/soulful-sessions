@@ -223,7 +223,7 @@ async function handleBreakAlarm(): Promise<void> {
     if (currentState.settings.notificationsEnabled) {
       chrome.notifications.create({
         type: "basic",
-        iconUrl: "soul_shepherd.png",
+        iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
         title: "Soul Shepherd",
         message: "Break complete. Ready for another session?",
       });
@@ -783,7 +783,7 @@ async function handleEndSession(): Promise<void> {
   if (currentState.settings.notificationsEnabled) {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "soul_shepherd.png",
+      iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
       title: "Soul Shepherd",
       message: "Your ritual is complete. Souls await you.",
     });
@@ -1054,7 +1054,7 @@ async function handleEndSessionRetroactive(payload: {
   if (currentState.settings.notificationsEnabled) {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "soul_shepherd.png",
+      iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
       title: "Soul Shepherd",
       message: "Your ritual is complete. Souls await you.",
     });
@@ -1136,7 +1136,7 @@ async function handleEndBreakRetroactive(payload: {
   if (currentState.settings.notificationsEnabled) {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "soul_shepherd.png",
+      iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
       title: "Soul Shepherd",
       message: "Break complete. Ready for another session?",
     });
@@ -1846,7 +1846,7 @@ async function handleEmergencyEndSession(): Promise<void> {
   if (currentState.settings.notificationsEnabled) {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "soul_shepherd.png",
+      iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
       title: "Soul Shepherd",
       message: "Session ended early. Reduced rewards applied.",
     });
