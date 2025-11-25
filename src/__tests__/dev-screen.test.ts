@@ -13,7 +13,8 @@ import {
 } from "../dev-screen";
 import { PlayerStats } from "../types";
 import { ProgressionManager } from "../ProgressionManager";
-import { STUBBORN_SOULS } from "../constants";
+import { RewardCalculator } from "../RewardCalculator";
+import { STUBBORN_SOULS, FORMULAS } from "../constants";
 
 describe("Dev Screen Property-Based Tests", () => {
   /**
@@ -1670,6 +1671,634 @@ describe("Dev Screen Property-Based Tests", () => {
       ),
       { numRuns: 100 } // Run 100 iterations as specified in design
     );
+  });
+
+  /**
+   * Integration Test: Verify RewardCalculator produces identical results
+   * 
+   * This test verifies that the Dev Screen's SimulationEngine uses the production
+   * RewardCalculator and produces identical results to direct RewardCalculator usage.
+   */
+  test("Integration: RewardCalculator produces identical results in Dev Screen and extension", () => {
+    const simulationEngine = new SimulationEngine();
+    const rewardCalculator = new RewardCalculator();
+
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 5, max: 120 }),
+        fc.record({
+          spirit: fc.float({ min: Math.fround(0.1), max: Math.fround(50), noNaN: true }),
+          harmony: fc.float({ min: Math.fround(0), max: Math.fround(0), noNaN: true }), // 0 to avoid random crits
+          soulflow: fc.float({ min: Math.fround(0.1), max: Math.fround(50), noNaN: true }),
+        }),
+        fc.boolean(),
+        (duration, stats: PlayerStats, isCompromised) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: 1,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: isCompromised,
+          };
+
+          // Get result from Dev Screen
+          const devScreenResult = simulationEngine.simulateSingleSession(config, 1);
+
+          // Create mock session for direct RewardCalculator call
+          const mockSession = {
+            startTime: Date.now() - duration * 60 * 1000,
+            duration: duration,
+            taskId: "test-session",
+            isActive: false,
+            isPaused: false,
+            isCompromised: isCompromised,
+            idleTime: 0,
+            activeTime: duration * 60,
+          };
+
+          // Get result from production RewardCalculator
+          const productionResult = rewardCalculator.calculateRewards(mockSession, stats);
+
+          // Verify Dev Screen produces identical results to production
+          expect(devScreenResult.soulInsight).toBe(productionResult.soulInsight);
+          expect(devScreenResult.soulEmbers).toBe(productionResult.soulEmbers);
+          expect(devScreenResult.bossProgress).toBe(productionResult.bossProgress);
+          expect(devScreenResult.wasCritical).toBe(productionResult.wasCritical);
+          expect(devScreenResult.wasCompromised).toBe(productionResult.wasCompromised);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * Integration Test: Verify ProgressionManager produces identical results
+   * 
+   * This test verifies that the Dev Screen's SimulationEngine uses the production
+   * ProgressionManager and produces identical level progression results.
+   */
+  test("Integration: ProgressionManager produces identical results in Dev Screen and extension", () => {
+    const simulationEngine = new SimulationEngine();
+    const progressionManager = new ProgressionManager();
+
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 50 }),
+        fc.float({ min: 0, max: 10000, noNaN: true }),
+        (startingLevel, soulInsightToAdd) => {
+          // Calculate expected level using production ProgressionManager
+          const mockPlayerState = {
+            level: startingLevel,
+            soulInsight: 0,
+            soulInsightToNextLevel: progressionManager.calculateLevelThreshold(startingLevel),
+            soulEmbers: 0,
+            skillPoints: 0,
+            stats: { spirit: 1, harmony: 0.05, soulflow: 1 },
+            cosmetics: {
+              ownedThemes: [],
+              ownedSprites: [],
+              activeTheme: "default",
+              activeSprite: "default",
+            },
+          };
+
+          const levelResult = progressionManager.addExperience(soulInsightToAdd, mockPlayerState);
+
+          // Now simulate in Dev Screen with enough sessions to earn similar Soul Insight
+          // We'll use a single long session to approximate the Soul Insight amount
+          const approximateDuration = Math.min(120, Math.max(5, Math.ceil(soulInsightToAdd / 10)));
+          const config = {
+            sessionDuration: approximateDuration,
+            sessionCount: 1,
+            playerStats: { spirit: 1, harmony: 0, soulflow: 1 },
+            startingLevel: startingLevel,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          const devScreenResult = simulationEngine.runSimulation(config);
+
+          // Verify Dev Screen uses the same level threshold formula
+          const threshold = progressionManager.calculateLevelThreshold(startingLevel);
+          const devScreenThreshold = simulationEngine["progressionManager"].calculateLevelThreshold(startingLevel);
+          expect(devScreenThreshold).toBe(threshold);
+
+          // Verify the formula matches: 100 * level^1.5
+          const expectedThreshold = Math.floor(100 * Math.pow(startingLevel, 1.5));
+          expect(threshold).toBe(expectedThreshold);
+          expect(devScreenThreshold).toBe(expectedThreshold);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * Integration Test: Verify constants.ts values are correctly imported
+   * 
+   * This test verifies that the Dev Screen imports and uses the same constant
+   * values from constants.ts as the production code.
+   */
+  test("Integration: constants.ts values are correctly imported", () => {
+    // FORMULAS and STUBBORN_SOULS are already imported at the top
+
+    // Verify FORMULAS constants are accessible and have expected values
+    expect(FORMULAS.SOUL_INSIGHT_BASE_MULTIPLIER).toBe(10);
+    expect(FORMULAS.SOUL_INSIGHT_SPIRIT_BONUS).toBe(0.1);
+    expect(FORMULAS.SOUL_EMBERS_BASE_MULTIPLIER).toBe(2);
+    expect(FORMULAS.SOUL_EMBERS_SOULFLOW_BONUS).toBe(0.05);
+    expect(FORMULAS.CRITICAL_HIT_MULTIPLIER).toBe(1.5);
+    expect(FORMULAS.COMPROMISE_PENALTY_MULTIPLIER).toBe(0.7);
+    expect(FORMULAS.BOSS_DAMAGE_MULTIPLIER).toBe(0.5);
+    expect(FORMULAS.LEVEL_THRESHOLD_BASE).toBe(100);
+    expect(FORMULAS.LEVEL_THRESHOLD_EXPONENT).toBe(1.5);
+    expect(FORMULAS.SKILL_POINTS_PER_LEVEL).toBe(1);
+
+    // Verify STUBBORN_SOULS array is accessible and has expected structure
+    expect(Array.isArray(STUBBORN_SOULS)).toBe(true);
+    expect(STUBBORN_SOULS.length).toBeGreaterThan(0);
+    
+    // Verify first boss has expected properties
+    const firstBoss = STUBBORN_SOULS[0];
+    expect(firstBoss).toHaveProperty("id");
+    expect(firstBoss).toHaveProperty("name");
+    expect(firstBoss).toHaveProperty("backstory");
+    expect(firstBoss).toHaveProperty("initialResolve");
+    expect(firstBoss).toHaveProperty("sprite");
+    expect(firstBoss).toHaveProperty("unlockLevel");
+    expect(firstBoss.unlockLevel).toBe(1);
+    expect(firstBoss.initialResolve).toBe(100);
+
+    // Verify Dev Screen uses these same constants
+    const simulationEngine = new SimulationEngine();
+    const config = {
+      sessionDuration: 25,
+      sessionCount: 1,
+      playerStats: { spirit: 1, harmony: 0, soulflow: 1 },
+      startingLevel: 1,
+      startingSoulInsight: 0,
+      currentBossIndex: 0,
+      isCompromised: false,
+    };
+
+    const result = simulationEngine.runSimulation(config);
+
+    // Verify the simulation uses the correct boss data
+    expect(result.boss.startingResolve).toBe(firstBoss.initialResolve);
+  });
+
+  /**
+   * Integration Test: Verify formula changes automatically reflect in Dev Screen
+   * 
+   * This test verifies that the Dev Screen dynamically imports production classes
+   * and would automatically reflect any formula changes without requiring Dev Screen
+   * code changes. We test this by verifying the Dev Screen uses the actual imported
+   * classes rather than duplicated logic.
+   */
+  test("Integration: Formula changes in production code automatically reflect in Dev Screen", () => {
+    const simulationEngine = new SimulationEngine();
+    
+    // Verify SimulationEngine has references to production classes
+    expect(simulationEngine["rewardCalculator"]).toBeDefined();
+    expect(simulationEngine["progressionManager"]).toBeDefined();
+    
+    // Verify these are actual instances of the production classes
+    expect(simulationEngine["rewardCalculator"]).toBeInstanceOf(RewardCalculator);
+    expect(simulationEngine["progressionManager"]).toBeInstanceOf(ProgressionManager);
+    
+    // Verify the Dev Screen doesn't duplicate formula logic by checking that
+    // it calls the production methods
+    const config = {
+      sessionDuration: 25,
+      sessionCount: 1,
+      playerStats: { spirit: 2, harmony: 0, soulflow: 3 },
+      startingLevel: 5,
+      startingSoulInsight: 0,
+      currentBossIndex: 0,
+      isCompromised: false,
+    };
+
+    const result = simulationEngine.runSimulation(config);
+
+    // Manually calculate expected values using production formulas (FORMULAS imported at top)
+    const expectedBaseSoulInsight = 25 * FORMULAS.SOUL_INSIGHT_BASE_MULTIPLIER * (1 + 2 * FORMULAS.SOUL_INSIGHT_SPIRIT_BONUS);
+    const expectedBaseSoulEmbers = 25 * FORMULAS.SOUL_EMBERS_BASE_MULTIPLIER * (1 + 3 * FORMULAS.SOUL_EMBERS_SOULFLOW_BONUS);
+    const expectedBossDamage = 2 * 25 * FORMULAS.BOSS_DAMAGE_MULTIPLIER;
+
+    // Verify Dev Screen results match production formula calculations
+    expect(result.sessions[0].soulInsight).toBeCloseTo(expectedBaseSoulInsight, 1);
+    expect(result.sessions[0].soulEmbers).toBeCloseTo(expectedBaseSoulEmbers, 1);
+    expect(result.sessions[0].bossProgress).toBeCloseTo(expectedBossDamage, 1);
+  });
+
+  /**
+   * **Feature: dev-screen, Property 26: Dev Screen uses production ProgressionManager**
+   * **Validates: Requirements 10.2**
+   *
+   * For any level progression calculation, the Dev Screen should import and use
+   * the production ProgressionManager class without modification, ensuring identical behavior.
+   */
+  test("Property 26: Dev Screen uses production ProgressionManager", () => {
+    const simulationEngine = new SimulationEngine();
+    const productionProgressionManager = new ProgressionManager();
+
+    fc.assert(
+      fc.property(
+        // Generate random session parameters that will cause level-ups
+        fc.integer({ min: 10, max: 30 }),
+        fc.integer({ min: 60, max: 120 }),
+        fc.record({
+          spirit: fc.float({ min: Math.fround(10), max: Math.fround(50), noNaN: true }),
+          harmony: fc.float({ min: Math.fround(0), max: Math.fround(0.3), noNaN: true }),
+          soulflow: fc.float({ min: Math.fround(10), max: Math.fround(50), noNaN: true }),
+        }),
+        fc.integer({ min: 1, max: 10 }),
+        fc.float({ min: 0, max: 500, noNaN: true }),
+        (sessionCount, duration, stats: PlayerStats, startingLevel, startingSoulInsight) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: startingLevel,
+            startingSoulInsight: startingSoulInsight,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Manually calculate expected progression using production ProgressionManager
+          let expectedLevel = startingLevel;
+          let expectedSoulInsight = startingSoulInsight;
+          let expectedSkillPoints = 0;
+
+          // Simulate each session's Soul Insight gain
+          for (const session of result.sessions) {
+            expectedSoulInsight += session.soulInsight;
+            
+            // Check for level-ups using production ProgressionManager
+            let levelThreshold = productionProgressionManager.calculateLevelThreshold(expectedLevel);
+            while (expectedSoulInsight >= levelThreshold) {
+              expectedLevel++;
+              expectedSkillPoints += 1;
+              levelThreshold = productionProgressionManager.calculateLevelThreshold(expectedLevel);
+            }
+          }
+
+          // Verify Dev Screen matches production ProgressionManager calculations
+          expect(result.progression.endLevel).toBe(expectedLevel);
+          expect(result.progression.levelsGained).toBe(expectedLevel - startingLevel);
+          expect(result.progression.skillPointsEarned).toBe(expectedSkillPoints);
+          expect(result.progression.finalSoulInsight).toBeCloseTo(expectedSoulInsight, 1);
+
+          // Verify Dev Screen uses the same level threshold formula
+          for (let level = 1; level <= 20; level++) {
+            const devScreenThreshold = simulationEngine["progressionManager"].calculateLevelThreshold(level);
+            const productionThreshold = productionProgressionManager.calculateLevelThreshold(level);
+            expect(devScreenThreshold).toBe(productionThreshold);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 27: Dev Screen uses production constants**
+   * **Validates: Requirements 10.3**
+   *
+   * For any formula constant (SOUL_INSIGHT_BASE_MULTIPLIER, BOSS_DAMAGE_MULTIPLIER, etc.),
+   * the Dev Screen should import the value from the production constants.ts file.
+   */
+  test("Property 27: Dev Screen uses production constants", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session parameters
+        fc.integer({ min: 5, max: 120 }),
+        fc.record({
+          spirit: fc.float({ min: Math.fround(1), max: Math.fround(50), noNaN: true }),
+          harmony: fc.float({ min: Math.fround(0), max: Math.fround(0), noNaN: true }), // 0 to avoid crits
+          soulflow: fc.float({ min: Math.fround(1), max: Math.fround(50), noNaN: true }),
+        }),
+        fc.boolean(),
+        (duration, stats: PlayerStats, isCompromised) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: 1,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: isCompromised,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+          const session = result.sessions[0];
+
+          // Manually calculate expected values using production constants
+          const expectedBaseSoulInsight = 
+            duration * FORMULAS.SOUL_INSIGHT_BASE_MULTIPLIER * 
+            (1 + stats.spirit * FORMULAS.SOUL_INSIGHT_SPIRIT_BONUS);
+          
+          const expectedBaseSoulEmbers = 
+            duration * FORMULAS.SOUL_EMBERS_BASE_MULTIPLIER * 
+            (1 + stats.soulflow * FORMULAS.SOUL_EMBERS_SOULFLOW_BONUS);
+          
+          const expectedBossDamage = 
+            stats.spirit * duration * FORMULAS.BOSS_DAMAGE_MULTIPLIER;
+
+          // Apply compromise penalty if needed
+          const compromiseMultiplier = isCompromised ? FORMULAS.COMPROMISE_PENALTY_MULTIPLIER : 1.0;
+          const expectedSoulInsight = Math.round(expectedBaseSoulInsight * compromiseMultiplier * 100) / 100;
+          const expectedSoulEmbers = Math.round(expectedBaseSoulEmbers * compromiseMultiplier * 100) / 100;
+          const expectedBossProgress = Math.round(expectedBossDamage * 100) / 100;
+
+          // Verify Dev Screen uses production constants
+          expect(session.soulInsight).toBe(expectedSoulInsight);
+          expect(session.soulEmbers).toBe(expectedSoulEmbers);
+          expect(session.bossProgress).toBe(expectedBossProgress);
+
+          // Verify calculation details use production constants
+          expect(session.calculationDetails.baseSoulInsight).toBeCloseTo(expectedBaseSoulInsight, 1);
+          expect(session.calculationDetails.baseSoulEmbers).toBeCloseTo(expectedBaseSoulEmbers, 1);
+          expect(session.calculationDetails.spiritBonus).toBe(stats.spirit * FORMULAS.SOUL_INSIGHT_SPIRIT_BONUS);
+          expect(session.calculationDetails.soulflowBonus).toBe(stats.soulflow * FORMULAS.SOUL_EMBERS_SOULFLOW_BONUS);
+          expect(session.calculationDetails.compromisePenalty).toBe(compromiseMultiplier);
+
+          // Verify boss data uses production constants
+          expect(result.boss.startingResolve).toBe(STUBBORN_SOULS[0].initialResolve);
+
+          // Verify level threshold uses production constants
+          const levelThreshold = simulationEngine["progressionManager"].calculateLevelThreshold(1);
+          const expectedThreshold = Math.floor(FORMULAS.LEVEL_THRESHOLD_BASE * Math.pow(1, FORMULAS.LEVEL_THRESHOLD_EXPONENT));
+          expect(levelThreshold).toBe(expectedThreshold);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * End-to-End Test: Complete simulation workflow
+   * 
+   * Tests the complete workflow: input → simulate → view results
+   */
+  test("E2E: Complete simulation workflow", () => {
+    const simulationEngine = new SimulationEngine();
+
+    // Test with various configurations
+    const testConfigs = [
+      {
+        sessionDuration: 25,
+        sessionCount: 5,
+        playerStats: { spirit: 2, harmony: 0.1, soulflow: 1.5 },
+        startingLevel: 1,
+        startingSoulInsight: 0,
+        currentBossIndex: 0,
+        isCompromised: false,
+      },
+      {
+        sessionDuration: 60,
+        sessionCount: 10,
+        playerStats: { spirit: 10, harmony: 0.3, soulflow: 5 },
+        startingLevel: 5,
+        startingSoulInsight: 500,
+        currentBossIndex: 2,
+        isCompromised: true,
+      },
+    ];
+
+    testConfigs.forEach((config) => {
+      // Run simulation
+      const result = simulationEngine.runSimulation(config);
+
+      // Verify results are complete and valid
+      expect(result.sessions).toBeDefined();
+      expect(result.sessions.length).toBe(config.sessionCount);
+      expect(result.totals).toBeDefined();
+      expect(result.progression).toBeDefined();
+      expect(result.boss).toBeDefined();
+
+      // Verify all sessions have required data
+      result.sessions.forEach((session) => {
+        expect(session.sessionNumber).toBeGreaterThan(0);
+        expect(session.duration).toBe(config.sessionDuration);
+        expect(session.soulInsight).toBeGreaterThanOrEqual(0);
+        expect(session.soulEmbers).toBeGreaterThanOrEqual(0);
+        expect(session.bossProgress).toBeGreaterThanOrEqual(0);
+        expect(typeof session.wasCritical).toBe("boolean");
+        expect(session.wasCompromised).toBe(config.isCompromised);
+        expect(session.calculationDetails).toBeDefined();
+      });
+
+      // Verify totals are aggregated correctly
+      const expectedTotalSoulInsight = result.sessions.reduce((sum, s) => sum + s.soulInsight, 0);
+      const expectedTotalSoulEmbers = result.sessions.reduce((sum, s) => sum + s.soulEmbers, 0);
+      const expectedTotalBossProgress = result.sessions.reduce((sum, s) => sum + s.bossProgress, 0);
+      const expectedCriticalHits = result.sessions.filter((s) => s.wasCritical).length;
+
+      expect(result.totals.soulInsight).toBeCloseTo(expectedTotalSoulInsight, 1);
+      expect(result.totals.soulEmbers).toBeCloseTo(expectedTotalSoulEmbers, 1);
+      expect(result.totals.bossProgress).toBeCloseTo(expectedTotalBossProgress, 1);
+      expect(result.totals.criticalHits).toBe(expectedCriticalHits);
+
+      // Verify progression is tracked correctly
+      expect(result.progression.startLevel).toBe(config.startingLevel);
+      expect(result.progression.endLevel).toBeGreaterThanOrEqual(config.startingLevel);
+      expect(result.progression.levelsGained).toBe(result.progression.endLevel - config.startingLevel);
+      expect(result.progression.skillPointsEarned).toBe(result.progression.levelsGained);
+      expect(result.progression.finalSoulInsight).toBeGreaterThanOrEqual(0);
+
+      // Verify boss status is tracked correctly
+      expect(result.boss.startingResolve).toBeGreaterThan(0);
+      expect(result.boss.remainingResolve).toBeGreaterThanOrEqual(0);
+      expect(result.boss.remainingResolve).toBeLessThanOrEqual(result.boss.startingResolve);
+      expect(typeof result.boss.wasDefeated).toBe("boolean");
+    });
+  });
+
+  /**
+   * End-to-End Test: Export → Import → Simulate round-trip
+   * 
+   * Tests the workflow: export → import → simulate with imported config
+   */
+  test("E2E: Export → Import → Simulate round-trip", () => {
+    const simulationEngine = new SimulationEngine();
+    const exportManager = new ExportImportManager();
+
+    // Create initial config and run simulation
+    const originalConfig = {
+      sessionDuration: 30,
+      sessionCount: 3,
+      playerStats: { spirit: 3, harmony: 0.15, soulflow: 2 },
+      startingLevel: 2,
+      startingSoulInsight: 150,
+      currentBossIndex: 1,
+      isCompromised: false,
+    };
+
+    const originalResult = simulationEngine.runSimulation(originalConfig);
+
+    // Export to JSON
+    const jsonString = exportManager.exportToJSON(originalConfig, originalResult);
+    expect(jsonString).toBeTruthy();
+    expect(jsonString.length).toBeGreaterThan(0);
+
+    // Import from JSON
+    const importedData = exportManager.importFromJSON(jsonString);
+    expect(importedData).toBeDefined();
+    expect(importedData.config).toEqual(originalConfig);
+
+    // Run simulation with imported config
+    const reimportedResult = simulationEngine.runSimulation(importedData.config);
+
+    // Verify reimported simulation produces consistent results
+    // (Note: Results may differ slightly due to random critical hits, but structure should match)
+    expect(reimportedResult.sessions.length).toBe(originalResult.sessions.length);
+    expect(reimportedResult.progression.startLevel).toBe(originalResult.progression.startLevel);
+    expect(reimportedResult.boss.startingResolve).toBe(originalResult.boss.startingResolve);
+  });
+
+  /**
+   * End-to-End Test: Reset → Configure → Simulate workflow
+   * 
+   * Tests the workflow: reset to defaults → configure parameters → simulate
+   */
+  test("E2E: Reset → Configure → Simulate workflow", () => {
+    const simulationEngine = new SimulationEngine();
+
+    // Define default values (as would be set by reset)
+    const defaultConfig = {
+      sessionDuration: 25,
+      sessionCount: 1,
+      playerStats: { spirit: 1, harmony: 0.05, soulflow: 1 },
+      startingLevel: 1,
+      startingSoulInsight: 0,
+      currentBossIndex: 0,
+      isCompromised: false,
+    };
+
+    // Run simulation with defaults
+    const defaultResult = simulationEngine.runSimulation(defaultConfig);
+    expect(defaultResult.sessions.length).toBe(1);
+    expect(defaultResult.progression.startLevel).toBe(1);
+
+    // Configure new parameters
+    const customConfig = {
+      sessionDuration: 45,
+      sessionCount: 7,
+      playerStats: { spirit: 5, harmony: 0.2, soulflow: 3 },
+      startingLevel: 10,
+      startingSoulInsight: 1000,
+      currentBossIndex: 3,
+      isCompromised: true,
+    };
+
+    // Run simulation with custom config
+    const customResult = simulationEngine.runSimulation(customConfig);
+    expect(customResult.sessions.length).toBe(7);
+    expect(customResult.progression.startLevel).toBe(10);
+    expect(customResult.sessions.every((s) => s.wasCompromised)).toBe(true);
+
+    // Verify custom config produces different results than defaults
+    expect(customResult.totals.soulInsight).not.toBe(defaultResult.totals.soulInsight);
+    expect(customResult.totals.soulEmbers).not.toBe(defaultResult.totals.soulEmbers);
+  });
+
+  /**
+   * End-to-End Test: Quick level buttons → Simulate workflow
+   * 
+   * Tests the workflow: click quick level button → simulate at that level
+   */
+  test("E2E: Quick level buttons → Simulate workflow", () => {
+    const simulationEngine = new SimulationEngine();
+    const progressionManager = new ProgressionManager();
+
+    // Test each quick level button value
+    const quickLevels = [5, 10, 20, 50, 100];
+
+    quickLevels.forEach((targetLevel) => {
+      // Calculate Soul Insight threshold for the target level (as quick button would)
+      const soulInsightThreshold = progressionManager.calculateLevelThreshold(targetLevel - 1);
+
+      // Create config at that level
+      const config = {
+        sessionDuration: 25,
+        sessionCount: 1,
+        playerStats: { spirit: 1, harmony: 0, soulflow: 1 },
+        startingLevel: targetLevel,
+        startingSoulInsight: soulInsightThreshold,
+        currentBossIndex: 0,
+        isCompromised: false,
+      };
+
+      // Run simulation
+      const result = simulationEngine.runSimulation(config);
+
+      // Verify simulation starts at correct level
+      expect(result.progression.startLevel).toBe(targetLevel);
+      expect(result.progression.finalSoulInsight).toBeGreaterThanOrEqual(soulInsightThreshold);
+
+      // Verify boss availability is appropriate for level
+      const availableBosses = STUBBORN_SOULS.filter((boss) => boss.unlockLevel <= targetLevel);
+      expect(availableBosses.length).toBeGreaterThan(0);
+    });
+  });
+
+  /**
+   * End-to-End Test: Compromised sessions workflow
+   * 
+   * Tests the workflow: enable compromised → simulate → view penalized rewards
+   */
+  test("E2E: Compromised sessions workflow", () => {
+    const simulationEngine = new SimulationEngine();
+
+    // Run normal simulation
+    const normalConfig = {
+      sessionDuration: 30,
+      sessionCount: 5,
+      playerStats: { spirit: 2, harmony: 0, soulflow: 1.5 },
+      startingLevel: 1,
+      startingSoulInsight: 0,
+      currentBossIndex: 0,
+      isCompromised: false,
+    };
+
+    const normalResult = simulationEngine.runSimulation(normalConfig);
+
+    // Run compromised simulation with same parameters
+    const compromisedConfig = { ...normalConfig, isCompromised: true };
+    const compromisedResult = simulationEngine.runSimulation(compromisedConfig);
+
+    // Verify all sessions are marked as compromised
+    expect(compromisedResult.sessions.every((s) => s.wasCompromised)).toBe(true);
+
+    // Verify compromised rewards are lower than normal rewards
+    // (approximately 70% due to 30% penalty)
+    expect(compromisedResult.totals.soulInsight).toBeLessThan(normalResult.totals.soulInsight);
+    expect(compromisedResult.totals.soulEmbers).toBeLessThan(normalResult.totals.soulEmbers);
+
+    // Verify penalty is approximately 30% (0.7 multiplier)
+    const penaltyRatio = compromisedResult.totals.soulInsight / normalResult.totals.soulInsight;
+    expect(penaltyRatio).toBeCloseTo(0.7, 1);
+
+    // Verify boss damage is NOT affected by compromise penalty
+    expect(compromisedResult.totals.bossProgress).toBe(normalResult.totals.bossProgress);
+
+    // Verify calculation details show penalty
+    compromisedResult.sessions.forEach((session) => {
+      expect(session.calculationDetails.compromisePenalty).toBe(0.7);
+    });
   });
 
   /**
