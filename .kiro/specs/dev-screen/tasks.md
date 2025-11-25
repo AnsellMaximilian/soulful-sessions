@@ -197,31 +197,45 @@
   - **Property 20: Next boss is displayed after defeat**
   - **Validates: Requirements 6.2, 6.3, 6.4, 6.5**
 
-- [ ] 5. Implement compromised session handling
-- [ ] 5.1 Add compromised session support to simulation
+- [x] 5. Implement compromised session handling
+
+
+
+
+- [x] 5.1 Add compromised session support to simulation
+
+
   - Update createMockSession to accept isCompromised parameter
   - Pass compromised status from checkbox to simulation
   - Ensure RewardCalculator.applyCompromisePenalty is called for compromised sessions
   - Track both base and penalized rewards in SessionSimulationResult
   - _Requirements: 4.2, 4.3_
 
-- [ ] 5.2 Write property tests for compromise penalty
+- [x] 5.2 Write property tests for compromise penalty
+
+
   - **Property 10: Compromise penalty is applied consistently**
   - **Property 11: Dev Screen uses production penalty method**
   - **Validates: Requirements 4.2, 4.3**
 
-- [ ] 5.3 Display compromised session rewards
+- [x] 5.3 Display compromised session rewards
+
+
   - Update renderSessionTable to show both base and penalized rewards
   - Add columns or tooltip showing pre-penalty values
   - Visually distinguish compromised sessions (e.g., red text or icon)
   - Update calculation tooltips to show penalty application
   - _Requirements: 4.4_
 
-- [ ] 5.4 Write property test for compromised display
+- [x] 5.4 Write property test for compromised display
+
+
   - **Property 12: Compromised sessions display both reward values**
   - **Validates: Requirements 4.4**
 
-- [ ] 5.5 Implement compromised checkbox toggle behavior
+- [x] 5.5 Implement compromised checkbox toggle behavior
+
+
   - Add event listener to compromised checkbox
   - Update simulation when checkbox is toggled
   - Re-run simulation automatically with new compromised status

@@ -517,9 +517,12 @@ class UIController {
       });
     });
 
-    // Compromised checkbox
+    // Compromised checkbox - automatically re-run simulation when toggled
     this.compromisedCheckbox.addEventListener("change", () => {
-      // No automatic re-simulation, user must click simulate again
+      // Only re-run if we have previous results
+      if (this.currentResults) {
+        this.handleSimulateClick();
+      }
     });
   }
 
@@ -914,16 +917,35 @@ class UIController {
     sessions.forEach((session) => {
       const rowClass = session.wasCritical ? "critical-hit" : "";
       const criticalIcon = session.wasCritical ? "⚡" : "";
+      const compromisedClass = session.wasCompromised ? "compromised-session" : "";
+      const compromisedIcon = session.wasCompromised ? "⚠️" : "";
       const compromisedText = session.wasCompromised
         ? '<span class="compromised">Compromised</span>'
         : "Normal";
 
+      // Calculate base rewards (before compromise penalty) for display
+      const baseSoulInsight = session.wasCompromised
+        ? Math.round((session.soulInsight / 0.7) * 100) / 100
+        : session.soulInsight;
+      const baseSoulEmbers = session.wasCompromised
+        ? Math.round((session.soulEmbers / 0.7) * 100) / 100
+        : session.soulEmbers;
+
+      // Format reward display with base and penalized values for compromised sessions
+      const soulInsightDisplay = session.wasCompromised
+        ? `<span style="text-decoration: line-through; color: #9ca3af;">${baseSoulInsight.toFixed(2)}</span> → <span style="color: #ef4444;">${session.soulInsight.toFixed(2)}</span>`
+        : session.soulInsight.toFixed(2);
+      
+      const soulEmbersDisplay = session.wasCompromised
+        ? `<span style="text-decoration: line-through; color: #9ca3af;">${baseSoulEmbers.toFixed(2)}</span> → <span style="color: #ef4444;">${session.soulEmbers.toFixed(2)}</span>`
+        : session.soulEmbers.toFixed(2);
+
       html += `
-        <tr class="${rowClass} session-row" data-session="${session.sessionNumber}" style="cursor: pointer;">
+        <tr class="${rowClass} ${compromisedClass} session-row" data-session="${session.sessionNumber}" style="cursor: pointer;">
           <td>${session.sessionNumber}</td>
           <td>${session.duration}</td>
-          <td class="tooltip-trigger" data-tooltip-type="soulInsight" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.soulInsight.toFixed(2)}</td>
-          <td class="tooltip-trigger" data-tooltip-type="soulEmbers" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.soulEmbers.toFixed(2)}</td>
+          <td class="tooltip-trigger" data-tooltip-type="soulInsight" data-session-num="${session.sessionNumber}" style="cursor: help;">${compromisedIcon} ${soulInsightDisplay}</td>
+          <td class="tooltip-trigger" data-tooltip-type="soulEmbers" data-session-num="${session.sessionNumber}" style="cursor: help;">${compromisedIcon} ${soulEmbersDisplay}</td>
           <td class="tooltip-trigger" data-tooltip-type="bossProgress" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.bossProgress.toFixed(2)}</td>
           <td>${criticalIcon} ${session.wasCritical ? "Yes" : "No"}</td>
           <td>${compromisedText}</td>
@@ -1010,6 +1032,11 @@ class UIController {
           let tooltipContent = "";
           
           if (tooltipType === "soulInsight") {
+            // Calculate pre-penalty value for compromised sessions
+            const prePenaltyValue = session.wasCompromised
+              ? Math.round((session.soulInsight / 0.7) * 100) / 100
+              : session.soulInsight;
+            
             tooltipContent = `
               <div style="font-weight: 600; margin-bottom: 8px; color: #a78bfa;">Soul Insight Formula</div>
               <div style="margin-bottom: 4px;">duration × 10 × (1 + spirit × 0.1)</div>
@@ -1018,10 +1045,16 @@ class UIController {
               </div>
               <div style="margin-bottom: 4px;">Base: ${session.calculationDetails.baseSoulInsight.toFixed(2)}</div>
               <div style="margin-bottom: 4px;">Critical: ×${session.calculationDetails.criticalMultiplier}</div>
-              <div style="margin-bottom: 4px;">Compromise: ×${session.calculationDetails.compromisePenalty}</div>
+              ${session.wasCompromised ? `<div style="margin-bottom: 4px; color: #9ca3af;">Before Penalty: ${prePenaltyValue.toFixed(2)}</div>` : ''}
+              <div style="margin-bottom: 4px; ${session.wasCompromised ? 'color: #ef4444;' : ''}">Compromise: ×${session.calculationDetails.compromisePenalty}${session.wasCompromised ? ' (30% reduction)' : ''}</div>
               <div style="font-weight: 600; margin-top: 8px;">Final: ${session.soulInsight.toFixed(2)}</div>
             `;
           } else if (tooltipType === "soulEmbers") {
+            // Calculate pre-penalty value for compromised sessions
+            const prePenaltyValue = session.wasCompromised
+              ? Math.round((session.soulEmbers / 0.7) * 100) / 100
+              : session.soulEmbers;
+            
             tooltipContent = `
               <div style="font-weight: 600; margin-bottom: 8px; color: #a78bfa;">Soul Embers Formula</div>
               <div style="margin-bottom: 4px;">duration × 2 × (1 + soulflow × 0.05)</div>
@@ -1030,7 +1063,8 @@ class UIController {
               </div>
               <div style="margin-bottom: 4px;">Base: ${session.calculationDetails.baseSoulEmbers.toFixed(2)}</div>
               <div style="margin-bottom: 4px;">Critical: ×${session.calculationDetails.criticalMultiplier}</div>
-              <div style="margin-bottom: 4px;">Compromise: ×${session.calculationDetails.compromisePenalty}</div>
+              ${session.wasCompromised ? `<div style="margin-bottom: 4px; color: #9ca3af;">Before Penalty: ${prePenaltyValue.toFixed(2)}</div>` : ''}
+              <div style="margin-bottom: 4px; ${session.wasCompromised ? 'color: #ef4444;' : ''}">Compromise: ×${session.calculationDetails.compromisePenalty}${session.wasCompromised ? ' (30% reduction)' : ''}</div>
               <div style="font-weight: 600; margin-top: 8px;">Final: ${session.soulEmbers.toFixed(2)}</div>
             `;
           } else if (tooltipType === "bossProgress") {

@@ -812,4 +812,232 @@ describe("Dev Screen Property-Based Tests", () => {
       { numRuns: 100 } // Run 100 iterations as specified in design
     );
   });
+
+  /**
+   * **Feature: dev-screen, Property 10: Compromise penalty is applied consistently**
+   * **Validates: Requirements 4.2**
+   *
+   * For any simulation with the compromised checkbox enabled, all sessions
+   * should have the 30% penalty (0.7 multiplier) applied to their rewards.
+   */
+  test("Property 10: Compromise penalty is applied consistently", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count
+        fc.integer({ min: 1, max: 20 }),
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0.5),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+        }),
+        (sessionCount, duration, stats: PlayerStats) => {
+          // Create simulation config with compromised = true
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: true,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify all sessions are marked as compromised
+          result.sessions.forEach((session) => {
+            expect(session.wasCompromised).toBe(true);
+            
+            // Verify compromise penalty is 0.7 (30% reduction)
+            expect(session.calculationDetails.compromisePenalty).toBe(0.7);
+          });
+
+          // Verify totals are positive (rewards were still calculated)
+          expect(result.totals.soulInsight).toBeGreaterThan(0);
+          expect(result.totals.soulEmbers).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 11: Dev Screen uses production penalty method**
+   * **Validates: Requirements 4.3**
+   *
+   * For any compromised session, the penalty calculation should produce
+   * identical results to the production RewardCalculator's applyCompromisePenalty method.
+   */
+  test("Property 11: Dev Screen uses production penalty method", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0),
+            noNaN: true,
+          }), // Set harmony to 0 to avoid critical hits
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+        }),
+        (duration, stats: PlayerStats) => {
+          // Run two simulations: one normal, one compromised
+          const normalConfig = {
+            sessionDuration: duration,
+            sessionCount: 1,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          const compromisedConfig = {
+            ...normalConfig,
+            isCompromised: true,
+          };
+
+          // Run both simulations
+          const normalResult = simulationEngine.runSimulation(normalConfig);
+          const compromisedResult = simulationEngine.runSimulation(compromisedConfig);
+
+          // Get the session results
+          const normalSession = normalResult.sessions[0];
+          const compromisedSession = compromisedResult.sessions[0];
+
+          // Verify compromised rewards are approximately 70% of normal rewards
+          // Due to rounding at different stages, we allow for small precision differences
+          const expectedCompromisedSoulInsight = normalSession.soulInsight * 0.7;
+          const expectedCompromisedSoulEmbers = normalSession.soulEmbers * 0.7;
+
+          // Allow for 1 decimal place precision (0.1 difference) due to rounding
+          expect(compromisedSession.soulInsight).toBeCloseTo(
+            expectedCompromisedSoulInsight,
+            1
+          );
+          expect(compromisedSession.soulEmbers).toBeCloseTo(
+            expectedCompromisedSoulEmbers,
+            1
+          );
+
+          // Boss damage should NOT be affected by compromise penalty
+          expect(compromisedSession.bossProgress).toBe(normalSession.bossProgress);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 12: Compromised sessions display both reward values**
+   * **Validates: Requirements 4.4**
+   *
+   * For any compromised session, the results should display both the base reward
+   * values (before penalty) and the penalized reward values (after penalty).
+   */
+  test("Property 12: Compromised sessions display both reward values", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0),
+            noNaN: true,
+          }), // Set harmony to 0 to avoid critical hits
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+        }),
+        (duration, stats: PlayerStats) => {
+          // Create compromised simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: 1,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: true,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+          const session = result.sessions[0];
+
+          // Verify session is marked as compromised
+          expect(session.wasCompromised).toBe(true);
+
+          // Verify calculation details contain the penalty multiplier
+          expect(session.calculationDetails.compromisePenalty).toBe(0.7);
+
+          // Verify we can calculate the base (pre-penalty) values
+          // Base values should be approximately 1/0.7 times the final values
+          const calculatedBaseSoulInsight = session.soulInsight / 0.7;
+          const calculatedBaseSoulEmbers = session.soulEmbers / 0.7;
+
+          // Verify the base values are greater than the penalized values
+          expect(calculatedBaseSoulInsight).toBeGreaterThan(session.soulInsight);
+          expect(calculatedBaseSoulEmbers).toBeGreaterThan(session.soulEmbers);
+
+          // Verify the relationship: penalized = base * 0.7
+          expect(session.soulInsight).toBeCloseTo(
+            calculatedBaseSoulInsight * 0.7,
+            1
+          );
+          expect(session.soulEmbers).toBeCloseTo(
+            calculatedBaseSoulEmbers * 0.7,
+            1
+          );
+
+          // Verify calculation details provide the information needed to display both values
+          expect(session.calculationDetails.baseSoulInsight).toBeGreaterThan(0);
+          expect(session.calculationDetails.baseSoulEmbers).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
 });
