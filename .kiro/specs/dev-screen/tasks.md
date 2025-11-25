@@ -366,8 +366,14 @@
   - **Property 24: Invalid imports display errors and preserve state**
   - **Validates: Requirements 8.3, 8.4**
 
-- [ ] 9. Implement reset functionality
-- [ ] 9.1 Implement reset button handler
+- [x] 9. Implement reset functionality
+
+
+
+
+- [x] 9.1 Implement reset button handler
+
+
   - Implement handleResetClick method
   - Reset level to 1, Soul Insight to 0
   - Reset stats to defaults (1, 0.05, 1)
@@ -378,12 +384,19 @@
   - Update UI immediately without page reload
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 9.2 Write property test for reset behavior
+- [x] 9.2 Write property test for reset behavior
+
+
   - **Property 28: Reset restores all defaults**
   - **Validates: Requirements 11.2**
 
-- [ ] 10. Implement dev server and build integration
-- [ ] 10.1 Create dev-screen.html
+- [x] 10. Implement dev server and build integration
+
+
+
+
+- [x] 10.1 Create dev-screen.html
+
   - Create HTML structure with form inputs and results containers
   - Add CSS styling for dev tool aesthetic (simple, functional)
   - Include script tag for dist/dev-screen.js
@@ -391,14 +404,16 @@
   - Style buttons, inputs, tables for readability
   - _Requirements: 1.1, 2.1, 4.1, 5.1, 6.1_
 
-- [ ] 10.2 Update build.js for Dev Screen
+- [x] 10.2 Update build.js for Dev Screen
+
   - Add dev-screen entry point to esbuild configuration
   - Configure output to dist/dev-screen.js
   - Use same TypeScript and bundling settings as extension
   - Ensure dev-screen.html is not included in extension build
   - _Requirements: 10.5_
 
-- [ ] 10.3 Create dev-screen-server.js script
+- [x] 10.3 Create dev-screen-server.js script
+
   - Create scripts/dev-screen-server.js
   - Implement HTTP server using Node.js http module
   - Serve dev-screen.html at root path
@@ -410,11 +425,14 @@
   - Handle server errors (port in use, file not found)
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 10.4 Write property test for server file serving
+- [x] 10.4 Write property test for server file serving
+
+
   - **Property 25: Server serves all required files**
   - **Validates: Requirements 9.3**
 
-- [ ] 10.5 Add npm script for Dev Screen
+- [x] 10.5 Add npm script for Dev Screen
+
   - Add "dev-screen" script to package.json
   - Script should run: "node scripts/dev-screen-server.js"
   - _Requirements: 9.1_

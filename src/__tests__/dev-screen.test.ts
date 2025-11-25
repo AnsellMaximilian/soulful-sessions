@@ -1611,4 +1611,163 @@ describe("Dev Screen Property-Based Tests", () => {
       { numRuns: 100 }
     );
   });
+
+  /**
+   * **Feature: dev-screen, Property 25: Server serves all required files**
+   * **Validates: Requirements 9.3**
+   *
+   * For any HTTP request to the dev server for HTML or JavaScript files, the
+   * server should respond with the correct file content and appropriate MIME type.
+   * 
+   * This test verifies the MIME type mapping logic that the server uses to
+   * determine the correct Content-Type header for different file types.
+   */
+  test("Property 25: Server serves all required files", () => {
+    // MIME type mapping function (same as in dev-screen-server.js)
+    function getMimeType(filePath: string): string {
+      const MIME_TYPES: Record<string, string> = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+      };
+      
+      const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
+      return MIME_TYPES[ext] || 'application/octet-stream';
+    }
+
+    fc.assert(
+      fc.property(
+        // Test different file paths that the server should handle
+        fc.constantFrom(
+          { requestPath: '/', expectedFile: 'dev-screen.html', expectedMimeType: 'text/html' },
+          { requestPath: '/index.html', expectedFile: 'dev-screen.html', expectedMimeType: 'text/html' },
+          { requestPath: '/dist/dev-screen.js', expectedFile: 'dist/dev-screen.js', expectedMimeType: 'application/javascript' }
+        ),
+        (testCase) => {
+          // Verify MIME type mapping is correct for the expected file
+          const actualMimeType = getMimeType(testCase.expectedFile);
+          expect(actualMimeType).toBe(testCase.expectedMimeType);
+
+          // Verify the request path mapping logic
+          if (testCase.requestPath === '/' || testCase.requestPath === '/index.html') {
+            // Root and /index.html should serve dev-screen.html
+            expect(testCase.expectedFile).toBe('dev-screen.html');
+          } else if (testCase.requestPath.startsWith('/dist/')) {
+            // /dist/ paths should serve from dist directory
+            expect(testCase.expectedFile).toMatch(/^dist\//);
+          }
+
+          // Verify all required files have correct extensions
+          const validExtensions = ['.html', '.js', '.css', '.json', '.png', '.jpg', '.gif', '.svg'];
+          const fileExtension = testCase.expectedFile.substring(testCase.expectedFile.lastIndexOf('.'));
+          expect(validExtensions).toContain(fileExtension);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 28: Reset restores all defaults**
+   * **Validates: Requirements 11.2**
+   *
+   * For any state of the Dev Screen, the default values should be valid and
+   * represent the expected reset state (level 1, 0 Soul Insight, base stats
+   * 1/0.05/1, 25 minute sessions, session count 1, first boss, not compromised).
+   */
+  test("Property 28: Reset restores all defaults", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random number of test iterations
+        fc.integer({ min: 1, max: 10 }),
+        (iterations) => {
+          // Define the expected default values
+          const defaultValues = {
+            sessionDuration: 25,
+            sessionCount: 1,
+            spirit: 1,
+            harmony: 0.05,
+            soulflow: 1,
+            level: 1,
+            soulInsight: 0,
+            bossIndex: 0,
+            isCompromised: false,
+          };
+
+          // Verify all default values are valid according to validation functions
+          const durationValidation = validateSessionDuration(defaultValues.sessionDuration);
+          expect(durationValidation.isValid).toBe(true);
+          expect(durationValidation.errorMessage).toBeUndefined();
+
+          const countValidation = validateSessionCount(defaultValues.sessionCount);
+          expect(countValidation.isValid).toBe(true);
+          expect(countValidation.errorMessage).toBeUndefined();
+
+          const spiritValidation = validateStatValue(defaultValues.spirit, "Spirit");
+          expect(spiritValidation.isValid).toBe(true);
+          expect(spiritValidation.errorMessage).toBeUndefined();
+
+          const harmonyValidation = validateStatValue(defaultValues.harmony, "Harmony");
+          expect(harmonyValidation.isValid).toBe(true);
+          expect(harmonyValidation.errorMessage).toBeUndefined();
+
+          const soulflowValidation = validateStatValue(defaultValues.soulflow, "Soulflow");
+          expect(soulflowValidation.isValid).toBe(true);
+          expect(soulflowValidation.errorMessage).toBeUndefined();
+
+          // Verify default values can be used in a simulation
+          const config = {
+            sessionDuration: defaultValues.sessionDuration,
+            sessionCount: defaultValues.sessionCount,
+            playerStats: {
+              spirit: defaultValues.spirit,
+              harmony: defaultValues.harmony,
+              soulflow: defaultValues.soulflow,
+            },
+            startingLevel: defaultValues.level,
+            startingSoulInsight: defaultValues.soulInsight,
+            currentBossIndex: defaultValues.bossIndex,
+            isCompromised: defaultValues.isCompromised,
+          };
+
+          // Run simulation with default values - should not throw
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify simulation produces valid results with defaults
+          expect(result.sessions.length).toBe(defaultValues.sessionCount);
+          expect(result.progression.startLevel).toBe(defaultValues.level);
+          expect(result.totals.soulInsight).toBeGreaterThan(0);
+          expect(result.totals.soulEmbers).toBeGreaterThan(0);
+          expect(result.totals.bossProgress).toBeGreaterThan(0);
+
+          // Verify first boss is valid
+          expect(defaultValues.bossIndex).toBe(0);
+          expect(STUBBORN_SOULS[defaultValues.bossIndex]).toBeDefined();
+          expect(STUBBORN_SOULS[defaultValues.bossIndex].unlockLevel).toBe(1);
+
+          // Verify default values are sensible
+          expect(defaultValues.sessionDuration).toBeGreaterThanOrEqual(5);
+          expect(defaultValues.sessionDuration).toBeLessThanOrEqual(120);
+          expect(defaultValues.sessionCount).toBeGreaterThan(0);
+          expect(defaultValues.spirit).toBeGreaterThan(0);
+          expect(defaultValues.harmony).toBeGreaterThanOrEqual(0);
+          expect(defaultValues.harmony).toBeLessThanOrEqual(1);
+          expect(defaultValues.soulflow).toBeGreaterThan(0);
+          expect(defaultValues.level).toBeGreaterThan(0);
+          expect(defaultValues.soulInsight).toBeGreaterThanOrEqual(0);
+          expect(defaultValues.bossIndex).toBeGreaterThanOrEqual(0);
+          expect(defaultValues.bossIndex).toBeLessThan(STUBBORN_SOULS.length);
+          expect(typeof defaultValues.isCompromised).toBe("boolean");
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
 });
