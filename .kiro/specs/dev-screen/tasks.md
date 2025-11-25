@@ -13,8 +13,14 @@
   - Ensure Dev Screen files are excluded from extension build
   - _Requirements: 9.1, 9.2, 9.3, 10.5_
 
-- [ ] 2. Create core simulation engine
-- [ ] 2.1 Implement SimulationEngine class with production class integration
+- [x] 2. Create core simulation engine
+
+
+
+
+- [x] 2.1 Implement SimulationEngine class with production class integration
+
+
   - Create src/dev-screen.ts with SimulationEngine class
   - Import and instantiate RewardCalculator from production code
   - Import and instantiate ProgressionManager from production code
@@ -22,7 +28,9 @@
   - Implement createMockSession helper to create SessionState objects
   - _Requirements: 10.1, 10.2, 10.3_
 
-- [ ] 2.2 Implement single session simulation logic
+- [x] 2.2 Implement single session simulation logic
+
+
   - Implement simulateSingleSession method
   - Create mock SessionState with specified duration
   - Call RewardCalculator.calculateRewards with mock session and stats
@@ -30,11 +38,15 @@
   - Return SessionSimulationResult with all reward data
   - _Requirements: 1.4, 2.5_
 
-- [ ] 2.3 Write property test for calculation consistency
+- [x] 2.3 Write property test for calculation consistency
+
+
   - **Property 7: Dev Screen produces identical results to production calculator**
   - **Validates: Requirements 2.5, 10.1**
 
-- [ ] 2.4 Implement full simulation orchestration
+- [x] 2.4 Implement full simulation orchestration
+
+
   - Implement runSimulation method accepting SimulationConfig
   - Loop through specified session count
   - Track cumulative Soul Insight and level progression
@@ -43,7 +55,9 @@
   - Return complete SimulationResult with all data
   - _Requirements: 1.4, 1.5, 5.2, 6.3_
 
-- [ ] 2.5 Write property test for session count accuracy
+- [x] 2.5 Write property test for session count accuracy
+
+
   - **Property 3: Simulation executes correct number of sessions**
   - **Validates: Requirements 1.4**
 
