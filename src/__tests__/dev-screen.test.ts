@@ -3,11 +3,95 @@
 // ============================================================================
 
 import * as fc from "fast-check";
-import { SimulationEngine, createMockSession } from "../dev-screen";
-import { RewardCalculator } from "../RewardCalculator";
+import {
+  SimulationEngine,
+  validateSessionDuration,
+  validateSessionCount,
+  validateStatValue,
+} from "../dev-screen";
 import { PlayerStats } from "../types";
 
 describe("Dev Screen Property-Based Tests", () => {
+  /**
+   * **Feature: dev-screen, Property 1: Valid session durations are accepted**
+   * **Validates: Requirements 1.2**
+   *
+   * For any session duration value between 5 and 120 minutes (inclusive),
+   * the input validation should accept the value as valid.
+   */
+  test("Property 1: Valid session durations are accepted", () => {
+    fc.assert(
+      fc.property(
+        // Generate random session duration between 5 and 120 minutes
+        fc.integer({ min: 5, max: 120 }),
+        (duration) => {
+          const result = validateSessionDuration(duration);
+          
+          // Valid durations should be accepted
+          expect(result.isValid).toBe(true);
+          expect(result.errorMessage).toBeUndefined();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 2: Invalid session durations are rejected**
+   * **Validates: Requirements 1.3**
+   *
+   * For any session duration value outside the range [5, 120] (negative, zero,
+   * or greater than 120), the input validation should reject the value and
+   * display an error message.
+   */
+  test("Property 2: Invalid session durations are rejected", () => {
+    fc.assert(
+      fc.property(
+        // Generate invalid durations: either < 5 or > 120
+        fc.oneof(
+          fc.integer({ max: 4 }), // Less than 5
+          fc.integer({ min: 121, max: 1000 }) // Greater than 120
+        ),
+        (duration) => {
+          const result = validateSessionDuration(duration);
+          
+          // Invalid durations should be rejected
+          expect(result.isValid).toBe(false);
+          expect(result.errorMessage).toBeDefined();
+          expect(result.errorMessage).toContain("Session duration must be between 5 and 120 minutes");
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 6: Negative stat values are rejected**
+   * **Validates: Requirements 2.3**
+   *
+   * For any negative stat value entered for Spirit, Harmony, or Soulflow,
+   * the input validation should reject the value and display an error message.
+   */
+  test("Property 6: Negative stat values are rejected", () => {
+    fc.assert(
+      fc.property(
+        // Generate negative stat values (use Math.fround for 32-bit float)
+        fc.float({ max: Math.fround(-0.01), noNaN: true }),
+        // Generate random stat name
+        fc.constantFrom("Spirit", "Harmony", "Soulflow"),
+        (statValue, statName) => {
+          const result = validateStatValue(statValue, statName);
+          
+          // Negative stat values should be rejected
+          expect(result.isValid).toBe(false);
+          expect(result.errorMessage).toBeDefined();
+          expect(result.errorMessage).toContain(`${statName} stat cannot be negative`);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
   /**
    * **Feature: dev-screen, Property 3: Simulation executes correct number of sessions**
    * **Validates: Requirements 1.4**
