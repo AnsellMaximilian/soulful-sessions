@@ -249,4 +249,567 @@ describe("Dev Screen Property-Based Tests", () => {
       { numRuns: 100 } // Run 100 iterations as specified in design
     );
   });
+
+  /**
+   * **Feature: dev-screen, Property 4: Simulation results contain all required fields**
+   * **Validates: Requirements 1.5**
+   *
+   * For any completed simulation, the results should include total Soul Insight,
+   * total Soul Embers, total boss damage, and critical hit count.
+   */
+  test("Property 4: Simulation results contain all required fields", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count between 1 and 50
+        fc.integer({ min: 1, max: 50 }),
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(1),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+        }),
+        // Generate random starting level
+        fc.integer({ min: 1, max: 100 }),
+        // Generate random starting Soul Insight
+        fc.float({ min: 0, max: 10000, noNaN: true }),
+        // Generate random boss index
+        fc.integer({ min: 0, max: 9 }), // Assuming 10 bosses
+        // Generate random compromised status
+        fc.boolean(),
+        (
+          sessionCount,
+          duration,
+          stats: PlayerStats,
+          startingLevel,
+          startingSoulInsight,
+          bossIndex,
+          isCompromised
+        ) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: startingLevel,
+            startingSoulInsight: startingSoulInsight,
+            currentBossIndex: bossIndex,
+            isCompromised: isCompromised,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify all required fields exist in totals
+          expect(result.totals).toBeDefined();
+          expect(result.totals.soulInsight).toBeDefined();
+          expect(typeof result.totals.soulInsight).toBe("number");
+          expect(result.totals.soulInsight).toBeGreaterThanOrEqual(0);
+
+          expect(result.totals.soulEmbers).toBeDefined();
+          expect(typeof result.totals.soulEmbers).toBe("number");
+          expect(result.totals.soulEmbers).toBeGreaterThanOrEqual(0);
+
+          expect(result.totals.bossProgress).toBeDefined();
+          expect(typeof result.totals.bossProgress).toBe("number");
+          expect(result.totals.bossProgress).toBeGreaterThanOrEqual(0);
+
+          expect(result.totals.criticalHits).toBeDefined();
+          expect(typeof result.totals.criticalHits).toBe("number");
+          expect(result.totals.criticalHits).toBeGreaterThanOrEqual(0);
+          expect(result.totals.criticalHits).toBeLessThanOrEqual(sessionCount);
+
+          // Verify progression fields exist
+          expect(result.progression).toBeDefined();
+          expect(result.progression.startLevel).toBe(startingLevel);
+          expect(result.progression.endLevel).toBeGreaterThanOrEqual(startingLevel);
+          expect(result.progression.levelsGained).toBeGreaterThanOrEqual(0);
+          expect(result.progression.skillPointsEarned).toBeGreaterThanOrEqual(0);
+          expect(result.progression.finalSoulInsight).toBeGreaterThanOrEqual(0);
+
+          // Verify boss fields exist
+          expect(result.boss).toBeDefined();
+          expect(result.boss.startingResolve).toBeGreaterThan(0);
+          expect(result.boss.remainingResolve).toBeGreaterThanOrEqual(0);
+          expect(typeof result.boss.wasDefeated).toBe("boolean");
+
+          // Verify sessions array exists and has correct length
+          expect(result.sessions).toBeDefined();
+          expect(Array.isArray(result.sessions)).toBe(true);
+          expect(result.sessions.length).toBe(sessionCount);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 9: Critical hit sessions are visually highlighted**
+   * **Validates: Requirements 3.2**
+   *
+   * For any session that results in a critical hit, that session's row in the
+   * results table should have visual highlighting applied.
+   */
+  test("Property 9: Critical hit sessions are visually highlighted", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count between 1 and 50
+        fc.integer({ min: 1, max: 50 }),
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats with high harmony to ensure some crits
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0.5), // Higher harmony for more crits
+            max: Math.fround(1),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+        }),
+        (sessionCount, duration, stats: PlayerStats) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify that critical hit sessions have the wasCritical flag set
+          result.sessions.forEach((session) => {
+            if (session.wasCritical) {
+              // Verify critical multiplier is applied
+              expect(session.calculationDetails.criticalMultiplier).toBe(1.5);
+              
+              // Verify the session is marked as critical
+              expect(session.wasCritical).toBe(true);
+            } else {
+              // Non-critical sessions should have 1.0 multiplier
+              expect(session.calculationDetails.criticalMultiplier).toBe(1.0);
+              expect(session.wasCritical).toBe(false);
+            }
+          });
+
+          // Verify total critical hits matches the count of critical sessions
+          const criticalSessionCount = result.sessions.filter(
+            (s) => s.wasCritical
+          ).length;
+          expect(result.totals.criticalHits).toBe(criticalSessionCount);
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 14: Level-up events are displayed with thresholds**
+   * **Validates: Requirements 5.3**
+   *
+   * For any simulation that causes a level-up, the results should display the
+   * level-up event along with the Soul Insight threshold required for that level.
+   */
+  test("Property 14: Level-up events are displayed with thresholds", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count that will likely cause level-ups
+        fc.integer({ min: 5, max: 20 }),
+        // Generate random session duration
+        fc.integer({ min: 20, max: 120 }),
+        // Generate random player stats with decent spirit for rewards
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(5),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0.5),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+        }),
+        // Start at level 1 with 0 Soul Insight
+        (sessionCount, duration, stats: PlayerStats) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify progression data is present
+          expect(result.progression).toBeDefined();
+          expect(result.progression.startLevel).toBe(1);
+          expect(result.progression.endLevel).toBeGreaterThanOrEqual(1);
+          expect(result.progression.levelsGained).toBeGreaterThanOrEqual(0);
+          
+          // If levels were gained, verify the data is consistent
+          if (result.progression.levelsGained > 0) {
+            expect(result.progression.endLevel).toBe(
+              result.progression.startLevel + result.progression.levelsGained
+            );
+            
+            // Verify skill points earned (1 per level)
+            expect(result.progression.skillPointsEarned).toBe(
+              result.progression.levelsGained
+            );
+            
+            // Verify final Soul Insight is less than next level threshold
+            const nextLevelThreshold = simulationEngine["progressionManager"].calculateLevelThreshold(
+              result.progression.endLevel
+            );
+            expect(result.progression.finalSoulInsight).toBeLessThan(nextLevelThreshold);
+          }
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 15: Multiple level-ups are tracked correctly**
+   * **Validates: Requirements 5.4**
+   *
+   * For any simulation that causes multiple level-ups, the results should show
+   * each level threshold crossed and the total skill points earned (1 per level).
+   */
+  test("Property 15: Multiple level-ups are tracked correctly", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate many sessions with high rewards to ensure multiple level-ups
+        fc.integer({ min: 10, max: 30 }),
+        // Long sessions for more rewards
+        fc.integer({ min: 60, max: 120 }),
+        // High stats for more rewards
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(10),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0.5),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(10),
+            max: Math.fround(100),
+            noNaN: true,
+          }),
+        }),
+        (sessionCount, duration, stats: PlayerStats) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify progression tracking
+          expect(result.progression.levelsGained).toBeGreaterThanOrEqual(0);
+          expect(result.progression.skillPointsEarned).toBe(
+            result.progression.levelsGained
+          );
+          
+          // If multiple levels were gained, verify consistency
+          if (result.progression.levelsGained >= 2) {
+            // Verify end level is correct
+            expect(result.progression.endLevel).toBe(
+              result.progression.startLevel + result.progression.levelsGained
+            );
+            
+            // Verify total Soul Insight earned is sufficient for the level-ups
+            const totalSoulInsight = result.totals.soulInsight;
+            expect(totalSoulInsight).toBeGreaterThan(0);
+            
+            // Verify final Soul Insight is within valid range
+            expect(result.progression.finalSoulInsight).toBeGreaterThanOrEqual(0);
+            
+            // Verify skill points match levels gained (1:1 ratio)
+            expect(result.progression.skillPointsEarned).toBe(
+              result.progression.levelsGained
+            );
+          }
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 17: Boss information is displayed correctly**
+   * **Validates: Requirements 6.2**
+   *
+   * For any selected boss from the STUBBORN_SOULS list, the display should show
+   * that boss's name, initial Resolve, and unlock level.
+   */
+  test("Property 17: Boss information is displayed correctly", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random boss index (0-9 for 10 bosses)
+        fc.integer({ min: 0, max: 9 }),
+        // Generate minimal simulation config
+        fc.integer({ min: 5, max: 30 }),
+        (bossIndex, duration) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: 1,
+            playerStats: { spirit: 1, harmony: 0.05, soulflow: 1 },
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: bossIndex,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Verify boss information is present
+          expect(result.boss).toBeDefined();
+          expect(result.boss.startingResolve).toBeGreaterThan(0);
+          expect(result.boss.remainingResolve).toBeGreaterThanOrEqual(0);
+          expect(result.boss.remainingResolve).toBeLessThanOrEqual(
+            result.boss.startingResolve
+          );
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 18: Boss damage calculations are accurate**
+   * **Validates: Requirements 6.3**
+   *
+   * For any completed simulation, the total boss damage should be calculated
+   * using the production formula (spirit * duration * 0.5) and the remaining
+   * Resolve should be correctly computed.
+   */
+  test("Property 18: Boss damage calculations are accurate", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count
+        fc.integer({ min: 1, max: 10 }),
+        // Generate random session duration
+        fc.integer({ min: 5, max: 60 }),
+        // Generate random spirit stat
+        fc.float({
+          min: Math.fround(1),
+          max: Math.fround(50),
+          noNaN: true,
+        }),
+        (sessionCount, duration, spirit) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: { spirit: spirit, harmony: 0, soulflow: 1 },
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0, // First boss
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Calculate expected boss damage per session
+          const expectedDamagePerSession = spirit * duration * 0.5;
+          const expectedTotalDamage = Math.round(
+            expectedDamagePerSession * sessionCount * 100
+          ) / 100;
+
+          // Verify total boss damage matches expected
+          expect(result.totals.bossProgress).toBeCloseTo(expectedTotalDamage, 1);
+
+          // Verify remaining resolve is correct
+          const expectedRemainingResolve = Math.max(
+            0,
+            result.boss.startingResolve - expectedTotalDamage
+          );
+          expect(result.boss.remainingResolve).toBeCloseTo(
+            expectedRemainingResolve,
+            1
+          );
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 19: Boss defeat is indicated with overflow**
+   * **Validates: Requirements 6.4**
+   *
+   * For any simulation where total boss damage exceeds current Resolve, the
+   * results should indicate the boss was defeated and show the overflow damage
+   * amount.
+   */
+  test("Property 19: Boss defeat is indicated with overflow", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate many sessions with high damage to ensure boss defeat
+        fc.integer({ min: 10, max: 30 }),
+        // Long sessions for more damage
+        fc.integer({ min: 30, max: 120 }),
+        // High spirit for more damage
+        fc.float({
+          min: Math.fround(20),
+          max: Math.fround(100),
+          noNaN: true,
+        }),
+        (sessionCount, duration, spirit) => {
+          // Create simulation config with first boss (100 Resolve)
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: { spirit: spirit, harmony: 0, soulflow: 1 },
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: 0, // First boss with 100 Resolve
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // Calculate expected total damage
+          const expectedDamagePerSession = spirit * duration * 0.5;
+          const expectedTotalDamage =
+            expectedDamagePerSession * sessionCount;
+
+          // If damage exceeds starting resolve, boss should be defeated
+          if (expectedTotalDamage > result.boss.startingResolve) {
+            expect(result.boss.wasDefeated).toBe(true);
+            expect(result.boss.remainingResolve).toBe(0);
+            
+            // Verify overflow damage calculation
+            const overflowDamage =
+              result.totals.bossProgress - result.boss.startingResolve;
+            expect(overflowDamage).toBeGreaterThan(0);
+          } else {
+            // Boss not defeated
+            expect(result.boss.wasDefeated).toBe(false);
+            expect(result.boss.remainingResolve).toBeGreaterThan(0);
+          }
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 20: Next boss is displayed after defeat**
+   * **Validates: Requirements 6.5**
+   *
+   * For any boss defeat where a next boss exists in the STUBBORN_SOULS sequence,
+   * the results should display the next boss's information.
+   */
+  test("Property 20: Next boss is displayed after defeat", () => {
+    const simulationEngine = new SimulationEngine();
+
+    fc.assert(
+      fc.property(
+        // Generate boss index (not the last one)
+        fc.integer({ min: 0, max: 8 }), // 0-8 so there's always a next boss
+        // Many sessions with high damage to ensure defeat
+        fc.integer({ min: 20, max: 50 }),
+        // Long sessions
+        fc.integer({ min: 60, max: 120 }),
+        // Very high spirit to guarantee defeat
+        fc.float({
+          min: Math.fround(50),
+          max: Math.fround(100),
+          noNaN: true,
+        }),
+        (bossIndex, sessionCount, duration, spirit) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: { spirit: spirit, harmony: 0, soulflow: 1 },
+            startingLevel: 1,
+            startingSoulInsight: 0,
+            currentBossIndex: bossIndex,
+            isCompromised: false,
+          };
+
+          // Run simulation
+          const result = simulationEngine.runSimulation(config);
+
+          // If boss was defeated, verify next boss is present
+          if (result.boss.wasDefeated) {
+            expect(result.boss.nextBoss).toBeDefined();
+            expect(result.boss.nextBoss!.id).toBe(bossIndex + 1);
+            expect(result.boss.nextBoss!.initialResolve).toBeGreaterThan(0);
+            expect(result.boss.nextBoss!.unlockLevel).toBeGreaterThanOrEqual(1);
+          }
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
 });

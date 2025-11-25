@@ -669,9 +669,385 @@ class UIController {
    * Render simulation results
    */
   renderResults(result: SimulationResult): void {
-    // Implementation will be added in task 4.1
-    console.log("Rendering results:", result);
+    // Clear previous results
+    this.resultsSummary.innerHTML = "";
+    this.progressionSummary.innerHTML = "";
+    this.bossSummary.innerHTML = "";
+    this.sessionTableContainer.innerHTML = "";
+
+    // Render totals summary
+    this.renderTotalsSummary(result.totals);
+
+    // Render progression summary
+    this.renderProgressionSummary(result.progression);
+
+    // Render boss summary
+    this.renderBossSummary(result.boss);
+
+    // Render session table
+    this.renderSessionTable(result.sessions);
+
+    // Show results panel
     this.resultsPanel.classList.add("show");
+  }
+
+  /**
+   * Render totals summary cards
+   */
+  private renderTotalsSummary(totals: SimulationResult["totals"]): void {
+    const cards = [
+      {
+        label: "Total Soul Insight",
+        value: totals.soulInsight.toFixed(2),
+      },
+      {
+        label: "Total Soul Embers",
+        value: totals.soulEmbers.toFixed(2),
+      },
+      {
+        label: "Total Boss Damage",
+        value: totals.bossProgress.toFixed(2),
+      },
+      {
+        label: "Critical Hits",
+        value: totals.criticalHits.toString(),
+      },
+    ];
+
+    cards.forEach((card) => {
+      const cardElement = document.createElement("div");
+      cardElement.className = "stat-card";
+      cardElement.innerHTML = `
+        <div class="stat-label">${card.label}</div>
+        <div class="stat-value">${card.value}</div>
+      `;
+      this.resultsSummary.appendChild(cardElement);
+    });
+  }
+
+  /**
+   * Render progression summary
+   */
+  private renderProgressionSummary(
+    progression: SimulationResult["progression"]
+  ): void {
+    const summaryDiv = document.createElement("div");
+    summaryDiv.style.marginBottom = "20px";
+    summaryDiv.style.padding = "15px";
+    summaryDiv.style.background = "#1e1e2e";
+    summaryDiv.style.borderRadius = "8px";
+    summaryDiv.style.border = "2px solid #4a4a6a";
+
+    let html = `<h3 style="color: #a78bfa; margin-bottom: 15px;">Level Progression</h3>`;
+    html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
+
+    // Starting level
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Starting Level</div>
+        <div style="color: #e0e0e0; font-size: 1.5em; font-weight: bold;">${progression.startLevel}</div>
+      </div>
+    `;
+
+    // Ending level
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Ending Level</div>
+        <div style="color: #e0e0e0; font-size: 1.5em; font-weight: bold;">${progression.endLevel}</div>
+      </div>
+    `;
+
+    // Levels gained
+    if (progression.levelsGained > 0) {
+      html += `
+        <div>
+          <div style="color: #9ca3af; font-size: 0.9em;">Levels Gained</div>
+          <div style="color: #10b981; font-size: 1.5em; font-weight: bold;">+${progression.levelsGained}</div>
+        </div>
+      `;
+
+      // Skill points earned
+      html += `
+        <div>
+          <div style="color: #9ca3af; font-size: 0.9em;">Skill Points Earned</div>
+          <div style="color: #a78bfa; font-size: 1.5em; font-weight: bold;">+${progression.skillPointsEarned}</div>
+        </div>
+      `;
+    }
+
+    // Final Soul Insight
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Final Soul Insight</div>
+        <div style="color: #e0e0e0; font-size: 1.5em; font-weight: bold;">${progression.finalSoulInsight.toFixed(2)}</div>
+      </div>
+    `;
+
+    html += `</div>`;
+
+    // Show level-up events if any
+    if (progression.levelsGained > 0) {
+      html += `<div style="margin-top: 15px; padding: 10px; background: #2d2d44; border-radius: 6px;">`;
+      html += `<div style="color: #c4b5fd; font-weight: 600; margin-bottom: 8px;">Level-Up Events:</div>`;
+      
+      for (let i = 0; i < progression.levelsGained; i++) {
+        const levelReached = progression.startLevel + i + 1;
+        const threshold = this.simulationEngine["progressionManager"].calculateLevelThreshold(
+          levelReached - 1
+        );
+        html += `<div style="color: #e0e0e0; margin-bottom: 4px;">`;
+        html += `🎉 Reached Level ${levelReached} (Required: ${threshold.toFixed(2)} Soul Insight)`;
+        html += `</div>`;
+      }
+      
+      html += `</div>`;
+    }
+
+    summaryDiv.innerHTML = html;
+    this.progressionSummary.appendChild(summaryDiv);
+  }
+
+  /**
+   * Render boss summary
+   */
+  private renderBossSummary(boss: SimulationResult["boss"]): void {
+    const summaryDiv = document.createElement("div");
+    summaryDiv.style.marginBottom = "20px";
+    summaryDiv.style.padding = "15px";
+    summaryDiv.style.background = "#1e1e2e";
+    summaryDiv.style.borderRadius = "8px";
+    summaryDiv.style.border = "2px solid #4a4a6a";
+
+    let html = `<h3 style="color: #a78bfa; margin-bottom: 15px;">Boss Status</h3>`;
+    html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
+
+    // Starting Resolve
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Starting Resolve</div>
+        <div style="color: #e0e0e0; font-size: 1.5em; font-weight: bold;">${boss.startingResolve.toFixed(2)}</div>
+      </div>
+    `;
+
+    // Remaining Resolve
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Remaining Resolve</div>
+        <div style="color: ${boss.wasDefeated ? "#10b981" : "#e0e0e0"}; font-size: 1.5em; font-weight: bold;">
+          ${boss.remainingResolve.toFixed(2)}
+          ${boss.wasDefeated ? ' <span class="defeated-badge">DEFEATED</span>' : ""}
+        </div>
+      </div>
+    `;
+
+    // Damage dealt
+    const damageDealt = boss.startingResolve - boss.remainingResolve;
+    html += `
+      <div>
+        <div style="color: #9ca3af; font-size: 0.9em;">Damage Dealt</div>
+        <div style="color: #ef4444; font-size: 1.5em; font-weight: bold;">${damageDealt.toFixed(2)}</div>
+      </div>
+    `;
+
+    html += `</div>`;
+
+    // Show overflow damage if boss was defeated
+    if (boss.wasDefeated && boss.remainingResolve === 0) {
+      const overflowDamage = damageDealt - boss.startingResolve;
+      if (overflowDamage > 0) {
+        html += `<div style="margin-top: 15px; padding: 10px; background: #065f46; border-radius: 6px; color: #d1fae5;">`;
+        html += `⚔️ Boss defeated with ${overflowDamage.toFixed(2)} overflow damage!`;
+        html += `</div>`;
+      }
+    }
+
+    // Show next boss if available
+    if (boss.nextBoss) {
+      html += `<div style="margin-top: 15px; padding: 10px; background: #2d2d44; border-radius: 6px;">`;
+      html += `<div style="color: #c4b5fd; font-weight: 600; margin-bottom: 8px;">Next Boss:</div>`;
+      html += `<div style="color: #e0e0e0;">`;
+      html += `${boss.nextBoss.name} (Resolve: ${boss.nextBoss.initialResolve}, Unlock Level: ${boss.nextBoss.unlockLevel})`;
+      html += `</div>`;
+      html += `</div>`;
+    }
+
+    summaryDiv.innerHTML = html;
+    this.bossSummary.appendChild(summaryDiv);
+  }
+
+  /**
+   * Render session results table
+   */
+  private renderSessionTable(sessions: SessionSimulationResult[]): void {
+    if (sessions.length === 0) {
+      return;
+    }
+
+    const tableContainer = document.createElement("div");
+    tableContainer.style.marginTop = "20px";
+
+    let html = `<h3 style="color: #a78bfa; margin-bottom: 15px;">Session Details</h3>`;
+    html += `<p style="color: #9ca3af; font-size: 0.9em; margin-bottom: 10px;">Click on a row to view detailed calculation breakdown</p>`;
+    
+    // Create scrollable container for large result sets
+    const scrollContainer = document.createElement("div");
+    scrollContainer.style.overflowX = "auto";
+    scrollContainer.style.maxHeight = sessions.length > 20 ? "600px" : "none";
+    scrollContainer.style.overflowY = sessions.length > 20 ? "auto" : "visible";
+
+    html += `
+      <table id="session-table">
+        <thead>
+          <tr>
+            <th>Session #</th>
+            <th>Duration (min)</th>
+            <th>Soul Insight</th>
+            <th>Soul Embers</th>
+            <th>Boss Damage</th>
+            <th>Critical</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    sessions.forEach((session) => {
+      const rowClass = session.wasCritical ? "critical-hit" : "";
+      const criticalIcon = session.wasCritical ? "⚡" : "";
+      const compromisedText = session.wasCompromised
+        ? '<span class="compromised">Compromised</span>'
+        : "Normal";
+
+      html += `
+        <tr class="${rowClass} session-row" data-session="${session.sessionNumber}" style="cursor: pointer;">
+          <td>${session.sessionNumber}</td>
+          <td>${session.duration}</td>
+          <td class="tooltip-trigger" data-tooltip-type="soulInsight" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.soulInsight.toFixed(2)}</td>
+          <td class="tooltip-trigger" data-tooltip-type="soulEmbers" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.soulEmbers.toFixed(2)}</td>
+          <td class="tooltip-trigger" data-tooltip-type="bossProgress" data-session-num="${session.sessionNumber}" style="cursor: help;">${session.bossProgress.toFixed(2)}</td>
+          <td>${criticalIcon} ${session.wasCritical ? "Yes" : "No"}</td>
+          <td>${compromisedText}</td>
+        </tr>
+        <tr class="session-details" id="details-${session.sessionNumber}" style="display: none;">
+          <td colspan="7" style="background: #1e1e2e; padding: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+              <div>
+                <div style="color: #c4b5fd; font-weight: 600; margin-bottom: 8px;">Soul Insight Calculation</div>
+                <div style="color: #e0e0e0; font-size: 0.9em;">
+                  Base: ${session.calculationDetails.baseSoulInsight.toFixed(2)}<br>
+                  Spirit Bonus: ${(session.calculationDetails.spiritBonus * 100).toFixed(1)}%<br>
+                  Critical Multiplier: ${session.calculationDetails.criticalMultiplier}x<br>
+                  Compromise Penalty: ${session.calculationDetails.compromisePenalty}x<br>
+                  <strong>Final: ${session.soulInsight.toFixed(2)}</strong>
+                </div>
+              </div>
+              <div>
+                <div style="color: #c4b5fd; font-weight: 600; margin-bottom: 8px;">Soul Embers Calculation</div>
+                <div style="color: #e0e0e0; font-size: 0.9em;">
+                  Base: ${session.calculationDetails.baseSoulEmbers.toFixed(2)}<br>
+                  Soulflow Bonus: ${(session.calculationDetails.soulflowBonus * 100).toFixed(1)}%<br>
+                  Critical Multiplier: ${session.calculationDetails.criticalMultiplier}x<br>
+                  Compromise Penalty: ${session.calculationDetails.compromisePenalty}x<br>
+                  <strong>Final: ${session.soulEmbers.toFixed(2)}</strong>
+                </div>
+              </div>
+              <div>
+                <div style="color: #c4b5fd; font-weight: 600; margin-bottom: 8px;">Boss Damage Calculation</div>
+                <div style="color: #e0e0e0; font-size: 0.9em;">
+                  Formula: spirit × duration × 0.5<br>
+                  <strong>Damage: ${session.bossProgress.toFixed(2)}</strong>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+      </table>
+    `;
+
+    scrollContainer.innerHTML = html;
+    tableContainer.innerHTML = `<h3 style="color: #a78bfa; margin-bottom: 15px;">Session Details</h3>`;
+    tableContainer.innerHTML += `<p style="color: #9ca3af; font-size: 0.9em; margin-bottom: 10px;">Click on a row to view detailed calculation breakdown</p>`;
+    tableContainer.appendChild(scrollContainer);
+    this.sessionTableContainer.appendChild(tableContainer);
+
+    // Add click event listeners to session rows
+    const sessionRows = tableContainer.querySelectorAll(".session-row");
+    sessionRows.forEach((row) => {
+      row.addEventListener("click", (e) => {
+        // Don't toggle if clicking on a tooltip trigger
+        if ((e.target as HTMLElement).classList.contains("tooltip-trigger")) {
+          return;
+        }
+        
+        const sessionNumber = row.getAttribute("data-session");
+        const detailsRow = document.getElementById(`details-${sessionNumber}`);
+        
+        if (detailsRow) {
+          // Toggle visibility
+          if (detailsRow.style.display === "none") {
+            detailsRow.style.display = "table-row";
+          } else {
+            detailsRow.style.display = "none";
+          }
+        }
+      });
+    });
+
+    // Add tooltip event listeners
+    const tooltipTriggers = tableContainer.querySelectorAll(".tooltip-trigger");
+    tooltipTriggers.forEach((trigger) => {
+      trigger.addEventListener("mouseenter", () => {
+        const sessionNum = parseInt(trigger.getAttribute("data-session-num") || "0", 10);
+        const tooltipType = trigger.getAttribute("data-tooltip-type");
+        const session = sessions.find((s) => s.sessionNumber === sessionNum);
+        
+        if (session && tooltipType) {
+          let tooltipContent = "";
+          
+          if (tooltipType === "soulInsight") {
+            tooltipContent = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #a78bfa;">Soul Insight Formula</div>
+              <div style="margin-bottom: 4px;">duration × 10 × (1 + spirit × 0.1)</div>
+              <div style="margin-bottom: 8px; font-size: 0.85em; color: #9ca3af;">
+                ${session.duration} × 10 × (1 + ${session.calculationDetails.spiritBonus.toFixed(2)})
+              </div>
+              <div style="margin-bottom: 4px;">Base: ${session.calculationDetails.baseSoulInsight.toFixed(2)}</div>
+              <div style="margin-bottom: 4px;">Critical: ×${session.calculationDetails.criticalMultiplier}</div>
+              <div style="margin-bottom: 4px;">Compromise: ×${session.calculationDetails.compromisePenalty}</div>
+              <div style="font-weight: 600; margin-top: 8px;">Final: ${session.soulInsight.toFixed(2)}</div>
+            `;
+          } else if (tooltipType === "soulEmbers") {
+            tooltipContent = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #a78bfa;">Soul Embers Formula</div>
+              <div style="margin-bottom: 4px;">duration × 2 × (1 + soulflow × 0.05)</div>
+              <div style="margin-bottom: 8px; font-size: 0.85em; color: #9ca3af;">
+                ${session.duration} × 2 × (1 + ${session.calculationDetails.soulflowBonus.toFixed(2)})
+              </div>
+              <div style="margin-bottom: 4px;">Base: ${session.calculationDetails.baseSoulEmbers.toFixed(2)}</div>
+              <div style="margin-bottom: 4px;">Critical: ×${session.calculationDetails.criticalMultiplier}</div>
+              <div style="margin-bottom: 4px;">Compromise: ×${session.calculationDetails.compromisePenalty}</div>
+              <div style="font-weight: 600; margin-top: 8px;">Final: ${session.soulEmbers.toFixed(2)}</div>
+            `;
+          } else if (tooltipType === "bossProgress") {
+            tooltipContent = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #a78bfa;">Boss Damage Formula</div>
+              <div style="margin-bottom: 4px;">spirit × duration × 0.5</div>
+              <div style="margin-bottom: 8px; font-size: 0.85em; color: #9ca3af;">
+                (calculated from player stats)
+              </div>
+              <div style="font-weight: 600;">Damage: ${session.bossProgress.toFixed(2)}</div>
+            `;
+          }
+          
+          this.showTooltip(trigger as HTMLElement, tooltipContent);
+        }
+      });
+    });
   }
 
   /**
@@ -709,6 +1085,47 @@ class UIController {
    */
   private hideResults(): void {
     this.resultsPanel.classList.remove("show");
+  }
+
+  /**
+   * Show tooltip with calculation details
+   * @param element Element to attach tooltip to
+   * @param content Tooltip content
+   */
+  showTooltip(element: HTMLElement, content: string): void {
+    // Create tooltip element
+    const tooltip = document.createElement("div");
+    tooltip.className = "calculation-tooltip";
+    tooltip.innerHTML = content;
+    tooltip.style.position = "absolute";
+    tooltip.style.background = "#1e1e2e";
+    tooltip.style.border = "2px solid #a78bfa";
+    tooltip.style.borderRadius = "8px";
+    tooltip.style.padding = "12px";
+    tooltip.style.color = "#e0e0e0";
+    tooltip.style.fontSize = "0.9em";
+    tooltip.style.zIndex = "1000";
+    tooltip.style.maxWidth = "300px";
+    tooltip.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.3)";
+    tooltip.style.pointerEvents = "none";
+
+    // Position tooltip near the element
+    const rect = element.getBoundingClientRect();
+    tooltip.style.left = `${rect.left}px`;
+    tooltip.style.top = `${rect.bottom + 5}px`;
+
+    // Add tooltip to document
+    document.body.appendChild(tooltip);
+
+    // Remove tooltip on mouse leave
+    const removeTooltip = () => {
+      if (tooltip.parentNode) {
+        tooltip.parentNode.removeChild(tooltip);
+      }
+      element.removeEventListener("mouseleave", removeTooltip);
+    };
+
+    element.addEventListener("mouseleave", removeTooltip);
   }
 }
 
