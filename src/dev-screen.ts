@@ -69,6 +69,17 @@ interface SimulationResult {
 }
 
 // ============================================================================
+// Export/Import Interfaces
+// ============================================================================
+
+interface ExportData {
+  version: number;
+  timestamp: string;
+  config: SimulationConfig;
+  results: SimulationResult;
+}
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
@@ -379,6 +390,177 @@ class SimulationEngine {
 }
 
 // ============================================================================
+// ExportImportManager Class
+// ============================================================================
+
+/**
+ * ExportImportManager handles serialization and deserialization of simulation data
+ */
+class ExportImportManager {
+  private static readonly CURRENT_VERSION = 1;
+
+  /**
+   * Export simulation configuration and results to JSON string
+   * @param config Simulation configuration
+   * @param results Simulation results
+   * @returns JSON string with proper indentation
+   */
+  exportToJSON(config: SimulationConfig, results: SimulationResult): string {
+    const exportData: ExportData = {
+      version: ExportImportManager.CURRENT_VERSION,
+      timestamp: new Date().toISOString(),
+      config: config,
+      results: results,
+    };
+
+    // Format JSON with 2-space indentation for readability
+    return JSON.stringify(exportData, null, 2);
+  }
+
+  /**
+   * Import simulation data from JSON string
+   * @param jsonString JSON string to parse
+   * @returns Parsed export data
+   * @throws Error if JSON is invalid or missing required fields
+   */
+  importFromJSON(jsonString: string): ExportData {
+    try {
+      const data = JSON.parse(jsonString);
+      
+      // Validate the imported data
+      if (!this.validateImportData(data)) {
+        throw new Error("Invalid import data structure");
+      }
+      
+      return data as ExportData;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error("Invalid JSON format");
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Validate that imported data contains all required fields
+   * @param data Data to validate
+   * @returns true if valid, false otherwise
+   */
+  validateImportData(data: any): boolean {
+    // Check for required top-level fields
+    if (!data || typeof data !== "object") {
+      return false;
+    }
+
+    if (typeof data.version !== "number") {
+      return false;
+    }
+
+    if (typeof data.timestamp !== "string") {
+      return false;
+    }
+
+    // Validate config object
+    if (!data.config || typeof data.config !== "object") {
+      return false;
+    }
+
+    const config = data.config;
+    if (
+      typeof config.sessionDuration !== "number" ||
+      typeof config.sessionCount !== "number" ||
+      typeof config.startingLevel !== "number" ||
+      typeof config.startingSoulInsight !== "number" ||
+      typeof config.currentBossIndex !== "number" ||
+      typeof config.isCompromised !== "boolean"
+    ) {
+      return false;
+    }
+
+    // Validate playerStats
+    if (!config.playerStats || typeof config.playerStats !== "object") {
+      return false;
+    }
+
+    const stats = config.playerStats;
+    if (
+      typeof stats.spirit !== "number" ||
+      typeof stats.harmony !== "number" ||
+      typeof stats.soulflow !== "number"
+    ) {
+      return false;
+    }
+
+    // Validate results object
+    if (!data.results || typeof data.results !== "object") {
+      return false;
+    }
+
+    const results = data.results;
+    
+    // Validate sessions array
+    if (!Array.isArray(results.sessions)) {
+      return false;
+    }
+
+    // Validate totals
+    if (!results.totals || typeof results.totals !== "object") {
+      return false;
+    }
+
+    // Validate progression
+    if (!results.progression || typeof results.progression !== "object") {
+      return false;
+    }
+
+    // Validate boss
+    if (!results.boss || typeof results.boss !== "object") {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Trigger browser download of a file
+   * @param filename Name of the file to download
+   * @param content Content of the file
+   */
+  downloadFile(filename: string, content: string): void {
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Generate filename with timestamp
+   * @returns Filename in format "dev-screen-results-YYYY-MM-DD-HHmmss.json"
+   */
+  generateFilename(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    
+    return `dev-screen-results-${year}-${month}-${day}-${hours}${minutes}${seconds}.json`;
+  }
+}
+
+// ============================================================================
 // UIController Class
 // ============================================================================
 
@@ -387,7 +569,9 @@ class SimulationEngine {
  */
 class UIController {
   private simulationEngine: SimulationEngine;
+  private exportImportManager: ExportImportManager;
   private currentResults: SimulationResult | null = null;
+  private currentConfig: SimulationConfig | null = null;
 
   // Form elements
   private sessionDurationInput!: HTMLInputElement;
@@ -420,6 +604,7 @@ class UIController {
 
   constructor() {
     this.simulationEngine = new SimulationEngine();
+    this.exportImportManager = new ExportImportManager();
   }
 
   /**
@@ -578,6 +763,7 @@ class UIController {
       // Run simulation
       const results = this.simulationEngine.runSimulation(config);
       this.currentResults = results;
+      this.currentConfig = config;
 
       // Render results
       this.renderResults(results);
@@ -598,6 +784,7 @@ class UIController {
     this.hideWarning();
     this.hideResults();
     this.currentResults = null;
+    this.currentConfig = null;
   }
 
   /**
@@ -649,16 +836,120 @@ class UIController {
    * Handle export button click
    */
   handleExportClick(): void {
-    // Implementation will be added in task 8.2
-    console.log("Export clicked - not yet implemented");
+    // Check if we have results to export
+    if (!this.currentResults || !this.currentConfig) {
+      this.showError("No simulation results to export. Please run a simulation first.");
+      return;
+    }
+
+    try {
+      // Export to JSON with proper indentation
+      const jsonString = this.exportImportManager.exportToJSON(
+        this.currentConfig,
+        this.currentResults
+      );
+
+      // Generate filename with timestamp
+      const filename = this.exportImportManager.generateFilename();
+
+      // Trigger browser download
+      this.exportImportManager.downloadFile(filename, jsonString);
+
+      // Show success message (optional - could add a success message element)
+      console.log(`Exported simulation results to ${filename}`);
+    } catch (error) {
+      this.showError(
+        `Export failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+      console.error("Export error:", error);
+    }
   }
 
   /**
    * Handle import button click
    */
   handleImportClick(): void {
-    // Implementation will be added in task 8.4
-    console.log("Import clicked - not yet implemented");
+    // Create file input element
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+    fileInput.style.display = "none";
+
+    // Handle file selection
+    fileInput.addEventListener("change", (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+
+      if (!file) {
+        return;
+      }
+
+      // Read file content using FileReader API
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const jsonString = e.target?.result as string;
+
+          // Parse and validate imported data
+          const exportData = this.exportImportManager.importFromJSON(jsonString);
+
+          // Populate all form inputs with imported config values
+          this.sessionDurationInput.value = exportData.config.sessionDuration.toString();
+          this.sessionCountInput.value = exportData.config.sessionCount.toString();
+          this.spiritInput.value = exportData.config.playerStats.spirit.toString();
+          this.harmonyInput.value = exportData.config.playerStats.harmony.toString();
+          this.soulflowInput.value = exportData.config.playerStats.soulflow.toString();
+          this.levelInput.value = exportData.config.startingLevel.toString();
+          this.soulInsightInput.value = exportData.config.startingSoulInsight.toString();
+          this.bossSelect.value = exportData.config.currentBossIndex.toString();
+          this.compromisedCheckbox.checked = exportData.config.isCompromised;
+
+          // Update boss dropdown for the imported level
+          this.updateBossDropdownForLevel(exportData.config.startingLevel);
+
+          // Clear any previous errors
+          this.hideError();
+          this.hideWarning();
+
+          // Automatically run simulation with imported parameters
+          this.handleSimulateClick();
+
+          console.log("Successfully imported configuration from file");
+        } catch (error) {
+          // Handle errors for invalid/corrupted files
+          if (error instanceof Error) {
+            if (error.message.includes("Invalid JSON format")) {
+              this.showError(
+                "Invalid file format. Please select a valid Dev Screen export file."
+              );
+            } else if (error.message.includes("Invalid import data structure")) {
+              this.showError(
+                "Import file is missing required fields or has an invalid structure."
+              );
+            } else {
+              this.showError(`Import failed: ${error.message}`);
+            }
+          } else {
+            this.showError("Import failed: Unknown error");
+          }
+          console.error("Import error:", error);
+        }
+      };
+
+      reader.onerror = () => {
+        this.showError("Failed to read file. Please try again.");
+        console.error("FileReader error:", reader.error);
+      };
+
+      // Read file as text
+      reader.readAsText(file);
+    });
+
+    // Trigger file picker
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   }
 
   /**
@@ -1246,6 +1537,7 @@ if (typeof document !== "undefined") {
 export {
   SimulationEngine,
   UIController,
+  ExportImportManager,
   createMockSession,
   validateSessionDuration,
   validateSessionCount,
@@ -1258,4 +1550,5 @@ export type {
   SessionSimulationResult,
   SimulationResult,
   ValidationResult,
+  ExportData,
 };

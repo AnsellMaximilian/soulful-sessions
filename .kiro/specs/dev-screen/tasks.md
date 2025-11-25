@@ -314,8 +314,14 @@
   - **Validates: Requirements 6.3**
   - **PBT Status: ✅ PASSED**
 
-- [ ] 8. Implement export and import functionality
-- [ ] 8.1 Create ExportImportManager class
+- [x] 8. Implement export and import functionality
+
+
+
+
+- [x] 8.1 Create ExportImportManager class
+
+
   - Create ExportImportManager class in dev-screen.ts
   - Define ExportData interface with version, timestamp, config, results
   - Implement exportToJSON method to serialize simulation data
@@ -323,7 +329,9 @@
   - Implement validateImportData to check for required fields
   - _Requirements: 7.2, 7.3, 8.3, 8.4_
 
-- [ ] 8.2 Implement export functionality
+- [x] 8.2 Implement export functionality
+
+
   - Implement handleExportClick method
   - Call ExportImportManager.exportToJSON with current config and results
   - Format JSON with proper indentation (JSON.stringify with 2 spaces)
@@ -331,12 +339,16 @@
   - Trigger browser download using Blob and URL.createObjectURL
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 8.3 Write property tests for export
+- [x] 8.3 Write property tests for export
+
+
   - **Property 21: Exported JSON contains all required data**
   - **Property 22: Export filename follows correct format**
   - **Validates: Requirements 7.2, 7.3, 7.4**
 
-- [ ] 8.4 Implement import functionality
+- [x] 8.4 Implement import functionality
+
+
   - Implement handleImportClick method
   - Create file input element accepting .json files
   - Read file content using FileReader API
@@ -347,7 +359,9 @@
   - Handle errors for invalid/corrupted files
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 8.5 Write property tests for import
+- [x] 8.5 Write property tests for import
+
+
   - **Property 23: Import populates all fields correctly**
   - **Property 24: Invalid imports display errors and preserve state**
   - **Validates: Requirements 8.3, 8.4**

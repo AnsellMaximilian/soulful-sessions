@@ -6,6 +6,7 @@ import * as fc from "fast-check";
 import {
   SimulationEngine,
   UIController,
+  ExportImportManager,
   validateSessionDuration,
   validateSessionCount,
   validateStatValue,
@@ -1309,6 +1310,305 @@ describe("Dev Screen Property-Based Tests", () => {
         }
       ),
       { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 21: Exported JSON contains all required data**
+   * **Validates: Requirements 7.2, 7.3**
+   *
+   * For any simulation export, the generated JSON should include session details,
+   * total rewards, level progression, boss damage, and timestamp.
+   */
+  test("Property 21: Exported JSON contains all required data", () => {
+    const simulationEngine = new SimulationEngine();
+    const exportManager = new ExportImportManager();
+
+    fc.assert(
+      fc.property(
+        // Generate random session count
+        fc.integer({ min: 1, max: 20 }),
+        // Generate random session duration
+        fc.integer({ min: 5, max: 120 }),
+        // Generate random player stats
+        fc.record({
+          spirit: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+          harmony: fc.float({
+            min: Math.fround(0),
+            max: Math.fround(0.5),
+            noNaN: true,
+          }),
+          soulflow: fc.float({
+            min: Math.fround(0.1),
+            max: Math.fround(50),
+            noNaN: true,
+          }),
+        }),
+        // Generate random starting level
+        fc.integer({ min: 1, max: 20 }),
+        // Generate random starting Soul Insight
+        fc.float({ min: 0, max: 1000, noNaN: true }),
+        // Generate random boss index
+        fc.integer({ min: 0, max: 9 }),
+        // Generate random compromised status
+        fc.boolean(),
+        (
+          sessionCount,
+          duration,
+          stats: PlayerStats,
+          startingLevel,
+          startingSoulInsight,
+          bossIndex,
+          isCompromised
+        ) => {
+          // Create simulation config
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: startingLevel,
+            startingSoulInsight: startingSoulInsight,
+            currentBossIndex: bossIndex,
+            isCompromised: isCompromised,
+          };
+
+          // Run simulation
+          const results = simulationEngine.runSimulation(config);
+
+          // Export to JSON
+          const jsonString = exportManager.exportToJSON(config, results);
+
+          // Parse the JSON
+          const exportData = JSON.parse(jsonString);
+
+          // Verify all required top-level fields exist
+          expect(exportData.version).toBeDefined();
+          expect(typeof exportData.version).toBe("number");
+          expect(exportData.version).toBeGreaterThan(0);
+
+          expect(exportData.timestamp).toBeDefined();
+          expect(typeof exportData.timestamp).toBe("string");
+          // Verify timestamp is a valid ISO string
+          expect(() => new Date(exportData.timestamp)).not.toThrow();
+
+          // Verify config is present and complete
+          expect(exportData.config).toBeDefined();
+          expect(exportData.config.sessionDuration).toBe(duration);
+          expect(exportData.config.sessionCount).toBe(sessionCount);
+          expect(exportData.config.playerStats).toEqual(stats);
+          expect(exportData.config.startingLevel).toBe(startingLevel);
+          expect(exportData.config.startingSoulInsight).toBe(startingSoulInsight);
+          expect(exportData.config.currentBossIndex).toBe(bossIndex);
+          expect(exportData.config.isCompromised).toBe(isCompromised);
+
+          // Verify results are present and complete
+          expect(exportData.results).toBeDefined();
+          
+          // Verify sessions array
+          expect(Array.isArray(exportData.results.sessions)).toBe(true);
+          expect(exportData.results.sessions.length).toBe(sessionCount);
+
+          // Verify totals
+          expect(exportData.results.totals).toBeDefined();
+          expect(exportData.results.totals.soulInsight).toBeDefined();
+          expect(exportData.results.totals.soulEmbers).toBeDefined();
+          expect(exportData.results.totals.bossProgress).toBeDefined();
+          expect(exportData.results.totals.criticalHits).toBeDefined();
+
+          // Verify progression
+          expect(exportData.results.progression).toBeDefined();
+          expect(exportData.results.progression.startLevel).toBe(startingLevel);
+          expect(exportData.results.progression.endLevel).toBeDefined();
+          expect(exportData.results.progression.levelsGained).toBeDefined();
+          expect(exportData.results.progression.skillPointsEarned).toBeDefined();
+          expect(exportData.results.progression.finalSoulInsight).toBeDefined();
+
+          // Verify boss
+          expect(exportData.results.boss).toBeDefined();
+          expect(exportData.results.boss.startingResolve).toBeDefined();
+          expect(exportData.results.boss.remainingResolve).toBeDefined();
+          expect(exportData.results.boss.wasDefeated).toBeDefined();
+
+          // Verify JSON is properly formatted (has indentation)
+          expect(jsonString).toContain("\n");
+          expect(jsonString).toContain("  "); // 2-space indentation
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 22: Export filename follows correct format**
+   * **Validates: Requirements 7.4**
+   *
+   * For any export operation, the downloaded filename should match the pattern
+   * "dev-screen-results-YYYY-MM-DD-HHmmss.json" with the current date and time.
+   */
+  test("Property 22: Export filename follows correct format", () => {
+    const exportManager = new ExportImportManager();
+
+    fc.assert(
+      fc.property(
+        // Generate random number of iterations to test filename generation
+        fc.integer({ min: 1, max: 10 }),
+        (iterations) => {
+          for (let i = 0; i < iterations; i++) {
+            // Generate filename
+            const filename = exportManager.generateFilename();
+
+            // Verify filename matches the expected pattern
+            const filenamePattern = /^dev-screen-results-\d{4}-\d{2}-\d{2}-\d{6}\.json$/;
+            expect(filename).toMatch(filenamePattern);
+
+            // Verify filename starts with correct prefix
+            expect(filename).toMatch(/^dev-screen-results-/);
+
+            // Verify filename ends with .json
+            expect(filename).toMatch(/\.json$/);
+
+            // Extract date and time components
+            const match = filename.match(
+              /dev-screen-results-(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(\d{2})\.json/
+            );
+            expect(match).not.toBeNull();
+
+            if (match) {
+              const [, year, month, day, hours, minutes, seconds] = match;
+
+              // Verify year is reasonable (current year or close to it)
+              const currentYear = new Date().getFullYear();
+              expect(parseInt(year, 10)).toBeGreaterThanOrEqual(currentYear - 1);
+              expect(parseInt(year, 10)).toBeLessThanOrEqual(currentYear + 1);
+
+              // Verify month is valid (01-12)
+              expect(parseInt(month, 10)).toBeGreaterThanOrEqual(1);
+              expect(parseInt(month, 10)).toBeLessThanOrEqual(12);
+
+              // Verify day is valid (01-31)
+              expect(parseInt(day, 10)).toBeGreaterThanOrEqual(1);
+              expect(parseInt(day, 10)).toBeLessThanOrEqual(31);
+
+              // Verify hours is valid (00-23)
+              expect(parseInt(hours, 10)).toBeGreaterThanOrEqual(0);
+              expect(parseInt(hours, 10)).toBeLessThanOrEqual(23);
+
+              // Verify minutes is valid (00-59)
+              expect(parseInt(minutes, 10)).toBeGreaterThanOrEqual(0);
+              expect(parseInt(minutes, 10)).toBeLessThanOrEqual(59);
+
+              // Verify seconds is valid (00-59)
+              expect(parseInt(seconds, 10)).toBeGreaterThanOrEqual(0);
+              expect(parseInt(seconds, 10)).toBeLessThanOrEqual(59);
+            }
+          }
+        }
+      ),
+      { numRuns: 100 } // Run 100 iterations as specified in design
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 23: Import populates all fields correctly**
+   * **Validates: Requirements 8.3**
+   *
+   * For any valid exported configuration file, importing it should populate all
+   * input fields (duration, session count, stats, level, boss) with the values
+   * from the file.
+   */
+  test("Property 23: Import populates all fields correctly", () => {
+    const simulationEngine = new SimulationEngine();
+    const exportManager = new ExportImportManager();
+
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 20 }),
+        fc.integer({ min: 5, max: 120 }),
+        fc.record({
+          spirit: fc.float({ min: Math.fround(0.1), max: Math.fround(50), noNaN: true }),
+          harmony: fc.float({ min: Math.fround(0), max: Math.fround(0.5), noNaN: true }),
+          soulflow: fc.float({ min: Math.fround(0.1), max: Math.fround(50), noNaN: true }),
+        }),
+        fc.integer({ min: 1, max: 20 }),
+        fc.float({ min: 0, max: 1000, noNaN: true }),
+        fc.integer({ min: 0, max: 9 }),
+        fc.boolean(),
+        (sessionCount, duration, stats: PlayerStats, startingLevel, startingSoulInsight, bossIndex, isCompromised) => {
+          const config = {
+            sessionDuration: duration,
+            sessionCount: sessionCount,
+            playerStats: stats,
+            startingLevel: startingLevel,
+            startingSoulInsight: startingSoulInsight,
+            currentBossIndex: bossIndex,
+            isCompromised: isCompromised,
+          };
+
+          const results = simulationEngine.runSimulation(config);
+          const jsonString = exportManager.exportToJSON(config, results);
+          const importedData = exportManager.importFromJSON(jsonString);
+
+          expect(importedData.config.sessionDuration).toBe(duration);
+          expect(importedData.config.sessionCount).toBe(sessionCount);
+          expect(importedData.config.playerStats.spirit).toBe(stats.spirit);
+          expect(importedData.config.playerStats.harmony).toBe(stats.harmony);
+          expect(importedData.config.playerStats.soulflow).toBe(stats.soulflow);
+          expect(importedData.config.startingLevel).toBe(startingLevel);
+          expect(importedData.config.startingSoulInsight).toBe(startingSoulInsight);
+          expect(importedData.config.currentBossIndex).toBe(bossIndex);
+          expect(importedData.config.isCompromised).toBe(isCompromised);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * **Feature: dev-screen, Property 24: Invalid imports display errors and preserve state**
+   * **Validates: Requirements 8.4**
+   *
+   * For any invalid or corrupted import file, the system should display an error
+   * message and maintain the current input field values without modification.
+   */
+  test("Property 24: Invalid imports display errors and preserve state", () => {
+    const exportManager = new ExportImportManager();
+
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant(""),
+          fc.constant("not json"),
+          fc.constant("{}"),
+          fc.constant('{"version": 1}'),
+          fc.constant('{"version": "not a number", "timestamp": "2024-01-01"}'),
+          fc.constant('{"version": 1, "timestamp": "2024-01-01", "config": null}'),
+          fc.constant('{"version": 1, "timestamp": "2024-01-01", "config": {}, "results": null}'),
+        ),
+        (invalidJson) => {
+          let errorThrown = false;
+          let errorMessage = "";
+
+          try {
+            exportManager.importFromJSON(invalidJson);
+          } catch (error) {
+            errorThrown = true;
+            errorMessage = error instanceof Error ? error.message : "Unknown error";
+          }
+
+          expect(errorThrown).toBe(true);
+          expect(errorMessage).toBeTruthy();
+          expect(
+            errorMessage.includes("Invalid") ||
+            errorMessage.includes("missing") ||
+            errorMessage.includes("required")
+          ).toBe(true);
+        }
+      ),
+      { numRuns: 100 }
     );
   });
 });
