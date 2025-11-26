@@ -239,6 +239,19 @@ body {
   color: #ffd700;
 }
 
+.currency-value-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currency-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+}
+
 /* Skill Points Panel */
 .skill-points-panel {
   display: flex;
@@ -338,6 +351,20 @@ body {
 }
 
 /* Resolve Bar */
+.resolve-bar-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resolve-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 107, 0.4));
+  flex-shrink: 0;
+}
+
 .resolve-bar-container {
   position: relative;
   width: 100%;
