@@ -2,6 +2,13 @@
    Soul Shepherd Options Page Styles
    ============================================================================ */
 
+@font-face {
+  font-family: 'Rubik Spray Paint';
+  src: url('RubikSprayPaint-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +44,12 @@ body {
 
 header {
   background: linear-gradient(135deg, #2d2d44 0%, #1f1f2e 100%);
+  background-image: url('options_header_bg.png');
+  background-size: auto 100%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
   padding: 30px;
+  padding-top: 94px;
   text-align: center;
   border-bottom: 2px solid rgba(138, 180, 248, 0.2);
 }
@@ -49,9 +61,14 @@ header {
 }
 
 header h1 {
-  font-size: 28px;
-  color: #8ab4f8;
-  font-weight: 600;
+  font-family: 'Rubik Spray Paint', cursive;
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: normal;
+  text-shadow: 
+    2px 2px 4px rgba(138, 43, 226, 0.6),
+    4px 4px 8px rgba(219, 39, 119, 0.5),
+    6px 6px 12px rgba(255, 140, 0, 0.4);
 }
 
 /* ============================================================================
