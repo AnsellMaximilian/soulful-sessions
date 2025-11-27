@@ -947,7 +947,7 @@ function applySprite(spriteId: string): void {
     const sprite = COSMETIC_SPRITES.find((s) => s.id === spriteId);
     if (!sprite) return;
 
-    // Update character sprites
+    // Update character sprites (currently not in popup, but keeping for future use)
     const idleSprite = document.getElementById(
       "character-sprite"
     ) as HTMLImageElement;

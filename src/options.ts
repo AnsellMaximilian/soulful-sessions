@@ -10,7 +10,7 @@ import {
   Subtask,
   TaskState,
 } from "./types";
-import { COSMETIC_THEMES } from "./constants";
+import { COSMETIC_THEMES, COSMETIC_SPRITES } from "./constants";
 
 // ============================================================================
 // State Management
@@ -88,6 +88,7 @@ async function loadSettings(): Promise<void> {
         populateSettings(currentState.settings);
         populateStatistics(currentState.statistics);
         populateTaskManagement(currentState.tasks);
+        applySprite(currentState.player.cosmetics.activeSprite);
       }
     }
   } catch (error) {
@@ -1629,5 +1630,23 @@ async function updateCosmetic(key: string, value: string): Promise<void> {
     console.log(`[Options] Cosmetic updated: ${key} = ${value}`);
   } catch (error) {
     console.error(`[Options] Failed to update cosmetic ${key}:`, error);
+  }
+}
+
+// ============================================================================
+// Sprite Application
+// ============================================================================
+
+function applySprite(spriteId: string): void {
+  const sprite = COSMETIC_SPRITES.find((s) => s.id === spriteId);
+  if (!sprite) return;
+
+  // Update statistics sprite
+  const statisticsSprite = document.getElementById(
+    "statistics-character-sprite"
+  ) as HTMLImageElement;
+
+  if (statisticsSprite) {
+    statisticsSprite.src = sprite.imagePath;
   }
 }
