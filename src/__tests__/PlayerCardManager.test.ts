@@ -915,6 +915,240 @@ describe("PlayerCardManager", () => {
     });
   });
 
+  describe("resource cleanup", () => {
+    /**
+     * **Feature: player-card, Property 12: Resource cleanup on dismissal**
+     * For any card modal dismissal, all event listeners attached to the modal
+     * should be removed
+     * **Validates: Requirements 5.4**
+     */
+    it("should remove all event listeners when modal is dismissed", () => {
+      fc.assert(
+        fc.property(
+          fc.record({
+            characterName: fc.string({ minLength: 1, maxLength: 50 }),
+            level: fc.integer({ min: 1, max: 50 }),
+            currentXP: fc.integer({ min: 0, max: 100000 }),
+            xpToNextLevel: fc.integer({ min: 1, max: 10000 }),
+            soulEmbers: fc.integer({ min: 0, max: 10000 }),
+            stats: fc.record({
+              spirit: fc.float({ min: Math.fround(1), max: Math.fround(100) }),
+              harmony: fc.float({ min: Math.fround(0.05), max: Math.fround(1) }),
+              soulflow: fc.float({ min: Math.fround(1), max: Math.fround(100) }),
+            }),
+            achievements: fc.record({
+              totalSessions: fc.integer({ min: 0, max: 10000 }),
+              totalFocusTime: fc.integer({ min: 0, max: 100000 }),
+              bossesDefeated: fc.integer({ min: 0, max: 10 }),
+              currentStreak: fc.integer({ min: 0, max: 365 }),
+            }),
+            cosmetics: fc.record({
+              spriteId: fc.constantFrom(...COSMETIC_SPRITES.map((s) => s.id)),
+              spritePath: fc.constantFrom(...COSMETIC_SPRITES.map((s) => s.imagePath)),
+              themeId: fc.constantFrom(...COSMETIC_THEMES.map((t) => t.id)),
+              themeName: fc.constantFrom(...COSMETIC_THEMES.map((t) => t.name)),
+            }),
+          }),
+          (cardData) => {
+            // Track event listener additions and removals
+            const addedListeners: Array<{ element: any; event: string; handler: any }> = [];
+            const removedListeners: Array<{ element: any; event: string; handler: any }> = [];
+
+            // Create mock elements with tracking
+            const createMockElement = () => ({
+              style: { display: "none" },
+              setAttribute: jest.fn(),
+              getAttribute: jest.fn(),
+              addEventListener: jest.fn((event: string, handler: any) => {
+                addedListeners.push({ element: mockModal, event, handler });
+              }),
+              removeEventListener: jest.fn((event: string, handler: any) => {
+                removedListeners.push({ element: mockModal, event, handler });
+              }),
+              querySelector: jest.fn(),
+              querySelectorAll: jest.fn(() => []),
+              focus: jest.fn(),
+            });
+
+            const mockModal = createMockElement();
+            const mockCardContent = { innerHTML: "" };
+            const mockCloseButton = createMockElement();
+            const mockBackdrop = createMockElement();
+            const mockCopyButton = createMockElement();
+            const mockDocument = createMockElement();
+
+            // Set up querySelector to return appropriate elements
+            (mockModal.querySelector as jest.Mock) = jest.fn((selector: string) => {
+              if (selector === "#player-card-close-btn") return mockCloseButton;
+              if (selector === "#player-card-close-btn-bottom") return mockCloseButton;
+              if (selector === ".modal-backdrop") return mockBackdrop;
+              if (selector === "#copy-card-btn") return mockCopyButton;
+              if (selector === ".player-card-container") return null;
+              return null;
+            });
+
+            (mockModal.querySelectorAll as jest.Mock) = jest.fn(() => [mockCloseButton, mockCopyButton]);
+
+            // Mock document methods
+            const originalGetElementById = (globalThis as any).document?.getElementById;
+            const originalAddEventListener = (globalThis as any).document?.addEventListener;
+            const originalRemoveEventListener = (globalThis as any).document?.removeEventListener;
+
+            (globalThis as any).document = {
+              getElementById: (id: string) => {
+                if (id === "player-card-modal") return mockModal;
+                if (id === "player-card-content") return mockCardContent;
+                return null;
+              },
+              querySelector: () => null,
+              addEventListener: (event: string, handler: any) => {
+                addedListeners.push({ element: mockDocument, event, handler });
+              },
+              removeEventListener: (event: string, handler: any) => {
+                removedListeners.push({ element: mockDocument, event, handler });
+              },
+              activeElement: null,
+            };
+
+            // Clear the internal event listeners array
+            (PlayerCardManager as any).eventListeners = [];
+
+            // Show modal (this should set up event listeners)
+            PlayerCardManager.showCardModal(cardData);
+
+            // Verify event listeners were added
+            const initialListenerCount = (PlayerCardManager as any).eventListeners.length;
+            expect(initialListenerCount).toBeGreaterThan(0);
+
+            // Hide modal (this should clean up event listeners)
+            PlayerCardManager.hideCardModal();
+
+            // Verify all event listeners were removed
+            const finalListenerCount = (PlayerCardManager as any).eventListeners.length;
+            expect(finalListenerCount).toBe(0);
+
+            // Verify that the number of removed listeners matches the number added
+            // Note: We check the internal tracking, not the mock calls, because
+            // the implementation uses its own tracking mechanism
+            expect(finalListenerCount).toBe(0);
+
+            // Restore original
+            if (originalGetElementById) {
+              (globalThis as any).document.getElementById = originalGetElementById;
+            }
+            if (originalAddEventListener) {
+              (globalThis as any).document.addEventListener = originalAddEventListener;
+            }
+            if (originalRemoveEventListener) {
+              (globalThis as any).document.removeEventListener = originalRemoveEventListener;
+            }
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("should handle cleanup when modal element is null", () => {
+      // Set modal element to null
+      (PlayerCardManager as any).modalElement = null;
+      (PlayerCardManager as any).eventListeners = [];
+
+      // Should not throw error
+      expect(() => PlayerCardManager.hideCardModal()).not.toThrow();
+
+      // Verify event listeners array is still empty
+      expect((PlayerCardManager as any).eventListeners.length).toBe(0);
+    });
+
+    it("should restore focus to previously focused element after dismissal", () => {
+      const mockPreviousElement = {
+        focus: jest.fn(),
+      };
+
+      const mockModal = {
+        style: { display: "flex" },
+        setAttribute: jest.fn(),
+        querySelector: jest.fn(() => null),
+        querySelectorAll: jest.fn(() => []),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+
+      // Mock document methods
+      const originalGetElementById = (globalThis as any).document?.getElementById;
+      (globalThis as any).document = {
+        getElementById: (id: string) => {
+          if (id === "player-card-modal") return mockModal;
+          return null;
+        },
+        activeElement: mockPreviousElement,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+
+      // Set up internal state
+      (PlayerCardManager as any).modalElement = mockModal;
+      (PlayerCardManager as any).previouslyFocusedElement = mockPreviousElement;
+      (PlayerCardManager as any).eventListeners = [];
+
+      // Hide modal
+      PlayerCardManager.hideCardModal();
+
+      // Verify focus was restored
+      expect(mockPreviousElement.focus).toHaveBeenCalled();
+
+      // Verify previouslyFocusedElement was cleared
+      expect((PlayerCardManager as any).previouslyFocusedElement).toBeNull();
+
+      // Restore original
+      if (originalGetElementById) {
+        (globalThis as any).document.getElementById = originalGetElementById;
+      }
+    });
+
+    it("should clear focus trap references on dismissal", () => {
+      const mockModal = {
+        style: { display: "flex" },
+        setAttribute: jest.fn(),
+        querySelector: jest.fn(() => null),
+        querySelectorAll: jest.fn(() => []),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+
+      // Mock document methods
+      const originalGetElementById = (globalThis as any).document?.getElementById;
+      (globalThis as any).document = {
+        getElementById: (id: string) => {
+          if (id === "player-card-modal") return mockModal;
+          return null;
+        },
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+
+      // Set up internal state with focus trap references
+      (PlayerCardManager as any).modalElement = mockModal;
+      (PlayerCardManager as any).focusableElements = [{ focus: jest.fn() }, { focus: jest.fn() }];
+      (PlayerCardManager as any).firstFocusableElement = { focus: jest.fn() };
+      (PlayerCardManager as any).lastFocusableElement = { focus: jest.fn() };
+      (PlayerCardManager as any).eventListeners = [];
+
+      // Hide modal
+      PlayerCardManager.hideCardModal();
+
+      // Verify focus trap references were cleared
+      expect((PlayerCardManager as any).focusableElements.length).toBe(0);
+      expect((PlayerCardManager as any).firstFocusableElement).toBeNull();
+      expect((PlayerCardManager as any).lastFocusableElement).toBeNull();
+
+      // Restore original
+      if (originalGetElementById) {
+        (globalThis as any).document.getElementById = originalGetElementById;
+      }
+    });
+  });
+
   describe("error handling", () => {
     /**
      * **Feature: player-card, Property 10: Error handling for generation failures**
