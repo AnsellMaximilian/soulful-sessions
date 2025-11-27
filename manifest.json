@@ -15,7 +15,8 @@
     "tabs",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
-    "notifications"
+    "notifications",
+    "clipboardWrite"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -34,5 +35,8 @@
       "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data: blob:;"
+  }
 }
