@@ -232,6 +232,11 @@ All requirements from requirements.md have been addressed:
 
 ## Known Issues
 
+### Critical Issues Fixed
+✅ **html2canvas library not found** - Fixed by adding library bundling to build.js and updating manifest.json
+- See BUGFIX_html2canvas.md for details
+- Extension must be rebuilt with `npm run build` after pulling changes
+
 ### None Critical
 All critical and major issues have been addressed during implementation.
 

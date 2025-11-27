@@ -32,7 +32,7 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js"],
+      "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js", "dist/html2canvas.js"],
       "matches": ["<all_urls>"]
     }
   ],

@@ -208,6 +208,12 @@ const dismissTime = type === "error" ? 5000 : 3000;
 - Better notification timing
 - Focus timing optimization
 
+### Version 1.2 (Critical Bug Fix)
+- Fixed html2canvas library not being bundled
+- Added library to build process
+- Updated manifest.json web_accessible_resources
+- Extension now properly loads html2canvas for image generation
+
 ---
 
 ## Sign-Off
