@@ -294,7 +294,12 @@
   - Verify permission is granted on extension load
   - _Requirements: 4.4_
 
-- [ ] 10. Checkpoint - Ensure all tests pass
+- [x] 10. Checkpoint - Ensure all tests pass
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 11. Manual testing and polish
