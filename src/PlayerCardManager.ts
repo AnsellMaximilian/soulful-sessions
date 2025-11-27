@@ -503,6 +503,31 @@ export class PlayerCardManager {
   }
 
   /**
+   * Apply theme colors to the player card container
+   * Sets the data-theme attribute which triggers CSS custom properties
+   */
+  static applyTheme(themeId: string): void {
+    const cardContainer = document.querySelector(".player-card-container") as HTMLElement;
+    
+    if (!cardContainer) {
+      console.warn("[PlayerCardManager] Card container not found, cannot apply theme");
+      return;
+    }
+
+    // Verify theme exists
+    const theme = COSMETIC_THEMES.find((t) => t.id === themeId);
+    
+    if (!theme) {
+      console.warn(`[PlayerCardManager] Theme '${themeId}' not found, using default`);
+      cardContainer.setAttribute("data-theme", "default");
+      return;
+    }
+
+    // Set theme data attribute
+    cardContainer.setAttribute("data-theme", themeId);
+  }
+
+  /**
    * Show notification toast
    */
   static showNotification(message: string, type: "success" | "error"): void {

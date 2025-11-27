@@ -330,6 +330,129 @@ describe("PlayerCardManager", () => {
     });
   });
 
+  describe("theme application", () => {
+    /**
+     * **Feature: player-card, Property 6: Theme application**
+     * For any game state with an active theme, the rendered card should use
+     * that theme's color values in its styling
+     * **Validates: Requirements 3.1**
+     */
+    it("should apply theme colors to card container for any active theme", () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom(...COSMETIC_THEMES.map((t) => t.id)),
+          (themeId) => {
+            // Create a mock card container element
+            const mockContainer = {
+              dataset: {} as Record<string, string>,
+              setAttribute: function(name: string, value: string) {
+                if (name.startsWith('data-')) {
+                  const key = name.substring(5);
+                  this.dataset[key] = value;
+                }
+              },
+              getAttribute: function(name: string) {
+                if (name.startsWith('data-')) {
+                  const key = name.substring(5);
+                  return this.dataset[key];
+                }
+                return null;
+              },
+            };
+
+            // Mock document.querySelector to return our mock container
+            const originalQuerySelector = (globalThis as any).document?.querySelector;
+            (globalThis as any).document = {
+              querySelector: (selector: string) => {
+                if (selector === ".player-card-container") {
+                  return mockContainer;
+                }
+                return null;
+              },
+            };
+
+            // Apply theme
+            PlayerCardManager.applyTheme(themeId);
+
+            // Verify theme data attribute was set
+            expect(mockContainer.dataset.theme).toBe(themeId);
+
+            // Find the theme in constants
+            const theme = COSMETIC_THEMES.find((t) => t.id === themeId);
+            expect(theme).toBeDefined();
+
+            // Restore original
+            if (originalQuerySelector) {
+              (globalThis as any).document.querySelector = originalQuerySelector;
+            }
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("should handle missing theme gracefully with default theme", () => {
+      // Create a mock card container element
+      const mockContainer = {
+        dataset: {} as Record<string, string>,
+        setAttribute: function(name: string, value: string) {
+          if (name.startsWith('data-')) {
+            const key = name.substring(5);
+            this.dataset[key] = value;
+          }
+        },
+        getAttribute: function(name: string) {
+          if (name.startsWith('data-')) {
+            const key = name.substring(5);
+            return this.dataset[key];
+          }
+          return null;
+        },
+      };
+
+      // Mock document.querySelector
+      const originalQuerySelector = (globalThis as any).document?.querySelector;
+      (globalThis as any).document = {
+        querySelector: (selector: string) => {
+          if (selector === ".player-card-container") {
+            return mockContainer;
+          }
+          return null;
+        },
+      };
+
+      // Apply invalid theme
+      PlayerCardManager.applyTheme("invalid-theme-id");
+
+      // Should fall back to default theme
+      expect(mockContainer.dataset.theme).toBe("default");
+
+      // Restore original
+      if (originalQuerySelector) {
+        (globalThis as any).document.querySelector = originalQuerySelector;
+      }
+    });
+
+    it("should verify all themes have required color properties", () => {
+      // Verify each theme has all required color properties
+      COSMETIC_THEMES.forEach((theme) => {
+        expect(theme.colors).toBeDefined();
+        expect(theme.colors.primary).toBeDefined();
+        expect(theme.colors.secondary).toBeDefined();
+        expect(theme.colors.accent).toBeDefined();
+        expect(theme.colors.background).toBeDefined();
+        expect(theme.colors.backgroundGradient).toBeDefined();
+
+        // Verify colors are valid CSS color values
+        expect(theme.colors.primary).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(theme.colors.secondary).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(theme.colors.accent).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(theme.colors.background).toMatch(/^#[0-9a-fA-F]{6}$/);
+        expect(theme.colors.backgroundGradient).toContain("linear-gradient");
+      });
+    });
+  });
+
   describe("renderCard", () => {
     /**
      * **Feature: player-card, Property 2: Modal visibility on button click**

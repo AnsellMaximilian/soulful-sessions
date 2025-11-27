@@ -1022,3 +1022,1067 @@ h2 {
     display: none;
   }
 }
+
+/* ============================================================================
+   Player Card Modal
+   ============================================================================ */
+
+.player-card-modal {
+  z-index: 2000;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.player-card-modal.active {
+  display: flex;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.player-card-container {
+  position: relative;
+  z-index: 2;
+  width: 600px;
+  max-width: 100%;
+  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+  border-radius: 16px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(138, 180, 248, 0.2),
+    0 0 40px rgba(138, 180, 248, 0.1);
+  overflow: hidden;
+  animation: cardSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.player-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  background: linear-gradient(135deg, rgba(138, 180, 248, 0.15) 0%, rgba(138, 180, 248, 0.05) 100%);
+  border-bottom: 2px solid rgba(138, 180, 248, 0.2);
+}
+
+.player-card-header h3 {
+  color: #8ab4f8;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(138, 180, 248, 0.3);
+}
+
+/* Show Player Card Button */
+.show-player-card-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(138, 180, 248, 0.15) 0%, rgba(138, 180, 248, 0.05) 100%);
+  border: 2px solid rgba(138, 180, 248, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #8ab4f8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.show-player-card-btn:hover {
+  background: linear-gradient(135deg, rgba(138, 180, 248, 0.25) 0%, rgba(138, 180, 248, 0.15) 100%);
+  border-color: #8ab4f8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(138, 180, 248, 0.3);
+}
+
+.show-player-card-btn:focus {
+  outline: 3px solid #ffd700;
+  outline-offset: 2px;
+}
+
+.show-player-card-btn .statistics-sprite {
+  width: 64px;
+  height: 64px;
+  margin: 0;
+}
+
+.show-player-card-btn .btn-text {
+  color: #8ab4f8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Responsive behavior for smaller viewports */
+@media (max-width: 768px) {
+  .player-card-container {
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .player-card-modal {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-card-container {
+    border-radius: 12px;
+  }
+  
+  .player-card-header {
+    padding: 15px 20px;
+  }
+  
+  .player-card-header h3 {
+    font-size: 18px;
+  }
+}
+
+/* ============================================================================
+   Player Card Content Layout
+   ============================================================================ */
+
+.player-card-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  background: linear-gradient(180deg, rgba(138, 180, 248, 0.03) 0%, transparent 100%);
+}
+
+/* Character Sprite Section */
+.card-character-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 107, 0.1) 0%,
+    rgba(147, 51, 234, 0.1) 50%,
+    rgba(255, 165, 0, 0.1) 100%
+  );
+  border-radius: 16px;
+  border: 2px solid rgba(138, 180, 248, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-character-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(138, 180, 248, 0.1) 0%, transparent 70%);
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.card-sprite {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 12px rgba(138, 180, 248, 0.4));
+}
+
+/* Level Section */
+.card-level-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.card-level-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-level-label {
+  font-size: 16px;
+  color: #a0a0b0;
+  font-weight: 500;
+}
+
+.card-level-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #8ab4f8;
+  text-shadow: 0 2px 8px rgba(138, 180, 248, 0.4);
+}
+
+.card-xp-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-xp-bar-container {
+  width: 100%;
+  height: 12px;
+  background: rgba(138, 180, 248, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(138, 180, 248, 0.3);
+}
+
+.card-xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #4fc3f7 100%);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 12px rgba(138, 180, 248, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-xp-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.card-xp-text {
+  font-size: 13px;
+  color: #a0a0b0;
+  text-align: center;
+}
+
+/* Stats Section */
+.card-stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.card-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(138, 180, 248, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(138, 180, 248, 0.15);
+  transition: all 0.3s ease;
+}
+
+.card-stat-item:hover {
+  background: rgba(138, 180, 248, 0.1);
+  border-color: rgba(138, 180, 248, 0.3);
+  transform: translateY(-2px);
+}
+
+.card-stat-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(138, 180, 248, 0.3));
+}
+
+.card-stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-stat-label {
+  font-size: 12px;
+  color: #a0a0b0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8ab4f8;
+}
+
+/* Resources Section */
+.card-resources-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.card-resource-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(138, 180, 248, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(138, 180, 248, 0.15);
+  transition: all 0.3s ease;
+}
+
+.card-resource-item:hover {
+  background: rgba(138, 180, 248, 0.1);
+  border-color: rgba(138, 180, 248, 0.3);
+}
+
+.card-resource-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(138, 180, 248, 0.3));
+  flex-shrink: 0;
+}
+
+.card-resource-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.card-resource-label {
+  font-size: 11px;
+  color: #a0a0b0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-resource-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffd93d;
+}
+
+/* Achievements Section */
+.card-achievements-section {
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.card-section-title {
+  font-size: 16px;
+  color: #8ab4f8;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card-achievement-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(138, 180, 248, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(138, 180, 248, 0.15);
+  transition: all 0.3s ease;
+}
+
+.card-achievement-item:hover {
+  background: rgba(138, 180, 248, 0.1);
+  border-color: rgba(138, 180, 248, 0.3);
+  transform: translateY(-2px);
+}
+
+.card-achievement-label {
+  font-size: 11px;
+  color: #a0a0b0;
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-achievement-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #8ab4f8;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 15px 20px;
+  background: rgba(138, 180, 248, 0.05);
+  border-top: 1px solid rgba(138, 180, 248, 0.2);
+  text-align: center;
+}
+
+.card-theme-name {
+  font-size: 12px;
+  color: #a0a0b0;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Responsive adjustments for card content */
+@media (max-width: 768px) {
+  .player-card-content {
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .card-stats-section {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 15px;
+  }
+  
+  .card-stat-item {
+    padding: 10px;
+  }
+  
+  .card-stat-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .card-stat-value {
+    font-size: 16px;
+  }
+  
+  .card-resources-section {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 15px;
+  }
+  
+  .card-achievement-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-sprite {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .card-level-value {
+    font-size: 28px;
+  }
+  
+  .card-stats-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   Player Card Theme-Aware Styling
+   ============================================================================ */
+
+/* CSS Custom Properties for Theme Colors */
+.player-card-container {
+  --theme-primary: #667eea;
+  --theme-secondary: #764ba2;
+  --theme-accent: #4fc3f7;
+  --theme-background: #1a1a2e;
+  --theme-background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* Apply theme colors dynamically */
+.player-card-container[data-theme="default"] {
+  --theme-primary: #667eea;
+  --theme-secondary: #764ba2;
+  --theme-accent: #4fc3f7;
+  --theme-background: #1a1a2e;
+  --theme-background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.player-card-container[data-theme="crimson-dusk"] {
+  --theme-primary: #ff6b6b;
+  --theme-secondary: #ee5a6f;
+  --theme-accent: #ffd93d;
+  --theme-background: #2d1b1b;
+  --theme-background-gradient: linear-gradient(135deg, #2d1b1b 0%, #3d1f1f 100%);
+}
+
+.player-card-container[data-theme="emerald-grove"] {
+  --theme-primary: #51cf66;
+  --theme-secondary: #37b24d;
+  --theme-accent: #94d82d;
+  --theme-background: #1a2e1a;
+  --theme-background-gradient: linear-gradient(135deg, #1a2e1a 0%, #1f3d1f 100%);
+}
+
+.player-card-container[data-theme="golden-dawn"] {
+  --theme-primary: #ffd700;
+  --theme-secondary: #ffed4e;
+  --theme-accent: #ffa94d;
+  --theme-background: #2e2a1a;
+  --theme-background-gradient: linear-gradient(135deg, #2e2a1a 0%, #3d361f 100%);
+}
+
+.player-card-container[data-theme="midnight-ocean"] {
+  --theme-primary: #339af0;
+  --theme-secondary: #1c7ed6;
+  --theme-accent: #74c0fc;
+  --theme-background: #1a1e2e;
+  --theme-background-gradient: linear-gradient(135deg, #1a1e2e 0%, #1f2d3d 100%);
+}
+
+.player-card-container[data-theme="violet-dream"] {
+  --theme-primary: #9775fa;
+  --theme-secondary: #845ef7;
+  --theme-accent: #d0bfff;
+  --theme-background: #221a2e;
+  --theme-background-gradient: linear-gradient(135deg, #221a2e 0%, #2d1f3d 100%);
+}
+
+/* Apply theme colors to card elements */
+.player-card-container {
+  background: var(--theme-background-gradient);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--theme-primary),
+    0 0 40px color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.player-card-header {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--theme-primary) 15%, transparent) 0%, 
+    color-mix(in srgb, var(--theme-primary) 5%, transparent) 100%
+  );
+  border-bottom: 2px solid color-mix(in srgb, var(--theme-primary) 40%, transparent);
+}
+
+.player-card-header h3 {
+  color: var(--theme-primary);
+  text-shadow: 0 2px 8px color-mix(in srgb, var(--theme-primary) 50%, transparent);
+}
+
+.card-character-section {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--theme-primary) 10%, transparent) 0%,
+    color-mix(in srgb, var(--theme-secondary) 10%, transparent) 50%,
+    color-mix(in srgb, var(--theme-accent) 10%, transparent) 100%
+  );
+  border: 2px solid color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.card-character-section::before {
+  background: radial-gradient(circle, 
+    color-mix(in srgb, var(--theme-primary) 20%, transparent) 0%, 
+    transparent 70%
+  );
+}
+
+.card-sprite {
+  filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--theme-primary) 60%, transparent));
+}
+
+.card-level-section,
+.card-stats-section,
+.card-resources-section,
+.card-achievements-section {
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.card-level-value,
+.card-stat-value,
+.card-achievement-value {
+  color: var(--theme-primary);
+  text-shadow: 0 2px 8px color-mix(in srgb, var(--theme-primary) 50%, transparent);
+}
+
+.card-xp-bar {
+  background: linear-gradient(90deg, 
+    var(--theme-primary) 0%, 
+    var(--theme-secondary) 50%, 
+    var(--theme-accent) 100%
+  );
+  box-shadow: 0 0 12px color-mix(in srgb, var(--theme-primary) 80%, transparent);
+}
+
+.card-xp-bar-container {
+  background: color-mix(in srgb, var(--theme-primary) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.card-stat-item,
+.card-resource-item,
+.card-achievement-item {
+  background: color-mix(in srgb, var(--theme-primary) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 15%, transparent);
+}
+
+.card-stat-item:hover,
+.card-resource-item:hover,
+.card-achievement-item:hover {
+  background: color-mix(in srgb, var(--theme-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.card-stat-icon,
+.card-resource-icon {
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--theme-primary) 50%, transparent));
+}
+
+.card-section-title {
+  color: var(--theme-primary);
+}
+
+.card-footer {
+  background: color-mix(in srgb, var(--theme-primary) 5%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+/* Accessibility: Ensure text contrast meets standards */
+.player-card-container {
+  color: #e0e0e0;
+}
+
+.card-level-label,
+.card-stat-label,
+.card-resource-label,
+.card-achievement-label,
+.card-xp-text,
+.card-theme-name {
+  color: #a0a0b0;
+  /* Ensures minimum 4.5:1 contrast ratio against dark backgrounds */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .player-card-container {
+    border: 3px solid var(--theme-primary);
+  }
+  
+  .card-level-value,
+  .card-stat-value,
+  .card-achievement-value {
+    color: #ffffff;
+  }
+  
+  .card-level-label,
+  .card-stat-label,
+  .card-resource-label,
+  .card-achievement-label {
+    color: #d0d0d0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .player-card-container {
+    animation: none;
+  }
+  
+  .card-xp-bar::after {
+    animation: none;
+  }
+  
+  .card-character-section::before {
+    animation: none;
+  }
+  
+  .card-stat-item:hover,
+  .card-resource-item:hover,
+  .card-achievement-item:hover {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   Player Card Action Buttons and Notifications
+   ============================================================================ */
+
+/* Action Buttons Container */
+.player-card-actions {
+  display: flex;
+  gap: 12px;
+  padding: 20px 25px;
+  background: rgba(20, 20, 30, 0.8);
+  border-top: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.player-card-actions .btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Copy Button */
+.player-card-actions .btn-primary {
+  background: linear-gradient(135deg, var(--theme-primary, #8ab4f8) 0%, var(--theme-secondary, #6a94d8) 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--theme-primary, #8ab4f8) 40%, transparent);
+}
+
+.player-card-actions .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--theme-primary, #8ab4f8) 120%, white) 0%, 
+    color-mix(in srgb, var(--theme-secondary, #6a94d8) 120%, white) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--theme-primary, #8ab4f8) 60%, transparent);
+}
+
+.player-card-actions .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--theme-primary, #8ab4f8) 40%, transparent);
+}
+
+/* Loading State for Copy Button */
+.player-card-actions .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #6a6a7a 0%, #5a5a6a 100%);
+  box-shadow: none;
+}
+
+.player-card-actions .btn-primary:disabled::after {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Close Button */
+.player-card-actions .btn-secondary {
+  background: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+  border: 1px solid rgba(138, 180, 248, 0.3);
+}
+
+.player-card-actions .btn-secondary:hover {
+  background: rgba(138, 180, 248, 0.2);
+  border-color: #8ab4f8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(138, 180, 248, 0.2);
+}
+
+.player-card-actions .btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Button Icons */
+.btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Notification Container */
+.player-card-notifications {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+/* Notification Toast */
+.player-card-notification {
+  min-width: 300px;
+  max-width: 400px;
+  padding: 16px 20px;
+  background: rgba(30, 30, 46, 0.98);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  border-left: 4px solid transparent;
+}
+
+.player-card-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Success Notification */
+.player-card-notification-success {
+  border-left-color: #4ade80;
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.15) 0%, rgba(30, 30, 46, 0.98) 100%);
+}
+
+.player-card-notification-success::before {
+  content: '✓';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background: #4ade80;
+  color: #1a1a2e;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Error Notification */
+.player-card-notification-error {
+  border-left-color: #f87171;
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(30, 30, 46, 0.98) 100%);
+}
+
+.player-card-notification-error::before {
+  content: '✕';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background: #f87171;
+  color: #1a1a2e;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Notification Animation */
+@keyframes notificationSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes notificationSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Modal Animations */
+.player-card-modal.active .player-card-container {
+  animation: modalBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  50% {
+    transform: scale(1.02) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.player-card-modal .modal-backdrop {
+  animation: backdropFadeIn 0.3s ease;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments for action buttons */
+@media (max-width: 768px) {
+  .player-card-actions {
+    padding: 15px 20px;
+  }
+  
+  .player-card-actions .btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .player-card-notifications {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .player-card-notification {
+    min-width: auto;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-card-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .player-card-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Reduced motion support for animations */
+@media (prefers-reduced-motion: reduce) {
+  .player-card-notification {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+  
+  .player-card-notification.show {
+    transform: none;
+  }
+  
+  .player-card-modal.active .player-card-container {
+    animation: none;
+  }
+  
+  .player-card-modal .modal-backdrop {
+    animation: none;
+  }
+  
+  .player-card-actions .btn:hover {
+    transform: none;
+  }
+  
+  .player-card-actions .btn:active {
+    transform: none;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: none;
+    }
+  }
+}
+
+/* High contrast mode support for buttons */
+@media (prefers-contrast: high) {
+  .player-card-actions .btn-primary {
+    border: 2px solid #ffffff;
+  }
+  
+  .player-card-actions .btn-secondary {
+    border: 2px solid #8ab4f8;
+  }
+  
+  .player-card-notification {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Focus visible styles for accessibility */
+.player-card-actions .btn:focus-visible {
+  outline: 3px solid #ffd700;
+  outline-offset: 2px;
+}
+
+/* Notification container for screen readers */
+.player-card-notifications[aria-live="polite"] {
+  /* Ensure notifications are announced by screen readers */
+}
