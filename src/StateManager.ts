@@ -95,7 +95,7 @@ export class StateManager {
       if (chrome.notifications) {
         chrome.notifications.create({
           type: "basic",
-          iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
+          iconUrl: chrome.runtime.getURL("assets/sprites/sprite_classic_shepherd.png"),
           title: "Soul Shepherd",
           message: "Failed to load saved progress. Starting fresh.",
         });
@@ -133,7 +133,7 @@ export class StateManager {
       if (chrome.notifications) {
         chrome.notifications.create({
           type: "basic",
-          iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
+          iconUrl: chrome.runtime.getURL("assets/sprites/sprite_classic_shepherd.png"),
           title: "Soul Shepherd",
           message: "Failed to save progress. Your changes may be lost.",
         });
@@ -297,7 +297,7 @@ export class StateManager {
       if (chrome.notifications) {
         chrome.notifications.create({
           type: "basic",
-          iconUrl: chrome.runtime.getURL("soul_shepherd.png"),
+          iconUrl: chrome.runtime.getURL("assets/sprites/sprite_classic_shepherd.png"),
           title: "Soul Shepherd - Data Reset",
           message:
             "Your save data was corrupted and has been reset. A backup was created.",
