@@ -52,6 +52,8 @@ header {
   padding-top: 94px;
   text-align: center;
   border-bottom: 2px solid rgba(138, 180, 248, 0.2);
+  position: relative;
+  overflow: visible;
 }
 
 .header-icon {
@@ -69,6 +71,45 @@ header h1 {
     2px 2px 4px rgba(138, 43, 226, 0.6),
     4px 4px 8px rgba(219, 39, 119, 0.5),
     6px 6px 12px rgba(255, 140, 0, 0.4);
+}
+
+.header-candle {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  position: absolute;
+  bottom: 0;
+  filter: drop-shadow(0 -5px 20px rgba(219, 39, 119, 0.6))
+          drop-shadow(0 -5px 30px rgba(138, 43, 226, 0.5))
+          drop-shadow(0 -5px 40px rgba(255, 140, 0, 0.4));
+  animation: candleFlicker 3s ease-in-out infinite;
+}
+
+.header-candle-left {
+  left: 40px;
+}
+
+.header-candle-right {
+  right: 40px;
+  animation-delay: 1.5s;
+}
+
+@keyframes candleFlicker {
+  0%, 100% {
+    filter: drop-shadow(0 -5px 20px rgba(219, 39, 119, 0.6))
+            drop-shadow(0 -5px 30px rgba(138, 43, 226, 0.5))
+            drop-shadow(0 -5px 40px rgba(255, 140, 0, 0.4));
+  }
+  33% {
+    filter: drop-shadow(0 -5px 25px rgba(255, 140, 0, 0.8))
+            drop-shadow(0 -5px 35px rgba(219, 39, 119, 0.6))
+            drop-shadow(0 -5px 45px rgba(138, 43, 226, 0.5));
+  }
+  66% {
+    filter: drop-shadow(0 -5px 22px rgba(138, 43, 226, 0.7))
+            drop-shadow(0 -5px 32px rgba(255, 140, 0, 0.5))
+            drop-shadow(0 -5px 42px rgba(219, 39, 119, 0.4));
+  }
 }
 
 /* ============================================================================
@@ -908,5 +949,9 @@ h2 {
 
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .header-candle {
+    display: none;
   }
 }
