@@ -11,6 +11,7 @@ import {
   TaskState,
 } from "./types";
 import { COSMETIC_THEMES, COSMETIC_SPRITES } from "./constants";
+import { PlayerCardManager } from "./PlayerCardManager";
 
 // ============================================================================
 // State Management
@@ -63,6 +64,11 @@ function setupTabs(): void {
       const targetContent = document.getElementById(`${tabName}-section`);
       if (targetContent) {
         targetContent.classList.add("active");
+      }
+
+      // Hide player card modal when switching away from statistics tab
+      if (tabName !== "statistics") {
+        PlayerCardManager.hideCardModal();
       }
     });
   });
@@ -238,6 +244,20 @@ function populateStatistics(statistics: any): void {
   if (totalEmbersEl) {
     totalEmbersEl.textContent =
       statistics.totalSoulEmbersEarned.toLocaleString();
+  }
+
+  // Update Show Player Card button with current sprite
+  const showPlayerCardBtn = document.getElementById("show-player-card-btn");
+  if (currentState && showPlayerCardBtn) {
+    const state = currentState; // Store in local variable for type narrowing
+    const sprite = COSMETIC_SPRITES.find(
+      (s) => s.id === state.player.cosmetics.activeSprite
+    );
+    
+    if (sprite) {
+      // Set button background to current sprite
+      showPlayerCardBtn.style.backgroundImage = `url('${sprite.imagePath}')`;
+    }
   }
 }
 
@@ -707,6 +727,17 @@ function setupEventListeners(): void {
       const themeId = themeSelector.value;
       updateCosmetic("activeTheme", themeId);
       updateThemePreview(themeId);
+    });
+  }
+
+  // Player Card - Show Player Card button
+  const showPlayerCardBtn = document.getElementById("show-player-card-btn");
+  if (showPlayerCardBtn) {
+    showPlayerCardBtn.addEventListener("click", () => {
+      if (currentState) {
+        const cardData = PlayerCardManager.generateCardData(currentState);
+        PlayerCardManager.showCardModal(cardData);
+      }
     });
   }
 

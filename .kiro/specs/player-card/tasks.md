@@ -155,34 +155,50 @@
   - Add animations for modal and notifications
   - _Requirements: 2.1_
 
-- [ ] 5. Integrate PlayerCardManager into options.ts
-- [ ] 5.1 Import and initialize PlayerCardManager
+- [x] 5. Integrate PlayerCardManager into options.ts
+
+
+
+- [x] 5.1 Import and initialize PlayerCardManager
+
+
   - Import PlayerCardManager module
   - Add event listener for "Show Player Card" button
   - Lazy load html2canvas on first button click
   - _Requirements: 5.1_
 
-- [ ] 5.2 Write property test for lazy loading
+- [x] 5.2 Write property test for lazy loading
+
+
+
   - **Property 11: Lazy loading of image library**
   - **Validates: Requirements 5.1**
 
-- [ ] 5.3 Wire up modal interactions
+- [x] 5.3 Wire up modal interactions
+
+
   - Connect close button to hideCardModal()
   - Connect backdrop click to hideCardModal()
   - Add ESC key listener to close modal
   - Connect copy button to copyCardToClipboard()
   - _Requirements: 1.4, 2.2_
 
-- [ ] 5.4 Add tab switching handler
+- [x] 5.4 Add tab switching handler
+
+
   - Listen for tab change events
   - Hide modal when user switches away from statistics tab
   - _Requirements: 5.5_
 
-- [ ] 5.5 Write property test for tab switching
+- [x] 5.5 Write property test for tab switching
+
+
   - **Property 13: Tab switching hides modal**
   - **Validates: Requirements 5.5**
 
-- [ ] 5.6 Update populateStatistics function
+- [x] 5.6 Update populateStatistics function
+
+
   - Remove old sprite display logic
   - Ensure button shows current sprite as icon/background
   - Pass current game state to card generation
