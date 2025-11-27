@@ -455,6 +455,181 @@ describe("PlayerCardManager", () => {
 
   describe("renderCard", () => {
     /**
+     * **Feature: player-card, Property 8: Correct sprite display**
+     * For any game state with an active sprite, the card should display
+     * an image element with the src matching that sprite's image path
+     * **Validates: Requirements 3.3**
+     */
+    it("should display correct sprite image for any active sprite", () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom(...COSMETIC_SPRITES.map((s) => s.id)),
+          (spriteId) => {
+            // Find the sprite
+            const sprite = COSMETIC_SPRITES.find((s) => s.id === spriteId);
+            expect(sprite).toBeDefined();
+
+            // Create card data with this sprite
+            const cardData = {
+              characterName: "Test Shepherd",
+              level: 5,
+              currentXP: 100,
+              xpToNextLevel: 200,
+              soulEmbers: 50,
+              stats: {
+                spirit: 2,
+                harmony: 0.1,
+                soulflow: 1.5,
+              },
+              achievements: {
+                totalSessions: 10,
+                totalFocusTime: 500,
+                bossesDefeated: 2,
+                currentStreak: 3,
+              },
+              cosmetics: {
+                spriteId: spriteId,
+                spritePath: sprite!.imagePath,
+                themeId: "default",
+                themeName: "Twilight Veil",
+              },
+            };
+
+            // Create a mock card content element
+            const mockElement = {
+              innerHTML: "",
+            };
+
+            // Mock document methods
+            const originalGetElementById = (globalThis as any).document?.getElementById;
+            (globalThis as any).document = {
+              getElementById: (id: string) => {
+                if (id === "player-card-content") {
+                  return mockElement;
+                }
+                return null;
+              },
+              querySelector: () => null,
+            };
+
+            // Render card
+            PlayerCardManager.renderCard(cardData);
+
+            // Verify sprite image is in the HTML
+            expect(mockElement.innerHTML).toContain(sprite!.imagePath);
+            expect(mockElement.innerHTML).toContain('class="player-card-sprite"');
+            expect(mockElement.innerHTML).toContain(`alt="${cardData.characterName} sprite"`);
+
+            // Verify fallback error handling is present
+            expect(mockElement.innerHTML).toContain('onerror=');
+
+            // Restore original
+            if (originalGetElementById) {
+              (globalThis as any).document.getElementById = originalGetElementById;
+            }
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    /**
+     * **Feature: player-card, Property 7: Required visual elements presence**
+     * For any rendered card, the DOM should contain the character sprite image,
+     * stat icons, and all required data fields
+     * **Validates: Requirements 3.2, 3.3**
+     */
+    it("should contain all required visual elements for any card data", () => {
+      fc.assert(
+        fc.property(
+          fc.record({
+            characterName: fc.string({ minLength: 1, maxLength: 50 }),
+            level: fc.integer({ min: 1, max: 50 }),
+            currentXP: fc.integer({ min: 0, max: 100000 }),
+            xpToNextLevel: fc.integer({ min: 1, max: 10000 }),
+            soulEmbers: fc.integer({ min: 0, max: 10000 }),
+            stats: fc.record({
+              spirit: fc.float({ min: Math.fround(1), max: Math.fround(100) }),
+              harmony: fc.float({ min: Math.fround(0.05), max: Math.fround(1) }),
+              soulflow: fc.float({ min: Math.fround(1), max: Math.fround(100) }),
+            }),
+            achievements: fc.record({
+              totalSessions: fc.integer({ min: 0, max: 10000 }),
+              totalFocusTime: fc.integer({ min: 0, max: 100000 }),
+              bossesDefeated: fc.integer({ min: 0, max: 10 }),
+              currentStreak: fc.integer({ min: 0, max: 365 }),
+            }),
+            cosmetics: fc.record({
+              spriteId: fc.constantFrom(...COSMETIC_SPRITES.map((s) => s.id)),
+              spritePath: fc.constantFrom(...COSMETIC_SPRITES.map((s) => s.imagePath)),
+              themeId: fc.constantFrom(...COSMETIC_THEMES.map((t) => t.id)),
+              themeName: fc.constantFrom(...COSMETIC_THEMES.map((t) => t.name)),
+            }),
+          }),
+          (cardData) => {
+            // Create a mock card content element
+            const mockElement = {
+              innerHTML: "",
+            };
+
+            // Mock document methods
+            const originalGetElementById = (globalThis as any).document?.getElementById;
+            (globalThis as any).document = {
+              getElementById: (id: string) => {
+                if (id === "player-card-content") {
+                  return mockElement;
+                }
+                return null;
+              },
+              querySelector: () => null,
+            };
+
+            // Render card
+            PlayerCardManager.renderCard(cardData);
+
+            // Verify character sprite is present
+            expect(mockElement.innerHTML).toContain('class="player-card-sprite"');
+            expect(mockElement.innerHTML).toContain(cardData.cosmetics.spritePath);
+
+            // Verify stat icons are present (3 stats: Spirit, Harmony, Soulflow)
+            const statIconMatches = mockElement.innerHTML.match(/class="stat-icon"/g);
+            expect(statIconMatches).not.toBeNull();
+            expect(statIconMatches!.length).toBeGreaterThanOrEqual(3);
+
+            // Verify resource icons are present (Soul Insight and Soul Embers)
+            expect(mockElement.innerHTML).toContain('soul_insight.png');
+            expect(mockElement.innerHTML).toContain('soul_ember.png');
+
+            // Verify all stat values are present
+            expect(mockElement.innerHTML).toContain(cardData.stats.spirit.toFixed(1));
+            expect(mockElement.innerHTML).toContain(cardData.stats.soulflow.toFixed(1));
+            const harmonyPercent = (cardData.stats.harmony * 100).toFixed(1);
+            expect(mockElement.innerHTML).toContain(harmonyPercent);
+
+            // Verify resource values are present
+            expect(mockElement.innerHTML).toContain(`>${cardData.currentXP}<`);
+            expect(mockElement.innerHTML).toContain(`>${cardData.soulEmbers}<`);
+
+            // Verify stat labels are present
+            expect(mockElement.innerHTML).toContain('Spirit');
+            expect(mockElement.innerHTML).toContain('Harmony');
+            expect(mockElement.innerHTML).toContain('Soulflow');
+
+            // Verify resource labels are present
+            expect(mockElement.innerHTML).toContain('Soul Insight');
+            expect(mockElement.innerHTML).toContain('Soul Embers');
+
+            // Restore original
+            if (originalGetElementById) {
+              (globalThis as any).document.getElementById = originalGetElementById;
+            }
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    /**
      * **Feature: player-card, Property 2: Modal visibility on button click**
      * For any game state, when the "Show Player Card" button is clicked,
      * the card modal should become visible and contain the player's current data
@@ -471,6 +646,7 @@ describe("PlayerCardManager", () => {
             level: fc.integer({ min: 1, max: 50 }),
             currentXP: fc.integer({ min: 0, max: 100000 }),
             xpToNextLevel: fc.integer({ min: 1, max: 10000 }),
+            soulEmbers: fc.integer({ min: 0, max: 10000 }),
             stats: fc.record({
               spirit: fc.float({ min: Math.fround(1), max: Math.fround(100) }),
               harmony: fc.float({ min: Math.fround(0.05), max: Math.fround(1) }),

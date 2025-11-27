@@ -1318,7 +1318,8 @@ h2 {
   border: 1px solid rgba(138, 180, 248, 0.2);
 }
 
-.card-stat-item {
+.card-stat-item,
+.player-card-stats .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1330,27 +1331,31 @@ h2 {
   transition: all 0.3s ease;
 }
 
-.card-stat-item:hover {
+.card-stat-item:hover,
+.player-card-stats .stat-item:hover {
   background: rgba(138, 180, 248, 0.1);
   border-color: rgba(138, 180, 248, 0.3);
   transform: translateY(-2px);
 }
 
-.card-stat-icon {
+.card-stat-icon,
+.player-card-stats .stat-icon {
   width: 32px;
   height: 32px;
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(138, 180, 248, 0.3));
 }
 
-.card-stat-info {
+.card-stat-info,
+.player-card-stats .stat-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
 
-.card-stat-label {
+.card-stat-label,
+.player-card-stats .stat-label {
   font-size: 12px;
   color: #a0a0b0;
   font-weight: 500;
@@ -1358,10 +1363,78 @@ h2 {
   letter-spacing: 0.5px;
 }
 
-.card-stat-value {
+.card-stat-value,
+.player-card-stats .stat-value {
   font-size: 20px;
   font-weight: 700;
   color: #8ab4f8;
+}
+
+/* Player Card Stats Grid */
+.player-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+/* Player Card Resources Section */
+.player-card-resources {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 180, 248, 0.2);
+}
+
+.player-card-resources .resource-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(138, 180, 248, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(138, 180, 248, 0.15);
+  transition: all 0.3s ease;
+}
+
+.player-card-resources .resource-item:hover {
+  background: rgba(138, 180, 248, 0.1);
+  border-color: rgba(138, 180, 248, 0.3);
+}
+
+.player-card-resources .resource-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(138, 180, 248, 0.3));
+  flex-shrink: 0;
+}
+
+.player-card-resources .resource-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.player-card-resources .resource-label {
+  font-size: 11px;
+  color: #a0a0b0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.player-card-resources .resource-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffd93d;
 }
 
 /* Resources Section */

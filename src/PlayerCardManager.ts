@@ -10,6 +10,7 @@ export interface PlayerCardData {
   level: number;
   currentXP: number;
   xpToNextLevel: number;
+  soulEmbers: number;
   stats: {
     spirit: number;
     harmony: number;
@@ -62,6 +63,7 @@ export class PlayerCardManager {
     const xpToNextLevel = typeof player.soulInsightToNextLevel === "number" 
       ? player.soulInsightToNextLevel 
       : 100;
+    const soulEmbers = typeof player.soulEmbers === "number" ? player.soulEmbers : 0;
 
     // Extract stats with defaults
     const stats = {
@@ -98,6 +100,7 @@ export class PlayerCardManager {
       level,
       currentXP,
       xpToNextLevel,
+      soulEmbers,
       stats,
       achievements,
       cosmetics: {
@@ -118,6 +121,7 @@ export class PlayerCardManager {
       level: 1,
       currentXP: 0,
       xpToNextLevel: 100,
+      soulEmbers: 0,
       stats: {
         spirit: 1,
         harmony: 0.05,
@@ -244,6 +248,7 @@ export class PlayerCardManager {
           src="${data.cosmetics.spritePath}" 
           alt="${data.characterName} sprite"
           class="player-card-sprite"
+          onerror="this.src='${COSMETIC_SPRITES[0].imagePath}'; this.onerror=null;"
         />
       </div>
 
@@ -264,17 +269,34 @@ export class PlayerCardManager {
           </div>
         </div>
         <div class="stat-item">
-          <img src="assets/icons/soul_insight.png" alt="" class="stat-icon" aria-hidden="true" />
+          <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
           <div class="stat-info">
             <div class="stat-label">Harmony</div>
             <div class="stat-value">${harmonyPercent}%</div>
           </div>
         </div>
         <div class="stat-item">
-          <img src="assets/icons/soul_ember.png" alt="" class="stat-icon" aria-hidden="true" />
+          <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
           <div class="stat-info">
             <div class="stat-label">Soulflow</div>
             <div class="stat-value">${data.stats.soulflow.toFixed(1)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-card-resources">
+        <div class="resource-item">
+          <img src="assets/icons/soul_insight.png" alt="" class="resource-icon" aria-hidden="true" />
+          <div class="resource-info">
+            <div class="resource-label">Soul Insight</div>
+            <div class="resource-value">${data.currentXP}</div>
+          </div>
+        </div>
+        <div class="resource-item">
+          <img src="assets/icons/soul_ember.png" alt="" class="resource-icon" aria-hidden="true" />
+          <div class="resource-info">
+            <div class="resource-label">Soul Embers</div>
+            <div class="resource-value">${data.soulEmbers}</div>
           </div>
         </div>
       </div>
