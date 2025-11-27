@@ -284,7 +284,12 @@
   - **Property 12: Resource cleanup on dismissal**
   - **Validates: Requirements 5.4**
 
-- [ ] 9. Add manifest permissions for clipboard
+- [x] 9. Add manifest permissions for clipboard
+
+
+
+
+
   - Add "clipboardWrite" permission to manifest.json
   - Verify permission is granted on extension load
   - _Requirements: 4.4_
