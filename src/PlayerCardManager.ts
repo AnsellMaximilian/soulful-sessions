@@ -199,8 +199,8 @@ export class PlayerCardManager {
     // Focus the first focusable element (close button in header)
     const closeButton = this.modalElement.querySelector("#player-card-close-btn") as HTMLElement;
     if (closeButton) {
-      // Use setTimeout to ensure modal is fully rendered before focusing
-      setTimeout(() => closeButton.focus(), 50);
+      // Use setTimeout to ensure modal is fully rendered and animation started before focusing
+      setTimeout(() => closeButton.focus(), 100);
     }
   }
 
@@ -243,8 +243,9 @@ export class PlayerCardManager {
       return;
     }
 
-    // Calculate XP percentage for progress bar
-    const xpPercentage = (data.currentXP / (data.currentXP + data.xpToNextLevel)) * 100;
+    // Calculate XP percentage for progress bar (handle edge case of 0 total XP)
+    const totalXP = data.currentXP + data.xpToNextLevel;
+    const xpPercentage = totalXP > 0 ? (data.currentXP / totalXP) * 100 : 0;
 
     // Format focus time
     const hours = Math.floor(data.achievements.totalFocusTime / 60);
@@ -553,8 +554,21 @@ export class PlayerCardManager {
     } catch (error) {
       console.error("[PlayerCardManager] Failed to copy card:", error);
       
-      // Show error notification
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      // Show error notification with helpful message
+      let errorMessage = "Unknown error";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Provide more helpful messages for common errors
+        if (errorMessage.includes("permission")) {
+          errorMessage = "Clipboard permission denied. Please allow clipboard access and try again.";
+        } else if (errorMessage.includes("not loaded")) {
+          errorMessage = "Image library failed to load. Please check your connection and try again.";
+        } else if (errorMessage.includes("not found")) {
+          errorMessage = "Card content not found. Please close and reopen the card.";
+        }
+      }
+      
       this.showNotification(`Failed to copy card: ${errorMessage}`, "error");
 
       // Restore button state
@@ -658,12 +672,13 @@ export class PlayerCardManager {
       notification.classList.add("show");
     }, 10);
 
-    // Auto-dismiss after 3 seconds
+    // Auto-dismiss after appropriate time (longer for errors to allow reading)
+    const dismissTime = type === "error" ? 5000 : 3000;
     setTimeout(() => {
       notification.classList.remove("show");
       setTimeout(() => {
         notification.remove();
       }, 300); // Wait for fade out animation
-    }, 3000);
+    }, dismissTime);
   }
 }
