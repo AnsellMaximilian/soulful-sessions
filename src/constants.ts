@@ -348,27 +348,27 @@ export const COSMETIC_SPRITES: CosmeticSprite[] = [
     name: "Classic Shepherd",
     description: "The original Soul Shepherd appearance",
     cost: 0,
-    imagePath: "soul_shepherd.png",
+    imagePath: "assets/sprites/sprite_classic_shepherd.png",
   },
   {
     id: "hooded-guide",
     name: "Hooded Guide",
     description: "A mysterious shepherd cloaked in shadows",
     cost: 150,
-    imagePath: "soul_shepherd.png", // Using default for now
+    imagePath: "assets/sprites/sprite_hooded_guide.png",
   },
   {
     id: "radiant-guardian",
     name: "Radiant Guardian",
     description: "A shepherd emanating gentle light",
     cost: 200,
-    imagePath: "soul_shepherd.png", // Using default for now
+    imagePath: "assets/sprites/sprite_radiant_guardian.png",
   },
   {
     id: "ethereal-wanderer",
     name: "Ethereal Wanderer",
     description: "A shepherd who walks between worlds",
     cost: 250,
-    imagePath: "soul_shepherd.png", // Using default for now
+    imagePath: "assets/sprites/sprite_ethereal_wanderer.png",
   },
 ];

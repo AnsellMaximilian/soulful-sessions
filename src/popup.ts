@@ -1486,7 +1486,7 @@ function spawnContentSoul(): void {
   
   // Randomly choose between soul_ember.png and soul_insight.png
   const soulImage = document.createElement("img");
-  soulImage.src = Math.random() < 0.5 ? "soul_ember.png" : "soul_insight.png";
+  soulImage.src = Math.random() < 0.5 ? "assets/icons/soul_ember.png" : "assets/icons/soul_insight.png";
   soulImage.alt = "";
   soulImage.style.width = "100%";
   soulImage.style.height = "100%";

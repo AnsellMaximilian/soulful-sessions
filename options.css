@@ -19,7 +19,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  background-image: url('options_bg.png');
+  background-image: url('assets/backgrounds/options_bg.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -44,7 +44,7 @@ body {
 
 header {
   background: linear-gradient(135deg, #2d2d44 0%, #1f1f2e 100%);
-  background-image: url('options_header_bg.png');
+  background-image: url('assets/backgrounds/options_header_bg.png');
   background-size: auto 100%;
   background-position: center bottom;
   background-repeat: no-repeat;
