@@ -233,6 +233,21 @@ export class PlayerCardManager {
   }
 
   /**
+   * Convert hex color to rgba string
+   */
+  private static hexToRgba(hex: string, alpha: number): string {
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    // Parse hex values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  /**
    * Render card HTML into modal
    */
   static renderCard(data: PlayerCardData): void {
@@ -258,6 +273,11 @@ export class PlayerCardManager {
     // Get theme colors
     const theme = COSMETIC_THEMES.find((t) => t.id === data.cosmetics.themeId);
     const themeColors = theme?.colors || COSMETIC_THEMES[0].colors;
+    
+    // Generate rgba colors for theme-aware transparency
+    const primaryRgba = (alpha: number) => this.hexToRgba(themeColors.primary, alpha);
+    const secondaryRgba = (alpha: number) => this.hexToRgba(themeColors.secondary, alpha);
+    const accentRgba = (alpha: number) => this.hexToRgba(themeColors.accent, alpha);
 
     // Generate card HTML with proper ARIA labels
     const cardHTML = `
@@ -353,14 +373,101 @@ export class PlayerCardManager {
 
     this.cardContentElement.innerHTML = cardHTML;
 
-    // Apply theme colors to card
+    // Apply theme colors to card with inline styles for html2canvas compatibility
     if (this.modalElement) {
       const cardContainer = this.modalElement.querySelector(".player-card-container") as HTMLElement;
       if (cardContainer) {
+        // Set CSS custom properties for modern browsers
         cardContainer.style.setProperty("--theme-primary", themeColors.primary);
         cardContainer.style.setProperty("--theme-secondary", themeColors.secondary);
         cardContainer.style.setProperty("--theme-accent", themeColors.accent);
+        
+        // Apply inline styles for html2canvas compatibility
+        // These override the hardcoded rgba values in CSS
+        this.applyThemeInlineStyles(cardContainer, themeColors);
       }
+    }
+  }
+
+  /**
+   * Apply theme colors as inline styles for html2canvas compatibility
+   * html2canvas doesn't support color-mix() or CSS custom properties in some contexts,
+   * so we inject rgba colors directly as inline styles
+   */
+  private static applyThemeInlineStyles(container: HTMLElement, colors: any): void {
+    const primaryRgba = (alpha: number) => this.hexToRgba(colors.primary, alpha);
+    
+    // Apply to header
+    const header = container.querySelector(".player-card-header") as HTMLElement;
+    if (header) {
+      header.style.background = `linear-gradient(135deg, ${primaryRgba(0.15)} 0%, ${primaryRgba(0.05)} 100%)`;
+      header.style.borderBottom = `2px solid ${primaryRgba(0.4)}`;
+      
+      const title = header.querySelector("h3") as HTMLElement;
+      if (title) {
+        title.style.textShadow = `0 2px 8px ${primaryRgba(0.5)}`;
+      }
+    }
+    
+    // Apply to character section
+    const charSection = container.querySelector(".card-character-section") as HTMLElement;
+    if (charSection) {
+      charSection.style.border = `2px solid ${primaryRgba(0.3)}`;
+      
+      const sprite = charSection.querySelector(".card-sprite") as HTMLElement;
+      if (sprite) {
+        sprite.style.filter = `drop-shadow(0 4px 12px ${primaryRgba(0.6)})`;
+      }
+    }
+    
+    // Apply to sections with borders
+    const sections = container.querySelectorAll(".card-level-section, .card-stats-section, .card-resources-section, .card-achievements-section");
+    sections.forEach((section) => {
+      (section as HTMLElement).style.border = `1px solid ${primaryRgba(0.3)}`;
+    });
+    
+    // Apply to stat/resource/achievement items
+    const items = container.querySelectorAll(".card-stat-item, .card-resource-item, .card-achievement-item");
+    items.forEach((item) => {
+      (item as HTMLElement).style.background = primaryRgba(0.05);
+      (item as HTMLElement).style.border = `1px solid ${primaryRgba(0.15)}`;
+    });
+    
+    // Apply to icons
+    const icons = container.querySelectorAll(".card-stat-icon, .card-resource-icon");
+    icons.forEach((icon) => {
+      (icon as HTMLElement).style.filter = `drop-shadow(0 2px 6px ${primaryRgba(0.5)})`;
+    });
+    
+    // Apply to XP bar
+    const xpBar = container.querySelector(".card-xp-bar") as HTMLElement;
+    if (xpBar) {
+      xpBar.style.boxShadow = `0 0 12px ${primaryRgba(0.8)}`;
+    }
+    
+    const xpBarContainer = container.querySelector(".card-xp-bar-container") as HTMLElement;
+    if (xpBarContainer) {
+      xpBarContainer.style.background = primaryRgba(0.15);
+      xpBarContainer.style.border = `1px solid ${primaryRgba(0.3)}`;
+    }
+    
+    // Apply to footer
+    const footer = container.querySelector(".card-footer") as HTMLElement;
+    if (footer) {
+      footer.style.background = primaryRgba(0.05);
+      footer.style.borderTop = `1px solid ${primaryRgba(0.3)}`;
+    }
+    
+    // Apply to value text colors
+    const values = container.querySelectorAll(".card-level-value, .card-stat-value, .card-achievement-value");
+    values.forEach((value) => {
+      (value as HTMLElement).style.textShadow = `0 2px 8px ${primaryRgba(0.5)}`;
+    });
+    
+    // Apply to section title
+    const sectionTitle = container.querySelector(".card-section-title") as HTMLElement;
+    if (sectionTitle) {
+      sectionTitle.style.color = colors.primary;
     }
   }
 

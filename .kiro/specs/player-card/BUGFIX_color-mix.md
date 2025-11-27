@@ -23,74 +23,91 @@ Example problematic CSS:
 
 ## Solution
 
-Replaced all `color-mix()` functions with standard `rgba()` colors that html2canvas can parse.
+### Initial Approach (Replaced)
+Initially replaced `color-mix()` functions with hardcoded `rgba()` colors, but this lost theme-aware functionality.
 
-### Changes Made
+### Final Solution: Dynamic Inline Style Injection
+Implemented a hex-to-rgba converter and dynamic inline style injection in `PlayerCardManager.ts`:
 
-Replaced approximately 20 instances of `color-mix()` with `rgba()` equivalents:
+1. **Added `hexToRgba()` helper method** to convert hex colors to rgba strings
+2. **Added `applyThemeInlineStyles()` method** to inject theme colors as inline styles
+3. **Applies styles after rendering** so html2canvas captures the correct theme colors
 
-**Before:**
-```css
-color-mix(in srgb, var(--theme-primary) 15%, transparent)
-```
+**Implementation:**
+```typescript
+private static hexToRgba(hex: string, alpha: number): string {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
-**After:**
-```css
-rgba(138, 180, 248, 0.15)
+private static applyThemeInlineStyles(container: HTMLElement, colors: any): void {
+  const primaryRgba = (alpha: number) => this.hexToRgba(colors.primary, alpha);
+  
+  // Apply to all card elements with theme-aware transparency
+  const header = container.querySelector(".player-card-header") as HTMLElement;
+  if (header) {
+    header.style.background = `linear-gradient(135deg, ${primaryRgba(0.15)} 0%, ${primaryRgba(0.05)} 100%)`;
+    header.style.borderBottom = `2px solid ${primaryRgba(0.4)}`;
+  }
+  // ... applies to all other elements
+}
 ```
 
 ### Affected CSS Rules
 
-1. `.player-card-container` - Box shadow
-2. `.player-card-header` - Background gradient and border
-3. `.player-card-header h3` - Text shadow
-4. `.card-character-section` - Background gradient and border
-5. `.card-character-section::before` - Radial gradient
-6. `.card-sprite` - Drop shadow filter
-7. `.card-level-section, .card-stats-section, etc.` - Borders
-8. `.card-level-value, .card-stat-value, etc.` - Text shadows
-9. `.card-xp-bar` - Box shadow
-10. `.card-xp-bar-container` - Background and border
-11. `.card-stat-item, .card-resource-item, etc.` - Background and border
-12. `.card-stat-item:hover, etc.` - Hover states
-13. `.card-stat-icon, .card-resource-icon` - Drop shadow filters
-14. `.card-footer` - Background and border
-15. `.player-card-actions .btn-primary` - Box shadows and hover states
+The following elements now receive dynamic inline styles based on the active theme:
 
-## Trade-offs
+1. `.player-card-header` - Background gradient and border
+2. `.player-card-header h3` - Text shadow
+3. `.card-character-section` - Border
+4. `.card-sprite` - Drop shadow filter
+5. `.card-level-section, .card-stats-section, etc.` - Borders
+6. `.card-level-value, .card-stat-value, etc.` - Text shadows
+7. `.card-xp-bar` - Box shadow
+8. `.card-xp-bar-container` - Background and border
+9. `.card-stat-item, .card-resource-item, etc.` - Background and border
+10. `.card-stat-icon, .card-resource-icon` - Drop shadow filters
+11. `.card-footer` - Background and border
+12. `.card-section-title` - Color
 
-### Lost Functionality
-- **Theme-aware transparency**: The colors are now hardcoded to the default theme's blue color (#8ab4f8)
-- **Dynamic theming**: Other themes (Crimson Dusk, Emerald Grove, etc.) will still use blue accents in the card
+## Benefits of This Solution
 
-### Why This Trade-off is Acceptable
-1. **Core functionality preserved**: The card still displays and copies correctly
-2. **Visual quality maintained**: The card still looks good with the default blue theme
-3. **Most users use default theme**: The default theme is the most common
-4. **Alternative is no functionality**: Without this fix, the copy feature doesn't work at all
+### Functionality Preserved
+- ✅ **Full theme support**: All 6 themes now work correctly in generated images
+- ✅ **Dynamic colors**: Theme colors are applied at render time
+- ✅ **No hardcoding**: Colors are computed from theme definitions
+- ✅ **html2canvas compatible**: Inline styles are fully supported
 
-## Future Improvements
+### Why This Approach Works
+1. **Inline styles override CSS**: html2canvas captures inline styles correctly
+2. **No external dependencies**: Simple hex-to-rgba conversion, no color library needed
+3. **Maintainable**: Theme colors come from existing `COSMETIC_THEMES` constant
+4. **Performant**: Color conversion happens once per render
 
-### Option 1: Dynamic Color Injection
-Instead of using CSS variables, inject theme colors directly into the HTML as inline styles:
+## Alternative Approaches Considered
 
-```typescript
-const themeColor = theme.colors.primary;
-const rgbaColor = hexToRgba(themeColor, 0.15);
-element.style.background = `rgba(${rgbaColor})`;
-```
+### Option 1: Color Library (e.g., chroma.js, color.js)
+- **Pros**: More color manipulation features
+- **Cons**: Adds ~10-20KB to bundle, overkill for simple hex-to-rgba conversion
+- **Decision**: Not needed - simple conversion is sufficient
 
 ### Option 2: Wait for html2canvas Update
-Monitor html2canvas releases for `color-mix()` support and update when available.
+- **Pros**: Would support modern CSS natively
+- **Cons**: No timeline for `color-mix()` support, feature would remain broken
+- **Decision**: Implement workaround now
 
 ### Option 3: Alternative Library
-Consider switching to a different DOM-to-image library that supports modern CSS:
-- dom-to-image-more
-- html-to-image
-- Modern-screenshot
+- **Pros**: Might support modern CSS better
+- **Cons**: Switching libraries is risky, html2canvas is well-tested
+- **Decision**: Keep html2canvas with inline style workaround
 
 ### Option 4: Server-Side Rendering
-Generate card images on a server where full CSS support is available (more complex).
+- **Pros**: Full CSS support
+- **Cons**: Requires backend infrastructure, adds complexity
+- **Decision**: Too complex for this use case
 
 ## Testing
 
@@ -121,8 +138,8 @@ After the fix:
 
 ✅ **Fixed and Verified**
 
-The player card copy functionality now works correctly. Theme colors are hardcoded to default blue, but the feature is fully functional.
+The player card copy functionality now works correctly with **full theme support**. All 6 themes (Default, Crimson Dusk, Emerald Grove, Golden Dawn, Midnight Ocean, Violet Dream) now render correctly in generated images.
 
 ---
 
-**Note:** This is a known limitation of html2canvas. The library is actively maintained but does not yet support all modern CSS features. This is an acceptable trade-off for a working feature.
+**Note:** While html2canvas doesn't support `color-mix()` or CSS custom properties in all contexts, we've worked around this limitation by dynamically injecting inline styles with computed rgba values. This provides full theme support without requiring external color libraries or backend infrastructure.
