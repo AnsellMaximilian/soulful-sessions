@@ -41,7 +41,6 @@ export interface PlayerCardData {
 export class PlayerCardManager {
   private static modalElement: HTMLElement | null = null;
   private static cardContentElement: HTMLElement | null = null;
-  private static isHtml2CanvasLoaded = false;
   private static eventListeners: Array<{ element: HTMLElement; event: string; handler: EventListener }> = [];
   private static previouslyFocusedElement: HTMLElement | null = null;
   private static focusableElements: HTMLElement[] = [];
@@ -518,14 +517,6 @@ export class PlayerCardManager {
     };
     document.addEventListener("keydown", escHandler as EventListener);
     this.eventListeners.push({ element: document as any, event: "keydown", handler: escHandler as EventListener });
-
-    // Copy button
-    const copyButton = this.modalElement.querySelector("#copy-card-btn") as HTMLElement;
-    if (copyButton) {
-      const copyHandler = () => this.copyCardToClipboard();
-      copyButton.addEventListener("click", copyHandler);
-      this.eventListeners.push({ element: copyButton, event: "click", handler: copyHandler });
-    }
   }
 
   /**
@@ -591,131 +582,7 @@ export class PlayerCardManager {
     });
   }
 
-  /**
-   * Copy card to clipboard as image
-   * Uses html2canvas to render the card and Clipboard API to write the image
-   */
-  static async copyCardToClipboard(): Promise<void> {
-    try {
-      // Lazy load html2canvas if not already loaded
-      if (!this.isHtml2CanvasLoaded) {
-        await this.loadHtml2Canvas();
-      }
 
-      // Get the card container element
-      const cardContainer = document.querySelector(".player-card-container") as HTMLElement;
-      if (!cardContainer) {
-        throw new Error("Card container not found");
-      }
-
-      // Show loading state on copy button
-      const copyButton = document.querySelector("#copy-card-btn") as HTMLElement;
-      const originalText = copyButton?.textContent || "Copy Card";
-      if (copyButton) {
-        copyButton.textContent = "Copying...";
-        copyButton.setAttribute("disabled", "true");
-        copyButton.setAttribute("aria-busy", "true");
-        copyButton.setAttribute("aria-label", "Copying player card to clipboard, please wait");
-      }
-
-      // Import html2canvas dynamically
-      const html2canvas = (window as any).html2canvas;
-      if (!html2canvas) {
-        throw new Error("html2canvas not loaded");
-      }
-
-      // Render card to canvas with options for external assets
-      const canvas = await html2canvas(cardContainer, {
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: null,
-        scale: 2, // Higher quality
-        logging: false,
-      });
-
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob: Blob | null) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error("Failed to convert canvas to blob"));
-          }
-        }, "image/png");
-      });
-
-      // Write to clipboard using Clipboard API
-      const clipboardItem = new ClipboardItem({ "image/png": blob });
-      await navigator.clipboard.write([clipboardItem]);
-
-      // Show success notification
-      this.showNotification("Player card copied to clipboard!", "success");
-
-      // Restore button state
-      if (copyButton) {
-        copyButton.textContent = originalText;
-        copyButton.removeAttribute("disabled");
-        copyButton.removeAttribute("aria-busy");
-        copyButton.setAttribute("aria-label", "Copy player card to clipboard");
-      }
-    } catch (error) {
-      console.error("[PlayerCardManager] Failed to copy card:", error);
-      
-      // Show error notification with helpful message
-      let errorMessage = "Unknown error";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        
-        // Provide more helpful messages for common errors
-        if (errorMessage.includes("permission")) {
-          errorMessage = "Clipboard permission denied. Please allow clipboard access and try again.";
-        } else if (errorMessage.includes("not loaded")) {
-          errorMessage = "Image library failed to load. Please check your connection and try again.";
-        } else if (errorMessage.includes("not found")) {
-          errorMessage = "Card content not found. Please close and reopen the card.";
-        }
-      }
-      
-      this.showNotification(`Failed to copy card: ${errorMessage}`, "error");
-
-      // Restore button state
-      const copyButton = document.querySelector("#copy-card-btn") as HTMLElement;
-      if (copyButton) {
-        copyButton.textContent = "Copy Card";
-        copyButton.removeAttribute("disabled");
-        copyButton.removeAttribute("aria-busy");
-        copyButton.setAttribute("aria-label", "Copy player card to clipboard");
-      }
-    }
-  }
-
-  /**
-   * Lazy load html2canvas library
-   */
-  private static async loadHtml2Canvas(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Check if already loaded
-      if ((window as any).html2canvas) {
-        this.isHtml2CanvasLoaded = true;
-        resolve();
-        return;
-      }
-
-      // Create script element
-      const script = document.createElement("script");
-      script.src = chrome.runtime.getURL("dist/html2canvas.js");
-      script.onload = () => {
-        this.isHtml2CanvasLoaded = true;
-        console.log("[PlayerCardManager] html2canvas loaded successfully");
-        resolve();
-      };
-      script.onerror = () => {
-        reject(new Error("Failed to load html2canvas library"));
-      };
-
-      document.head.appendChild(script);
-    });
-  }
 
   /**
    * Apply theme colors to the player card container

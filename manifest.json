@@ -15,8 +15,7 @@
     "tabs",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
-    "notifications",
-    "clipboardWrite"
+    "notifications"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -32,7 +31,7 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js", "dist/html2canvas.js"],
+      "resources": ["blocked.html", "dist/blocked.js", "dist/chunks/*.js"],
       "matches": ["<all_urls>"]
     }
   ],
