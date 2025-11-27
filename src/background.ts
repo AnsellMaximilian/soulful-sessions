@@ -115,39 +115,43 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   console.log("[Background] Alarm fired:", alarm.name);
 
-  // Ensure state is loaded
-  if (!stateManager) {
-    stateManager = new StateManager();
-    await stateManager.loadState();
-  }
+  try {
+    // Ensure state is loaded
+    if (!stateManager) {
+      stateManager = new StateManager();
+      await stateManager.loadState();
+    }
 
-  if (!sessionManager) {
-    sessionManager = new SessionManager();
-  }
+    if (!sessionManager) {
+      sessionManager = new SessionManager();
+    }
 
-  if (!idleCollector) {
-    idleCollector = new IdleCollector();
-  }
+    if (!idleCollector) {
+      idleCollector = new IdleCollector();
+    }
 
-  if (!navigationMonitor) {
-    navigationMonitor = new NavigationMonitor();
-  }
+    if (!navigationMonitor) {
+      navigationMonitor = new NavigationMonitor();
+    }
 
-  switch (alarm.name) {
-    case "soulShepherd_sessionEnd":
-      await handleSessionAlarm();
-      break;
+    switch (alarm.name) {
+      case "soulShepherd_sessionEnd":
+        await handleSessionAlarm();
+        break;
 
-    case "soulShepherd_breakEnd":
-      await handleBreakAlarm();
-      break;
+      case "soulShepherd_breakEnd":
+        await handleBreakAlarm();
+        break;
 
-    case "soulShepherd_idleCollection":
-      await handleIdleCollectionAlarm();
-      break;
+      case "soulShepherd_idleCollection":
+        await handleIdleCollectionAlarm();
+        break;
 
-    default:
-      console.warn("[Background] Unknown alarm:", alarm.name);
+      default:
+        console.warn("[Background] Unknown alarm:", alarm.name);
+    }
+  } catch (error) {
+    console.error(`[Background] Error handling ${alarm.name} alarm:`, error);
   }
 });
 
@@ -257,6 +261,12 @@ async function handleIdleCollectionAlarm(): Promise<void> {
   console.log("[Background] Idle collection alarm fired");
 
   try {
+    // Ensure state is loaded
+    if (!stateManager) {
+      stateManager = new StateManager();
+      await stateManager.loadState();
+    }
+
     const currentState = stateManager.getState();
     const { lastCollectionTime, accumulatedSouls } =
       currentState.progression.idleState;
