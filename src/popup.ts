@@ -1483,7 +1483,14 @@ function spawnContentSoul(): void {
   // Create soul element
   const soul = document.createElement("div");
   soul.className = "content-soul";
-  soul.textContent = "👻"; // Ghost emoji as soul sprite
+  
+  // Randomly choose between soul_ember.png and soul_insight.png
+  const soulImage = document.createElement("img");
+  soulImage.src = Math.random() < 0.5 ? "soul_ember.png" : "soul_insight.png";
+  soulImage.alt = "";
+  soulImage.style.width = "100%";
+  soulImage.style.height = "100%";
+  soul.appendChild(soulImage);
 
   // Random horizontal position
   const randomX = Math.random() * (400 - 32); // 400px popup width - 32px soul width

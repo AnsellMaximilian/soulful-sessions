@@ -46,7 +46,8 @@ body {
   z-index: 1;
 }
 
-#idle-view::before {
+#idle-view::before,
+#break-view::before {
   content: '';
   position: absolute;
   top: -120px;
@@ -161,13 +162,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
+  padding: 4px 6px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-  min-width: 40px;
+  min-width: 32px;
 }
 
 .skill-point-button:hover:not(:disabled) {
@@ -186,7 +187,7 @@ body {
 }
 
 .skill-point-icon {
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
   font-weight: bold;
 }
@@ -201,13 +202,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
+  padding: 3px 6px;
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-  min-width: 45px;
+  min-width: 38px;
 }
 
 .upgrade-button:hover:not(:disabled) {
@@ -226,7 +227,7 @@ body {
 }
 
 .upgrade-icon {
-  font-size: 14px;
+  font-size: 12px;
   color: #1a1a2e;
   font-weight: bold;
 }
@@ -236,10 +237,10 @@ body {
 }
 
 .upgrade-cost {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: bold;
   color: #1a1a2e;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .upgrade-button:disabled .upgrade-cost {
@@ -1092,6 +1093,24 @@ body {
 .shop-content {
   max-height: 300px;
   overflow-y: auto;
+}
+
+.shop-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shop-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.shop-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+  border-radius: 4px;
+}
+
+.shop-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--theme-secondary) 0%, var(--theme-primary) 100%);
 }
 
 .shop-content.hidden {
