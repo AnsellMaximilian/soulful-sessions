@@ -43,6 +43,10 @@ export class PlayerCardManager {
   private static cardContentElement: HTMLElement | null = null;
   private static isHtml2CanvasLoaded = false;
   private static eventListeners: Array<{ element: HTMLElement; event: string; handler: EventListener }> = [];
+  private static previouslyFocusedElement: HTMLElement | null = null;
+  private static focusableElements: HTMLElement[] = [];
+  private static firstFocusableElement: HTMLElement | null = null;
+  private static lastFocusableElement: HTMLElement | null = null;
 
   /**
    * Generate card data from game state
@@ -176,6 +180,9 @@ export class PlayerCardManager {
       return;
     }
 
+    // Store the element that had focus before opening modal
+    this.previouslyFocusedElement = document.activeElement as HTMLElement;
+
     // Render card content
     this.renderCard(cardData);
 
@@ -186,10 +193,14 @@ export class PlayerCardManager {
     // Set up event listeners
     this.setupEventListeners();
 
-    // Focus trap - focus the modal
-    const closeButton = this.modalElement.querySelector(".player-card-close") as HTMLElement;
+    // Set up focus trap
+    this.setupFocusTrap();
+
+    // Focus the first focusable element (close button in header)
+    const closeButton = this.modalElement.querySelector("#player-card-close-btn") as HTMLElement;
     if (closeButton) {
-      closeButton.focus();
+      // Use setTimeout to ensure modal is fully rendered before focusing
+      setTimeout(() => closeButton.focus(), 50);
     }
   }
 
@@ -208,6 +219,17 @@ export class PlayerCardManager {
 
     // Clean up event listeners
     this.cleanupEventListeners();
+
+    // Restore focus to the element that had focus before modal opened
+    if (this.previouslyFocusedElement) {
+      this.previouslyFocusedElement.focus();
+      this.previouslyFocusedElement = null;
+    }
+
+    // Clear focus trap references
+    this.focusableElements = [];
+    this.firstFocusableElement = null;
+    this.lastFocusableElement = null;
   }
 
   /**
@@ -236,95 +258,95 @@ export class PlayerCardManager {
     const theme = COSMETIC_THEMES.find((t) => t.id === data.cosmetics.themeId);
     const themeColors = theme?.colors || COSMETIC_THEMES[0].colors;
 
-    // Generate card HTML
+    // Generate card HTML with proper ARIA labels
     const cardHTML = `
       <div class="player-card-header">
-        <h3 class="player-card-title">${data.characterName}</h3>
-        <div class="player-card-level">Level ${data.level}</div>
+        <h3 class="player-card-title" role="heading" aria-level="2">${data.characterName}</h3>
+        <div class="player-card-level" aria-label="Player level ${data.level}">Level ${data.level}</div>
       </div>
 
-      <div class="player-card-sprite-container">
+      <div class="player-card-sprite-container" role="img" aria-label="Character sprite for ${data.characterName}">
         <img 
           src="${data.cosmetics.spritePath}" 
-          alt="${data.characterName} sprite"
+          alt="${data.characterName} character sprite"
           class="player-card-sprite"
           onerror="this.src='${COSMETIC_SPRITES[0].imagePath}'; this.onerror=null;"
         />
       </div>
 
-      <div class="player-card-xp">
-        <div class="xp-label">Soul Insight</div>
-        <div class="xp-bar">
+      <div class="player-card-xp" role="region" aria-label="Experience progress">
+        <div class="xp-label" id="xp-label">Soul Insight</div>
+        <div class="xp-bar" role="progressbar" aria-labelledby="xp-label" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" aria-valuetext="${data.currentXP} out of ${data.currentXP + data.xpToNextLevel} experience points, ${xpPercentage.toFixed(0)}% complete">
           <div class="xp-bar-fill" style="width: ${xpPercentage}%"></div>
         </div>
-        <div class="xp-text">${data.currentXP} / ${data.currentXP + data.xpToNextLevel}</div>
+        <div class="xp-text" aria-hidden="true">${data.currentXP} / ${data.currentXP + data.xpToNextLevel}</div>
       </div>
 
-      <div class="player-card-stats">
-        <div class="stat-item">
+      <div class="player-card-stats" role="region" aria-label="Character statistics">
+        <div class="stat-item" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
           <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
           <div class="stat-info">
             <div class="stat-label">Spirit</div>
-            <div class="stat-value">${data.stats.spirit.toFixed(1)}</div>
+            <div class="stat-value" aria-label="${data.stats.spirit.toFixed(1)} spirit">${data.stats.spirit.toFixed(1)}</div>
           </div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
           <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
           <div class="stat-info">
             <div class="stat-label">Harmony</div>
-            <div class="stat-value">${harmonyPercent}%</div>
+            <div class="stat-value" aria-label="${harmonyPercent} percent harmony">${harmonyPercent}%</div>
           </div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
           <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
           <div class="stat-info">
             <div class="stat-label">Soulflow</div>
-            <div class="stat-value">${data.stats.soulflow.toFixed(1)}</div>
+            <div class="stat-value" aria-label="${data.stats.soulflow.toFixed(1)} soulflow">${data.stats.soulflow.toFixed(1)}</div>
           </div>
         </div>
       </div>
 
-      <div class="player-card-resources">
-        <div class="resource-item">
+      <div class="player-card-resources" role="region" aria-label="Resources">
+        <div class="resource-item" role="group" aria-label="Soul Insight: ${data.currentXP}">
           <img src="assets/icons/soul_insight.png" alt="" class="resource-icon" aria-hidden="true" />
           <div class="resource-info">
             <div class="resource-label">Soul Insight</div>
-            <div class="resource-value">${data.currentXP}</div>
+            <div class="resource-value" aria-label="${data.currentXP} soul insight">${data.currentXP}</div>
           </div>
         </div>
-        <div class="resource-item">
+        <div class="resource-item" role="group" aria-label="Soul Embers: ${data.soulEmbers}">
           <img src="assets/icons/soul_ember.png" alt="" class="resource-icon" aria-hidden="true" />
           <div class="resource-info">
             <div class="resource-label">Soul Embers</div>
-            <div class="resource-value">${data.soulEmbers}</div>
+            <div class="resource-value" aria-label="${data.soulEmbers} soul embers">${data.soulEmbers}</div>
           </div>
         </div>
       </div>
 
-      <div class="player-card-achievements">
-        <h4>Achievements</h4>
+      <div class="player-card-achievements" role="region" aria-label="Achievements">
+        <h4 role="heading" aria-level="3">Achievements</h4>
         <div class="achievement-grid">
-          <div class="achievement-item">
-            <div class="achievement-value">${data.achievements.totalSessions}</div>
+          <div class="achievement-item" role="group" aria-label="Total sessions: ${data.achievements.totalSessions}">
+            <div class="achievement-value" aria-label="${data.achievements.totalSessions} sessions">${data.achievements.totalSessions}</div>
             <div class="achievement-label">Sessions</div>
           </div>
-          <div class="achievement-item">
-            <div class="achievement-value">${focusTimeFormatted}</div>
+          <div class="achievement-item" role="group" aria-label="Focus time: ${focusTimeFormatted}">
+            <div class="achievement-value" aria-label="${focusTimeFormatted} focus time">${focusTimeFormatted}</div>
             <div class="achievement-label">Focus Time</div>
           </div>
-          <div class="achievement-item">
-            <div class="achievement-value">${data.achievements.bossesDefeated}</div>
+          <div class="achievement-item" role="group" aria-label="Bosses defeated: ${data.achievements.bossesDefeated}">
+            <div class="achievement-value" aria-label="${data.achievements.bossesDefeated} bosses defeated">${data.achievements.bossesDefeated}</div>
             <div class="achievement-label">Bosses</div>
           </div>
-          <div class="achievement-item">
-            <div class="achievement-value">${data.achievements.currentStreak}</div>
+          <div class="achievement-item" role="group" aria-label="Current streak: ${data.achievements.currentStreak}">
+            <div class="achievement-value" aria-label="${data.achievements.currentStreak} day streak">${data.achievements.currentStreak}</div>
             <div class="achievement-label">Streak</div>
           </div>
         </div>
       </div>
 
-      <div class="player-card-footer">
-        <div class="theme-indicator">${data.cosmetics.themeName}</div>
+      <div class="player-card-footer" role="contentinfo">
+        <div class="theme-indicator" aria-label="Active theme: ${data.cosmetics.themeName}">${data.cosmetics.themeName}</div>
       </div>
     `;
 
@@ -343,28 +365,11 @@ export class PlayerCardManager {
 
   /**
    * Create modal element and append to body
+   * Note: This method is not used as the modal is already in options.html
+   * Keeping for backwards compatibility
    */
   private static createModalElement(): void {
-    const modalHTML = `
-      <div id="player-card-modal" class="player-card-modal" role="dialog" aria-modal="true" aria-labelledby="player-card-title" aria-hidden="true">
-        <div class="player-card-backdrop"></div>
-        <div class="player-card-container">
-          <div id="player-card-content" class="player-card-content">
-            <!-- Card content will be rendered here -->
-          </div>
-          <div class="player-card-actions">
-            <button class="btn btn-primary player-card-copy" aria-label="Copy card to clipboard">
-              Copy Card
-            </button>
-            <button class="btn btn-secondary player-card-close" aria-label="Close player card">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.body.insertAdjacentHTML("beforeend", modalHTML);
+    console.warn("[PlayerCardManager] Modal element should already exist in options.html");
   }
 
   /**
@@ -373,16 +378,24 @@ export class PlayerCardManager {
   private static setupEventListeners(): void {
     if (!this.modalElement) return;
 
-    // Close button
-    const closeButton = this.modalElement.querySelector(".player-card-close") as HTMLElement;
-    if (closeButton) {
+    // Close button in header
+    const closeButtonHeader = this.modalElement.querySelector("#player-card-close-btn") as HTMLElement;
+    if (closeButtonHeader) {
       const closeHandler = () => this.hideCardModal();
-      closeButton.addEventListener("click", closeHandler);
-      this.eventListeners.push({ element: closeButton, event: "click", handler: closeHandler });
+      closeButtonHeader.addEventListener("click", closeHandler);
+      this.eventListeners.push({ element: closeButtonHeader, event: "click", handler: closeHandler });
+    }
+
+    // Close button in footer
+    const closeButtonFooter = this.modalElement.querySelector("#player-card-close-btn-bottom") as HTMLElement;
+    if (closeButtonFooter) {
+      const closeHandler = () => this.hideCardModal();
+      closeButtonFooter.addEventListener("click", closeHandler);
+      this.eventListeners.push({ element: closeButtonFooter, event: "click", handler: closeHandler });
     }
 
     // Backdrop click
-    const backdrop = this.modalElement.querySelector(".player-card-backdrop") as HTMLElement;
+    const backdrop = this.modalElement.querySelector(".modal-backdrop") as HTMLElement;
     if (backdrop) {
       const backdropHandler = () => this.hideCardModal();
       backdrop.addEventListener("click", backdropHandler);
@@ -399,7 +412,7 @@ export class PlayerCardManager {
     this.eventListeners.push({ element: document as any, event: "keydown", handler: escHandler as EventListener });
 
     // Copy button
-    const copyButton = this.modalElement.querySelector(".player-card-copy") as HTMLElement;
+    const copyButton = this.modalElement.querySelector("#copy-card-btn") as HTMLElement;
     if (copyButton) {
       const copyHandler = () => this.copyCardToClipboard();
       copyButton.addEventListener("click", copyHandler);
@@ -415,6 +428,59 @@ export class PlayerCardManager {
       element.removeEventListener(event, handler);
     });
     this.eventListeners = [];
+  }
+
+  /**
+   * Set up focus trap to keep focus within modal
+   * Implements keyboard navigation and prevents focus from leaving the modal
+   */
+  private static setupFocusTrap(): void {
+    if (!this.modalElement) return;
+
+    // Get all focusable elements within the modal
+    const focusableSelectors = [
+      'button:not([disabled])',
+      'a[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(', ');
+
+    this.focusableElements = Array.from(
+      this.modalElement.querySelectorAll(focusableSelectors)
+    ) as HTMLElement[];
+
+    if (this.focusableElements.length === 0) {
+      console.warn("[PlayerCardManager] No focusable elements found in modal");
+      return;
+    }
+
+    this.firstFocusableElement = this.focusableElements[0];
+    this.lastFocusableElement = this.focusableElements[this.focusableElements.length - 1];
+
+    // Handle Tab key to trap focus
+    const trapFocusHandler = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      // If Shift + Tab on first element, go to last
+      if (e.shiftKey && document.activeElement === this.firstFocusableElement) {
+        e.preventDefault();
+        this.lastFocusableElement?.focus();
+      }
+      // If Tab on last element, go to first
+      else if (!e.shiftKey && document.activeElement === this.lastFocusableElement) {
+        e.preventDefault();
+        this.firstFocusableElement?.focus();
+      }
+    };
+
+    this.modalElement.addEventListener('keydown', trapFocusHandler as EventListener);
+    this.eventListeners.push({ 
+      element: this.modalElement, 
+      event: 'keydown', 
+      handler: trapFocusHandler as EventListener 
+    });
   }
 
   /**
@@ -435,11 +501,13 @@ export class PlayerCardManager {
       }
 
       // Show loading state on copy button
-      const copyButton = document.querySelector(".player-card-copy") as HTMLElement;
+      const copyButton = document.querySelector("#copy-card-btn") as HTMLElement;
       const originalText = copyButton?.textContent || "Copy Card";
       if (copyButton) {
         copyButton.textContent = "Copying...";
         copyButton.setAttribute("disabled", "true");
+        copyButton.setAttribute("aria-busy", "true");
+        copyButton.setAttribute("aria-label", "Copying player card to clipboard, please wait");
       }
 
       // Import html2canvas dynamically
@@ -479,6 +547,8 @@ export class PlayerCardManager {
       if (copyButton) {
         copyButton.textContent = originalText;
         copyButton.removeAttribute("disabled");
+        copyButton.removeAttribute("aria-busy");
+        copyButton.setAttribute("aria-label", "Copy player card to clipboard");
       }
     } catch (error) {
       console.error("[PlayerCardManager] Failed to copy card:", error);
@@ -488,10 +558,12 @@ export class PlayerCardManager {
       this.showNotification(`Failed to copy card: ${errorMessage}`, "error");
 
       // Restore button state
-      const copyButton = document.querySelector(".player-card-copy") as HTMLElement;
+      const copyButton = document.querySelector("#copy-card-btn") as HTMLElement;
       if (copyButton) {
         copyButton.textContent = "Copy Card";
         copyButton.removeAttribute("disabled");
+        copyButton.removeAttribute("aria-busy");
+        copyButton.setAttribute("aria-label", "Copy player card to clipboard");
       }
     }
   }
@@ -550,26 +622,33 @@ export class PlayerCardManager {
   }
 
   /**
-   * Show notification toast
+   * Show notification toast with proper ARIA live region support
    */
   static showNotification(message: string, type: "success" | "error"): void {
     // Get or create notification container
-    let notificationContainer = document.getElementById("player-card-notifications");
+    let notificationContainer = document.getElementById("notification-container");
     
     if (!notificationContainer) {
       notificationContainer = document.createElement("div");
-      notificationContainer.id = "player-card-notifications";
-      notificationContainer.className = "player-card-notifications";
-      notificationContainer.setAttribute("aria-live", "polite");
+      notificationContainer.id = "notification-container";
+      notificationContainer.className = "notification-container";
+      // Use assertive for errors, polite for success
+      notificationContainer.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
       notificationContainer.setAttribute("aria-atomic", "true");
+      notificationContainer.setAttribute("role", type === "error" ? "alert" : "status");
       document.body.appendChild(notificationContainer);
+    } else {
+      // Update aria-live based on notification type
+      notificationContainer.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+      notificationContainer.setAttribute("role", type === "error" ? "alert" : "status");
     }
 
     // Create notification element
     const notification = document.createElement("div");
     notification.className = `player-card-notification player-card-notification-${type}`;
     notification.textContent = message;
-    notification.setAttribute("role", "status");
+    // Add descriptive label for screen readers
+    notification.setAttribute("aria-label", `${type === "error" ? "Error" : "Success"}: ${message}`);
 
     // Add to container
     notificationContainer.appendChild(notification);

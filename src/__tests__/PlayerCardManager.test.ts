@@ -518,7 +518,7 @@ describe("PlayerCardManager", () => {
             // Verify sprite image is in the HTML
             expect(mockElement.innerHTML).toContain(sprite!.imagePath);
             expect(mockElement.innerHTML).toContain('class="player-card-sprite"');
-            expect(mockElement.innerHTML).toContain(`alt="${cardData.characterName} sprite"`);
+            expect(mockElement.innerHTML).toContain(`alt="${cardData.characterName} character sprite"`);
 
             // Verify fallback error handling is present
             expect(mockElement.innerHTML).toContain('onerror=');
@@ -822,7 +822,11 @@ describe("PlayerCardManager", () => {
             // Verify notification was created
             expect(mockElement.textContent).toBe(message);
             expect(mockElement.className).toContain(`player-card-notification-${type}`);
-            expect(mockElement.setAttribute).toHaveBeenCalledWith("role", "status");
+            // Verify aria-label was set with appropriate prefix
+            expect(mockElement.setAttribute).toHaveBeenCalledWith(
+              "aria-label", 
+              `${type === "error" ? "Error" : "Success"}: ${message}`
+            );
 
             // Restore original
             if (originalGetElementById) {

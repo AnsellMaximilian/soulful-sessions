@@ -254,7 +254,12 @@
   - Show XP to next level
   - _Requirements: 1.3_
 
-- [ ] 7. Add accessibility features
+- [x] 7. Add accessibility features
+
+
+
+
+
   - Add ARIA labels to all interactive elements
   - Implement focus trap in modal
   - Ensure keyboard navigation works correctly
