@@ -1244,6 +1244,14 @@ async function toggleTaskCompletion(
   const task = goal?.tasks.find((t) => t.id === taskId);
   if (task) {
     task.isComplete = isComplete;
+    
+    // Cascade completion state to all subtasks
+    if (task.subtasks && task.subtasks.length > 0) {
+      task.subtasks.forEach((subtask) => {
+        subtask.isComplete = isComplete;
+      });
+    }
+    
     await updateTaskState(currentState.tasks);
   }
 }

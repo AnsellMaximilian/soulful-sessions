@@ -969,6 +969,55 @@ function applySprite(spriteId: string): void {
 // ============================================================================
 
 function setupEventHandlers(): void {
+  // Task selector - update duration based on selection
+  const taskSelector = getElement<HTMLSelectElement>("task-selector");
+  taskSelector.addEventListener("change", () => {
+    if (!currentState) return;
+    
+    const durationInput = getElement<HTMLInputElement>("duration-input");
+    const selectedTaskId = taskSelector.value;
+    
+    if (!selectedTaskId) {
+      // No task selected - use default
+      durationInput.value = currentState.settings.defaultSessionDuration.toString();
+      return;
+    }
+    
+    // Find the selected task or subtask
+    let foundDuration: number | null = null;
+    
+    for (const goal of currentState.tasks.goals) {
+      for (const task of goal.tasks) {
+        // Check if this is the selected task
+        if (task.id === selectedTaskId) {
+          // Calculate total duration of incomplete subtasks
+          const incompleteDuration = task.subtasks
+            .filter(subtask => !subtask.isComplete)
+            .reduce((sum, subtask) => sum + subtask.estimatedDuration, 0);
+          
+          foundDuration = incompleteDuration > 0 
+            ? incompleteDuration 
+            : currentState.settings.defaultSessionDuration;
+          break;
+        }
+        
+        // Check if this is a selected subtask
+        const subtask = task.subtasks.find(s => s.id === selectedTaskId);
+        if (subtask) {
+          foundDuration = subtask.estimatedDuration;
+          break;
+        }
+      }
+      
+      if (foundDuration !== null) break;
+    }
+    
+    // Update duration input
+    if (foundDuration !== null) {
+      durationInput.value = foundDuration.toString();
+    }
+  });
+
   // Start Session button
   const startSessionBtn = getElement<HTMLButtonElement>("start-session-btn");
   startSessionBtn.addEventListener("click", async () => {
