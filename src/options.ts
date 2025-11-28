@@ -114,10 +114,7 @@ function handleURLParameters(): void {
     if (bossIdStr !== null && bossIdStr !== '') {
       const bossId = parseInt(bossIdStr);
       if (!isNaN(bossId) && bossId >= 0 && bossId <= 9) {
-        // Note: showDetailView will be implemented in a future task
-        // For now, we just validate and prepare the boss ID
-        console.log(`[Options] URL parameter: boss=${bossId}`);
-        // TODO: Call showDetailView(bossId) when implemented
+        showDetailView(bossId);
       }
     }
   }
@@ -236,8 +233,7 @@ function createSoulCard(
     card.setAttribute('tabindex', '0');
     
     const clickHandler = () => {
-      // TODO: Implement showDetailView in future task
-      console.log(`[Options] Boss card clicked: ${soul.name} (id: ${soul.id})`);
+      showDetailView(soul.id);
     };
 
     card.addEventListener('click', clickHandler);
@@ -254,6 +250,218 @@ function createSoulCard(
   }
 
   return card;
+}
+
+// ============================================================================
+// Detail View Rendering
+// ============================================================================
+
+/**
+ * Show detail view for a specific boss
+ * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
+ */
+function showDetailView(bossId: number): void {
+  if (!currentState) {
+    console.error('[Options] Cannot show detail view: state not loaded');
+    return;
+  }
+
+  const soul = STUBBORN_SOULS.find(s => s.id === bossId);
+  if (!soul) {
+    console.error(`[Options] Boss not found: ${bossId}`);
+    return;
+  }
+
+  const isDefeated = currentState.progression.defeatedBosses.includes(bossId);
+
+  // Hide gallery, show detail view
+  const gallery = document.getElementById('souls-gallery');
+  const detailView = document.getElementById('soul-detail');
+  
+  if (gallery) gallery.style.display = 'none';
+  if (detailView) {
+    detailView.style.display = 'block';
+    renderDetailView(soul, isDefeated);
+  }
+
+  console.log(`[Options] Detail view shown for boss: ${soul.name}`);
+}
+
+/**
+ * Render the detail view for a specific boss
+ * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
+ */
+function renderDetailView(soul: StubbornSoul, isDefeated: boolean): void {
+  const detailView = document.getElementById('soul-detail');
+  if (!detailView) {
+    console.error('[Options] Detail view container not found');
+    return;
+  }
+
+  // Clear existing content
+  detailView.innerHTML = '';
+
+  // Create back button
+  const backButton = document.createElement('button');
+  backButton.id = 'back-to-gallery-btn';
+  backButton.className = 'btn btn-secondary';
+  backButton.innerHTML = '← Back to Gallery';
+  backButton.setAttribute('aria-label', 'Return to gallery');
+  backButton.addEventListener('click', () => {
+    hideDetailView();
+  });
+  detailView.appendChild(backButton);
+
+  // Create detail header
+  const header = document.createElement('div');
+  header.className = 'soul-detail-header';
+
+  const sprite = document.createElement('img');
+  sprite.id = 'detail-sprite';
+  sprite.className = 'soul-sprite-large';
+  sprite.src = `assets/sprites/${soul.sprite}`;
+  sprite.alt = soul.name;
+  header.appendChild(sprite);
+
+  const name = document.createElement('h2');
+  name.id = 'detail-name';
+  name.className = 'soul-name';
+  name.textContent = soul.name;
+  header.appendChild(name);
+
+  detailView.appendChild(header);
+
+  // Create info grid
+  const infoGrid = document.createElement('div');
+  infoGrid.className = 'soul-info-grid';
+
+  const resolveItem = document.createElement('div');
+  resolveItem.className = 'info-item';
+  resolveItem.innerHTML = `
+    <span class="info-label">Initial Resolve:</span>
+    <span id="detail-resolve" class="info-value">${soul.initialResolve}</span>
+  `;
+  infoGrid.appendChild(resolveItem);
+
+  const unlockItem = document.createElement('div');
+  unlockItem.className = 'info-item';
+  unlockItem.innerHTML = `
+    <span class="info-label">Unlock Level:</span>
+    <span id="detail-unlock-level" class="info-value">${soul.unlockLevel}</span>
+  `;
+  infoGrid.appendChild(unlockItem);
+
+  detailView.appendChild(infoGrid);
+
+  // Create backstory section
+  const backstorySection = document.createElement('div');
+  backstorySection.className = 'soul-backstory-section';
+  backstorySection.innerHTML = `
+    <h3>Backstory</h3>
+    <p id="detail-backstory">${escapeHtml(soul.backstory)}</p>
+  `;
+  detailView.appendChild(backstorySection);
+
+  // Create final conversation section
+  const conversationSection = document.createElement('div');
+  conversationSection.id = 'final-conversation-section';
+  conversationSection.className = 'narrative-section';
+  
+  if (isDefeated) {
+    renderConversation(conversationSection, soul.finalConversation);
+  } else {
+    renderLockedPlaceholder(conversationSection, 'Final Conversation');
+  }
+  
+  detailView.appendChild(conversationSection);
+
+  // Create resolution section
+  const resolutionSection = document.createElement('div');
+  resolutionSection.id = 'resolution-section';
+  resolutionSection.className = 'narrative-section';
+  
+  if (isDefeated) {
+    renderResolution(resolutionSection, soul.resolution);
+  } else {
+    renderLockedPlaceholder(resolutionSection, 'Resolution');
+  }
+  
+  detailView.appendChild(resolutionSection);
+
+  console.log(`[Options] Detail view rendered for: ${soul.name}, defeated: ${isDefeated}`);
+}
+
+/**
+ * Render the conversation dialogue
+ * Requirements: 3.4, 3.5
+ */
+function renderConversation(container: HTMLElement, conversation: any[]): void {
+  container.innerHTML = '<h3>Final Conversation</h3>';
+  
+  const dialogueContainer = document.createElement('div');
+  dialogueContainer.className = 'dialogue-container';
+  
+  conversation.forEach((exchange) => {
+    const bubble = document.createElement('div');
+    bubble.className = `dialogue-bubble ${exchange.speaker}`;
+    
+    const speaker = document.createElement('div');
+    speaker.className = 'dialogue-speaker';
+    speaker.textContent = exchange.speaker === 'shepherd' ? 'Soul Shepherd' : 'Stubborn Soul';
+    bubble.appendChild(speaker);
+    
+    const text = document.createElement('div');
+    text.className = 'dialogue-text';
+    text.textContent = exchange.text;
+    bubble.appendChild(text);
+    
+    dialogueContainer.appendChild(bubble);
+  });
+  
+  container.appendChild(dialogueContainer);
+}
+
+/**
+ * Render the resolution text
+ * Requirements: 3.6, 3.7
+ */
+function renderResolution(container: HTMLElement, resolution: string): void {
+  container.innerHTML = '<h3>Resolution</h3>';
+  
+  const resolutionText = document.createElement('div');
+  resolutionText.className = 'resolution-text';
+  resolutionText.textContent = resolution;
+  
+  container.appendChild(resolutionText);
+}
+
+/**
+ * Render a locked content placeholder
+ * Requirements: 3.3
+ */
+function renderLockedPlaceholder(container: HTMLElement, contentName: string): void {
+  container.innerHTML = `<h3>${contentName}</h3>`;
+  
+  const placeholder = document.createElement('div');
+  placeholder.className = 'locked-placeholder';
+  placeholder.setAttribute('aria-label', `${contentName}, locked, guide this soul to unlock`);
+  placeholder.textContent = `Guide this soul to unlock the ${contentName.toLowerCase()}`;
+  
+  container.appendChild(placeholder);
+}
+
+/**
+ * Hide detail view and return to gallery
+ * Requirements: 3.2
+ */
+function hideDetailView(): void {
+  const gallery = document.getElementById('souls-gallery');
+  const detailView = document.getElementById('soul-detail');
+  
+  if (gallery) gallery.style.display = '';
+  if (detailView) detailView.style.display = 'none';
+  
+  console.log('[Options] Returned to gallery view');
 }
 
 // ============================================================================

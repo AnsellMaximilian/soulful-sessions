@@ -121,34 +121,50 @@
   - **Property 5: Boss card navigation**
   - **Validates: Requirements 2.7**
 
-- [ ] 7. Implement detail view rendering
+- [x] 7. Implement detail view rendering
+
+
+
+
+
   - Create `renderDetailView()` function in `options.ts`
   - Display boss name, sprite, backstory, resolve, and unlock level
   - Implement back button to return to gallery
   - Conditionally render narrative content based on defeat status
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 7.1 Write property test for detail view completeness
+- [x] 7.1 Write property test for detail view completeness
+
+
   - **Property 6: Detail view completeness**
   - **Validates: Requirements 3.1**
 
-- [ ] 7.2 Write property test for locked content placeholders
+- [x] 7.2 Write property test for locked content placeholders
+
+
   - **Property 7: Locked content placeholders**
   - **Validates: Requirements 3.3**
 
-- [ ] 7.3 Write property test for unlocked conversation display
+- [x] 7.3 Write property test for unlocked conversation display
+
+
   - **Property 8: Unlocked conversation display**
   - **Validates: Requirements 3.4**
 
-- [ ] 7.4 Write property test for conversation speaker distinction
+- [x] 7.4 Write property test for conversation speaker distinction
+
+
   - **Property 9: Conversation speaker distinction**
   - **Validates: Requirements 3.5**
 
-- [ ] 7.5 Write property test for unlocked resolution display
+- [x] 7.5 Write property test for unlocked resolution display
+
+
   - **Property 10: Unlocked resolution display**
   - **Validates: Requirements 3.6**
 
 - [ ] 8. Implement narrative content rendering
+
   - Create `renderConversation()` function to display dialogue exchanges
   - Create `renderResolution()` function to display epilogue text
   - Create `renderLockedPlaceholder()` function for locked content
