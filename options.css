@@ -1086,44 +1086,14 @@ h2 {
 
 /* Show Player Card Button */
 .show-player-card-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--theme-primary, #667eea) 0%, var(--theme-secondary, #764ba2) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.show-player-card-btn:hover {
-  background: linear-gradient(135deg, var(--theme-secondary, #764ba2) 0%, var(--theme-primary, #667eea) 100%);
-  border-color: var(--theme-accent, #4fc3f7);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-}
-
-.show-player-card-btn:focus {
-  outline: 3px solid #ffd700;
-  outline-offset: 2px;
+  /* Override any inline styles and force themed gradient */
+  background: linear-gradient(135deg, var(--theme-primary, #667eea) 0%, var(--theme-secondary, #764ba2) 100%) !important;
+  background-image: linear-gradient(135deg, var(--theme-primary, #667eea) 0%, var(--theme-secondary, #764ba2) 100%) !important;
+  color: #fff !important;
 }
 
 .show-player-card-btn .statistics-sprite {
-  width: 64px;
-  height: 64px;
-  margin: 0;
-}
-
-.show-player-card-btn .btn-text {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: none;
 }
 
 /* ============================================================================
