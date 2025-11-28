@@ -278,95 +278,102 @@ export class PlayerCardManager {
     const secondaryRgba = (alpha: number) => this.hexToRgba(themeColors.secondary, alpha);
     const accentRgba = (alpha: number) => this.hexToRgba(themeColors.accent, alpha);
 
-    // Generate card HTML with proper ARIA labels
+    // Generate card HTML with Pokemon card-inspired layout
     const cardHTML = `
-      <div class="player-card-header">
-        <h3 class="player-card-title" role="heading" aria-level="2">${data.characterName}</h3>
-        <div class="player-card-level" aria-label="Player level ${data.level}">Level ${data.level}</div>
-      </div>
-
-      <div class="player-card-sprite-container" role="img" aria-label="Character sprite for ${data.characterName}">
+      <div class="card-character-section" role="region" aria-label="Character display">
+        <!-- Level badge in top-right corner -->
+        <div class="card-level-badge" aria-label="Level ${data.level}">
+          <div class="card-level-badge-label">LV</div>
+          <div class="card-level-badge-value">${data.level}</div>
+        </div>
+        
+        <!-- Character sprite with glow effects -->
         <img 
           src="${data.cosmetics.spritePath}" 
           alt="${data.characterName} character sprite"
-          class="player-card-sprite"
+          class="card-sprite"
           onerror="this.src='${COSMETIC_SPRITES[0].imagePath}'; this.onerror=null;"
         />
-      </div>
-
-      <div class="player-card-xp" role="region" aria-label="Experience progress">
-        <div class="xp-label" id="xp-label">Soul Insight</div>
-        <div class="xp-bar" role="progressbar" aria-labelledby="xp-label" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" aria-valuetext="${data.currentXP} out of ${data.currentXP + data.xpToNextLevel} experience points, ${xpPercentage.toFixed(0)}% complete">
-          <div class="xp-bar-fill" style="width: ${xpPercentage}%"></div>
+        
+        <!-- Character name below sprite -->
+        <div style="margin-top: 10px; font-size: 16px; font-weight: 700; color: #ffd700; text-shadow: 0 2px 6px rgba(255, 215, 0, 0.5); text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+          ${data.characterName}
         </div>
-        <div class="xp-text" aria-hidden="true">${data.currentXP} / ${data.currentXP + data.xpToNextLevel}</div>
-      </div>
-
-      <div class="player-card-stats" role="region" aria-label="Character statistics">
-        <div class="stat-item" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
-          <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
-          <div class="stat-info">
-            <div class="stat-label">Spirit</div>
-            <div class="stat-value" aria-label="${data.stats.spirit.toFixed(1)} spirit">${data.stats.spirit.toFixed(1)}</div>
+        
+        <!-- XP bar below name -->
+        <div class="card-xp-container" role="region" aria-label="Experience progress">
+          <div class="card-xp-bar-container">
+            <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
           </div>
-        </div>
-        <div class="stat-item" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
-          <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
-          <div class="stat-info">
-            <div class="stat-label">Harmony</div>
-            <div class="stat-value" aria-label="${harmonyPercent} percent harmony">${harmonyPercent}%</div>
-          </div>
-        </div>
-        <div class="stat-item" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
-          <img src="assets/icons/soul_resolve.png" alt="" class="stat-icon" aria-hidden="true" />
-          <div class="stat-info">
-            <div class="stat-label">Soulflow</div>
-            <div class="stat-value" aria-label="${data.stats.soulflow.toFixed(1)} soulflow">${data.stats.soulflow.toFixed(1)}</div>
-          </div>
+          <div class="card-xp-text">${data.currentXP} / ${data.currentXP + data.xpToNextLevel} XP</div>
         </div>
       </div>
 
-      <div class="player-card-resources" role="region" aria-label="Resources">
-        <div class="resource-item" role="group" aria-label="Soul Insight: ${data.currentXP}">
-          <img src="assets/icons/soul_insight.png" alt="" class="resource-icon" aria-hidden="true" />
-          <div class="resource-info">
-            <div class="resource-label">Soul Insight</div>
-            <div class="resource-value" aria-label="${data.currentXP} soul insight">${data.currentXP}</div>
+      <div class="card-stats-section" role="region" aria-label="Character statistics">
+        <div class="card-stat-item" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
+          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
+          <div class="card-stat-info">
+            <div class="card-stat-label">Spirit</div>
+            <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
           </div>
         </div>
-        <div class="resource-item" role="group" aria-label="Soul Embers: ${data.soulEmbers}">
-          <img src="assets/icons/soul_ember.png" alt="" class="resource-icon" aria-hidden="true" />
-          <div class="resource-info">
-            <div class="resource-label">Soul Embers</div>
-            <div class="resource-value" aria-label="${data.soulEmbers} soul embers">${data.soulEmbers}</div>
+        <div class="card-stat-item" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
+          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
+          <div class="card-stat-info">
+            <div class="card-stat-label">Harmony</div>
+            <div class="card-stat-value">${harmonyPercent}%</div>
+          </div>
+        </div>
+        <div class="card-stat-item" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
+          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
+          <div class="card-stat-info">
+            <div class="card-stat-label">Soulflow</div>
+            <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
           </div>
         </div>
       </div>
 
-      <div class="player-card-achievements" role="region" aria-label="Achievements">
-        <h4 role="heading" aria-level="3">Achievements</h4>
-        <div class="achievement-grid">
-          <div class="achievement-item" role="group" aria-label="Total sessions: ${data.achievements.totalSessions}">
-            <div class="achievement-value" aria-label="${data.achievements.totalSessions} sessions">${data.achievements.totalSessions}</div>
-            <div class="achievement-label">Sessions</div>
+      <div class="card-resources-section" role="region" aria-label="Resources">
+        <div class="card-resource-item" role="group" aria-label="Soul Insight: ${data.currentXP}">
+          <img src="assets/icons/soul_insight.png" alt="" class="card-resource-icon" aria-hidden="true" />
+          <div class="card-resource-info">
+            <div class="card-resource-label">Soul Insight</div>
+            <div class="card-resource-value">${data.currentXP}</div>
           </div>
-          <div class="achievement-item" role="group" aria-label="Focus time: ${focusTimeFormatted}">
-            <div class="achievement-value" aria-label="${focusTimeFormatted} focus time">${focusTimeFormatted}</div>
-            <div class="achievement-label">Focus Time</div>
-          </div>
-          <div class="achievement-item" role="group" aria-label="Bosses defeated: ${data.achievements.bossesDefeated}">
-            <div class="achievement-value" aria-label="${data.achievements.bossesDefeated} bosses defeated">${data.achievements.bossesDefeated}</div>
-            <div class="achievement-label">Bosses</div>
-          </div>
-          <div class="achievement-item" role="group" aria-label="Current streak: ${data.achievements.currentStreak}">
-            <div class="achievement-value" aria-label="${data.achievements.currentStreak} day streak">${data.achievements.currentStreak}</div>
-            <div class="achievement-label">Streak</div>
+        </div>
+        <div class="card-resource-item" role="group" aria-label="Soul Embers: ${data.soulEmbers}">
+          <img src="assets/icons/soul_ember.png" alt="" class="card-resource-icon" aria-hidden="true" />
+          <div class="card-resource-info">
+            <div class="card-resource-label">Soul Embers</div>
+            <div class="card-resource-value">${data.soulEmbers}</div>
           </div>
         </div>
       </div>
 
-      <div class="player-card-footer" role="contentinfo">
-        <div class="theme-indicator" aria-label="Active theme: ${data.cosmetics.themeName}">${data.cosmetics.themeName}</div>
+      <div class="card-achievements-section" role="region" aria-label="Achievements">
+        <h4 class="card-section-title" role="heading" aria-level="3">Achievements</h4>
+        <div class="card-achievement-grid">
+          <div class="card-achievement-item" role="group" aria-label="Total sessions: ${data.achievements.totalSessions}">
+            <div class="card-achievement-value">${data.achievements.totalSessions}</div>
+            <div class="card-achievement-label">Sessions</div>
+          </div>
+          <div class="card-achievement-item" role="group" aria-label="Focus time: ${focusTimeFormatted}">
+            <div class="card-achievement-value">${focusTimeFormatted}</div>
+            <div class="card-achievement-label">Focus Time</div>
+          </div>
+          <div class="card-achievement-item" role="group" aria-label="Bosses defeated: ${data.achievements.bossesDefeated}">
+            <div class="card-achievement-value">${data.achievements.bossesDefeated}</div>
+            <div class="card-achievement-label">Bosses</div>
+          </div>
+          <div class="card-achievement-item" role="group" aria-label="Current streak: ${data.achievements.currentStreak}">
+            <div class="card-achievement-value">${data.achievements.currentStreak}</div>
+            <div class="card-achievement-label">Streak</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer" role="contentinfo">
+        <div class="card-theme-name" aria-label="Active theme: ${data.cosmetics.themeName}">${data.cosmetics.themeName}</div>
       </div>
     `;
 
