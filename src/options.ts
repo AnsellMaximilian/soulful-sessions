@@ -32,6 +32,9 @@ let currentParentId: string | null = null;
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("[Options] Initializing options page");
 
+  // Create screen reader announcement region if it doesn't exist
+  createScreenReaderAnnouncementRegion();
+
   // Set up tab navigation
   setupTabs();
 
@@ -43,6 +46,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Handle URL parameters for deep linking
   handleURLParameters();
+
+  // Set up global keyboard shortcuts
+  setupKeyboardShortcuts();
 
   console.log("[Options] Options page initialized");
 });
@@ -147,15 +153,29 @@ function renderGalleryView(): void {
   const defeatedBosses = currentState.progression.defeatedBosses;
   const playerLevel = currentState.player.level;
 
+  // Count boss states for screen reader announcement
+  let lockedCount = 0;
+  let unlockedCount = 0;
+  let defeatedCount = 0;
+
   // Render each boss card
   STUBBORN_SOULS.forEach((soul) => {
     const isLocked = playerLevel < soul.unlockLevel;
     const isCurrent = soul.id === currentBossId;
     const isDefeated = defeatedBosses.includes(soul.id);
 
+    if (isLocked) lockedCount++;
+    else if (isDefeated) defeatedCount++;
+    else unlockedCount++;
+
     const card = createSoulCard(soul, isLocked, isCurrent, isDefeated);
     gallery.appendChild(card);
   });
+
+  // Announce gallery state to screen readers
+  announceToScreenReader(
+    `Gallery loaded. ${defeatedCount} souls guided, ${unlockedCount} souls available, ${lockedCount} souls locked.`
+  );
 
   console.log('[Options] Gallery view rendered');
 }
@@ -278,10 +298,26 @@ function showDetailView(bossId: number): void {
   const gallery = document.getElementById('souls-gallery');
   const detailView = document.getElementById('soul-detail');
   
-  if (gallery) gallery.style.display = 'none';
+  if (gallery) {
+    gallery.style.display = 'none';
+    gallery.setAttribute('aria-hidden', 'true');
+  }
   if (detailView) {
     detailView.style.display = 'block';
+    detailView.removeAttribute('aria-hidden');
     renderDetailView(soul, isDefeated);
+    
+    // Announce to screen readers
+    const status = isDefeated ? 'guided' : 'unlocked';
+    announceToScreenReader(`Viewing details for ${soul.name}, ${status} soul.`);
+    
+    // Focus management: Move focus to the back button for keyboard navigation
+    setTimeout(() => {
+      const backButton = document.getElementById('back-to-gallery-btn') as HTMLButtonElement;
+      if (backButton) {
+        backButton.focus();
+      }
+    }, 100);
   }
 
   console.log(`[Options] Detail view shown for boss: ${soul.name}`);
@@ -300,6 +336,10 @@ function renderDetailView(soul: StubbornSoul, isDefeated: boolean): void {
 
   // Clear existing content
   detailView.innerHTML = '';
+  
+  // Set ARIA attributes for detail view
+  detailView.setAttribute('role', 'article');
+  detailView.setAttribute('aria-labelledby', 'detail-name');
 
   // Create back button
   const backButton = document.createElement('button');
@@ -309,6 +349,12 @@ function renderDetailView(soul: StubbornSoul, isDefeated: boolean): void {
   backButton.setAttribute('aria-label', 'Return to gallery');
   backButton.addEventListener('click', () => {
     hideDetailView();
+  });
+  // Add keyboard support for back button
+  backButton.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      hideDetailView();
+    }
   });
   detailView.appendChild(backButton);
 
@@ -444,6 +490,7 @@ function renderLockedPlaceholder(container: HTMLElement, contentName: string): v
   
   const placeholder = document.createElement('div');
   placeholder.className = 'locked-placeholder';
+  placeholder.setAttribute('role', 'status');
   placeholder.setAttribute('aria-label', `${contentName}, locked, guide this soul to unlock`);
   placeholder.textContent = `Guide this soul to unlock the ${contentName.toLowerCase()}`;
   
@@ -458,8 +505,33 @@ function hideDetailView(): void {
   const gallery = document.getElementById('souls-gallery');
   const detailView = document.getElementById('soul-detail');
   
-  if (gallery) gallery.style.display = '';
-  if (detailView) detailView.style.display = 'none';
+  if (gallery) {
+    gallery.style.display = '';
+    gallery.removeAttribute('aria-hidden');
+  }
+  if (detailView) {
+    detailView.style.display = 'none';
+    detailView.setAttribute('aria-hidden', 'true');
+  }
+  
+  // Announce to screen readers
+  announceToScreenReader('Returned to gallery view.');
+  
+  // Focus management: Return focus to the gallery container
+  setTimeout(() => {
+    if (gallery) {
+      // Try to focus the first unlocked boss card
+      const firstUnlockedCard = gallery.querySelector('.soul-card:not(.locked)[tabindex="0"]') as HTMLElement;
+      if (firstUnlockedCard) {
+        firstUnlockedCard.focus();
+      } else {
+        // If no unlocked cards, focus the gallery itself
+        gallery.setAttribute('tabindex', '-1');
+        gallery.focus();
+        gallery.removeAttribute('tabindex');
+      }
+    }
+  }, 100);
   
   console.log('[Options] Returned to gallery view');
 }
@@ -2100,6 +2172,68 @@ function applyTheme(themeId: string): void {
     "--theme-background",
     theme.colors.background
   );
+}
+
+// ============================================================================
+// Accessibility Helper Functions
+// ============================================================================
+
+/**
+ * Create a live region for screen reader announcements
+ */
+function createScreenReaderAnnouncementRegion(): void {
+  // Check if region already exists
+  if (document.getElementById('sr-announcements')) {
+    return;
+  }
+
+  const liveRegion = document.createElement('div');
+  liveRegion.id = 'sr-announcements';
+  liveRegion.setAttribute('role', 'status');
+  liveRegion.setAttribute('aria-live', 'polite');
+  liveRegion.setAttribute('aria-atomic', 'true');
+  liveRegion.style.position = 'absolute';
+  liveRegion.style.left = '-10000px';
+  liveRegion.style.width = '1px';
+  liveRegion.style.height = '1px';
+  liveRegion.style.overflow = 'hidden';
+  
+  document.body.appendChild(liveRegion);
+}
+
+/**
+ * Announce a message to screen readers
+ */
+function announceToScreenReader(message: string): void {
+  const liveRegion = document.getElementById('sr-announcements');
+  if (!liveRegion) {
+    console.warn('[Options] Screen reader announcement region not found');
+    return;
+  }
+
+  // Clear previous announcement
+  liveRegion.textContent = '';
+  
+  // Set new announcement after a brief delay to ensure it's picked up
+  setTimeout(() => {
+    liveRegion.textContent = message;
+  }, 100);
+}
+
+/**
+ * Set up global keyboard shortcuts for accessibility
+ */
+function setupKeyboardShortcuts(): void {
+  document.addEventListener('keydown', (e) => {
+    // Escape key closes detail view
+    if (e.key === 'Escape') {
+      const detailView = document.getElementById('soul-detail');
+      if (detailView && detailView.style.display !== 'none') {
+        hideDetailView();
+      }
+    }
+  });
+}
 
   console.log(`[Options] Theme applied: ${themeId}`);
 }
