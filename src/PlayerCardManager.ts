@@ -380,9 +380,17 @@ export class PlayerCardManager {
 
     this.cardContentElement.innerHTML = cardHTML;
 
-    // Apply theme colors to CSS variables (same as popup)
-    // The CSS variables are already set on document.documentElement by applyTheme()
-    // in options.ts, so the card will automatically use the current theme
+    // Apply theme background color (solid, not gradient)
+    // Using the darkest color from the theme makes each theme more distinct
+    this.cardContentElement.style.background = themeColors.background;
+    
+    // Also apply to the card container for consistency
+    if (this.modalElement) {
+      const cardContainer = this.modalElement.querySelector(".player-card-container") as HTMLElement;
+      if (cardContainer) {
+        cardContainer.style.background = themeColors.background;
+      }
+    }
   }
 
   /**
