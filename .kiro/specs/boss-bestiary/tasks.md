@@ -47,7 +47,11 @@
   - Test click handler opens correct URL with boss ID parameter
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 4. Create Guided Souls tab in options page
+- [x] 4. Create Guided Souls tab in options page
+
+
+
+
   - Add "Guided Souls" tab button to `options.html` navigation
   - Create tab content section with gallery and detail view containers
   - Update tab switching logic in `options.ts` to handle new tab

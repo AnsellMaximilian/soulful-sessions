@@ -53,6 +53,15 @@
         </button>
         <button
           class="tab-button"
+          data-tab="guided-souls"
+          role="tab"
+          aria-selected="false"
+          aria-controls="guided-souls-section"
+        >
+          Guided Souls
+        </button>
+        <button
+          class="tab-button"
           data-tab="statistics"
           role="tab"
           aria-selected="false"
@@ -439,6 +448,27 @@
                 <!-- Theme preview will be shown here -->
               </div>
             </div>
+          </div>
+        </section>
+
+        <!-- Guided Souls Section -->
+        <section
+          id="guided-souls-section"
+          class="tab-content"
+          role="tabpanel"
+          aria-labelledby="guided-souls-tab"
+        >
+          <h2 id="guided-souls-tab">Guided Souls</h2>
+          <p class="section-description">
+            Explore the stories of the Stubborn Souls you've encountered on your journey.
+          </p>
+
+          <div id="souls-gallery" class="souls-gallery" role="list" aria-label="Stubborn Souls Gallery">
+            <!-- Boss cards will be dynamically generated here -->
+          </div>
+
+          <div id="soul-detail" class="soul-detail" style="display: none;" role="article">
+            <!-- Detail view content will be dynamically generated here -->
           </div>
         </section>
 

@@ -56,11 +56,15 @@ function setupTabs(): void {
       const tabName = button.getAttribute("data-tab");
 
       // Remove active class from all tabs
-      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabButtons.forEach((btn) => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-selected", "false");
+      });
       tabContents.forEach((content) => content.classList.remove("active"));
 
       // Add active class to clicked tab
       button.classList.add("active");
+      button.setAttribute("aria-selected", "true");
       const targetContent = document.getElementById(`${tabName}-section`);
       if (targetContent) {
         targetContent.classList.add("active");
@@ -72,6 +76,20 @@ function setupTabs(): void {
       }
     });
   });
+}
+
+/**
+ * Switch to a specific tab programmatically
+ * Used for URL parameter handling
+ */
+function switchToTab(tabName: string): void {
+  const tabButton = document.querySelector(
+    `.tab-button[data-tab="${tabName}"]`
+  ) as HTMLButtonElement;
+  
+  if (tabButton) {
+    tabButton.click();
+  }
 }
 
 // ============================================================================
