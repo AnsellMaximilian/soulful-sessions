@@ -22,6 +22,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 100,
     sprite: "athlete.png",
     unlockLevel: 1,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 1,
@@ -31,6 +33,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 200,
     sprite: "scholar.png",
     unlockLevel: 3,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 2,
@@ -40,6 +44,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 350,
     sprite: "parent.png",
     unlockLevel: 5,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 3,
@@ -49,6 +55,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 500,
     sprite: "artist.png",
     unlockLevel: 7,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 4,
@@ -58,6 +66,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 700,
     sprite: "musician.png",
     unlockLevel: 10,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 5,
@@ -67,6 +77,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 950,
     sprite: "gardener.png",
     unlockLevel: 13,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 6,
@@ -76,6 +88,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 1250,
     sprite: "inventor.png",
     unlockLevel: 16,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 7,
@@ -85,6 +99,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 1600,
     sprite: "explorer.png",
     unlockLevel: 20,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 8,
@@ -94,6 +110,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 2000,
     sprite: "poet.png",
     unlockLevel: 24,
+    finalConversation: [],
+    resolution: "",
   },
   {
     id: 9,
@@ -103,6 +121,8 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 2500,
     sprite: "guardian.png",
     unlockLevel: 28,
+    finalConversation: [],
+    resolution: "",
   },
 ];
 

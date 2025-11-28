@@ -1,6 +1,11 @@
 # Implementation Plan
 
-- [ ] 1. Extend data models with narrative content
+- [x] 1. Extend data models with narrative content
+
+
+
+
+
   - Update `StubbornSoul` interface in `types.ts` to include `finalConversation` and `resolution` properties
   - Create `ConversationExchange` interface with `speaker` and `text` properties
   - _Requirements: 4.1, 4.2, 4.3_

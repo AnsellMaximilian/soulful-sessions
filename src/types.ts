@@ -79,6 +79,11 @@ export interface ProgressionState {
   idleState: IdleState;
 }
 
+export interface ConversationExchange {
+  speaker: 'shepherd' | 'soul';
+  text: string;
+}
+
 export interface StubbornSoul {
   id: number;
   name: string;
@@ -86,6 +91,8 @@ export interface StubbornSoul {
   initialResolve: number;
   sprite: string;
   unlockLevel: number;
+  finalConversation: ConversationExchange[];
+  resolution: string;
 }
 
 export interface BossResult {
