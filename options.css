@@ -1548,11 +1548,18 @@ h2 {
   pointer-events: none;
 }
 
+/* Unlocked and defeated states - clickable */
+.soul-card.unlocked,
+.soul-card.defeated {
+  cursor: pointer;
+}
+
 /* Unlocked and defeated states - hover effects */
 .soul-card.unlocked:hover,
 .soul-card.defeated:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
 .soul-card.unlocked:focus,
