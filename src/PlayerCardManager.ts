@@ -280,7 +280,8 @@ export class PlayerCardManager {
 
     // Generate card HTML with Pokemon card-inspired layout
     const cardHTML = `
-      <div class="card-character-section" role="region" aria-label="Character display">
+      <!-- Sprite container with animated background and level badge -->
+      <div class="card-sprite-container" role="region" aria-label="Character sprite">
         <!-- Level badge in top-right corner -->
         <div class="card-level-badge" aria-label="Level ${data.level}">
           <div class="card-level-badge-label">LV</div>
@@ -294,13 +295,14 @@ export class PlayerCardManager {
           class="card-sprite"
           onerror="this.src='${COSMETIC_SPRITES[0].imagePath}'; this.onerror=null;"
         />
+      </div>
+      
+      <!-- Character info container (name and XP) -->
+      <div class="card-character-info" role="region" aria-label="Character information">
+        <!-- Character name -->
+        <div class="card-character-name">${data.characterName}</div>
         
-        <!-- Character name below sprite -->
-        <div style="margin-top: 10px; font-size: 16px; font-weight: 700; color: #ffd700; text-shadow: 0 2px 6px rgba(255, 215, 0, 0.5); text-align: center; text-transform: uppercase; letter-spacing: 1px;">
-          ${data.characterName}
-        </div>
-        
-        <!-- XP bar below name -->
+        <!-- XP bar -->
         <div class="card-xp-container" role="region" aria-label="Experience progress">
           <div class="card-xp-bar-container">
             <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
