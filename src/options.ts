@@ -9,8 +9,9 @@ import {
   Task,
   Subtask,
   TaskState,
+  StubbornSoul,
 } from "./types";
-import { COSMETIC_THEMES, COSMETIC_SPRITES } from "./constants";
+import { COSMETIC_THEMES, COSMETIC_SPRITES, STUBBORN_SOULS } from "./constants";
 import { PlayerCardManager } from "./PlayerCardManager";
 
 // ============================================================================
@@ -123,6 +124,139 @@ function handleURLParameters(): void {
 }
 
 // ============================================================================
+// Gallery View Rendering
+// ============================================================================
+
+/**
+ * Render the gallery view showing all Stubborn Souls
+ * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7
+ */
+function renderGalleryView(): void {
+  if (!currentState) {
+    console.error('[Options] Cannot render gallery: state not loaded');
+    return;
+  }
+
+  const gallery = document.getElementById('souls-gallery');
+  if (!gallery) {
+    console.error('[Options] Gallery container not found');
+    return;
+  }
+
+  // Clear existing content
+  gallery.innerHTML = '';
+
+  const currentBossId = currentState.progression.currentBossIndex;
+  const defeatedBosses = currentState.progression.defeatedBosses;
+  const playerLevel = currentState.player.level;
+
+  // Render each boss card
+  STUBBORN_SOULS.forEach((soul) => {
+    const isLocked = playerLevel < soul.unlockLevel;
+    const isCurrent = soul.id === currentBossId;
+    const isDefeated = defeatedBosses.includes(soul.id);
+
+    const card = createSoulCard(soul, isLocked, isCurrent, isDefeated);
+    gallery.appendChild(card);
+  });
+
+  console.log('[Options] Gallery view rendered');
+}
+
+/**
+ * Create a boss card element for the gallery
+ * Requirements: 2.2, 2.3, 2.4, 2.5, 2.6, 2.7
+ */
+function createSoulCard(
+  soul: StubbornSoul,
+  isLocked: boolean,
+  isCurrent: boolean,
+  isDefeated: boolean
+): HTMLElement {
+  const card = document.createElement('div');
+  card.className = 'soul-card';
+  card.setAttribute('role', 'listitem');
+
+  // Apply state classes
+  if (isLocked) {
+    card.classList.add('locked');
+    card.setAttribute('aria-label', `${soul.name}, locked, requires level ${soul.unlockLevel}`);
+  } else if (isCurrent) {
+    card.classList.add('unlocked', 'current');
+    card.setAttribute('aria-label', `${soul.name}, current boss, click to view details`);
+  } else if (isDefeated) {
+    card.classList.add('defeated');
+    card.setAttribute('aria-label', `${soul.name}, guided, click to view story`);
+  } else {
+    card.classList.add('unlocked');
+    card.setAttribute('aria-label', `${soul.name}, unlocked, click to view details`);
+  }
+
+  // Create sprite container
+  const spriteContainer = document.createElement('div');
+  spriteContainer.className = 'soul-sprite-container';
+
+  // Create sprite image
+  const sprite = document.createElement('img');
+  sprite.className = 'soul-sprite';
+  sprite.src = `assets/sprites/${soul.sprite}`;
+  sprite.alt = soul.name;
+  spriteContainer.appendChild(sprite);
+
+  // Add unlock level overlay for locked bosses
+  if (isLocked) {
+    const overlay = document.createElement('div');
+    overlay.className = 'unlock-level-overlay';
+    overlay.textContent = soul.unlockLevel.toString();
+    overlay.setAttribute('aria-hidden', 'true');
+    spriteContainer.appendChild(overlay);
+  }
+
+  // Add "Guided" badge for defeated bosses
+  if (isDefeated) {
+    const badge = document.createElement('div');
+    badge.className = 'guided-badge';
+    badge.textContent = 'Guided';
+    badge.setAttribute('aria-hidden', 'true');
+    spriteContainer.appendChild(badge);
+  }
+
+  card.appendChild(spriteContainer);
+
+  // Add boss name
+  const name = document.createElement('div');
+  name.className = 'soul-card-name';
+  name.textContent = soul.name;
+  card.appendChild(name);
+
+  // Add click handler only for unlocked/defeated bosses
+  // Requirements: 2.3, 2.7
+  if (!isLocked) {
+    card.style.cursor = 'pointer';
+    card.setAttribute('tabindex', '0');
+    
+    const clickHandler = () => {
+      // TODO: Implement showDetailView in future task
+      console.log(`[Options] Boss card clicked: ${soul.name} (id: ${soul.id})`);
+    };
+
+    card.addEventListener('click', clickHandler);
+    card.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        clickHandler();
+      }
+    });
+  } else {
+    // Locked bosses should not be interactive
+    card.style.cursor = 'not-allowed';
+    card.removeAttribute('tabindex');
+  }
+
+  return card;
+}
+
+// ============================================================================
 // Load Settings from Background
 // ============================================================================
 
@@ -142,6 +276,7 @@ async function loadSettings(): Promise<void> {
         populateSettings(currentState.settings);
         populateStatistics(currentState.statistics);
         populateTaskManagement(currentState.tasks);
+        renderGalleryView();
         applyTheme(currentState.player.cosmetics.activeTheme);
         applySprite(currentState.player.cosmetics.activeSprite);
       }

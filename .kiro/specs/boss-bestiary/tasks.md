@@ -78,7 +78,12 @@
   - Test malformed URLs
   - _Requirements: 1.3, 1.4_
 
-- [ ] 6. Implement gallery view rendering
+- [x] 6. Implement gallery view rendering
+
+
+
+
+
   - Create `renderGalleryView()` function in `options.ts`
   - Generate boss cards for all 10 Stubborn Souls
   - Determine boss state (locked/unlocked-current/defeated) based on game state
@@ -86,23 +91,33 @@
   - Attach click handlers only to unlocked/defeated bosses
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [ ] 6.1 Write property test for locked boss visual state
+- [x] 6.1 Write property test for locked boss visual state
+
+
   - **Property 1: Locked boss visual state**
   - **Validates: Requirements 2.2**
 
-- [ ] 6.2 Write property test for locked boss interaction prevention
+- [x] 6.2 Write property test for locked boss interaction prevention
+
+
   - **Property 2: Locked boss interaction prevention**
   - **Validates: Requirements 2.3**
 
-- [ ] 6.3 Write property test for defeated boss visual indicator
+- [x] 6.3 Write property test for defeated boss visual indicator
+
+
   - **Property 3: Defeated boss visual indicator**
   - **Validates: Requirements 2.5**
 
-- [ ] 6.4 Write property test for unlocked boss hover feedback
+- [x] 6.4 Write property test for unlocked boss hover feedback
+
+
   - **Property 4: Unlocked boss hover feedback**
   - **Validates: Requirements 2.6**
 
-- [ ] 6.5 Write property test for boss card navigation
+- [x] 6.5 Write property test for boss card navigation
+
+
   - **Property 5: Boss card navigation**
   - **Validates: Requirements 2.7**
 
