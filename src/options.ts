@@ -108,21 +108,29 @@ function switchToTab(tabName: string): void {
  * Requirements: 1.3, 1.4
  */
 function handleURLParameters(): void {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-  const bossIdStr = urlParams.get('boss');
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    const bossIdStr = urlParams.get('boss');
 
-  // Switch to guided-souls tab if specified
-  if (tab === 'guided-souls') {
-    switchToTab('guided-souls');
+    // Switch to guided-souls tab if specified
+    if (tab === 'guided-souls') {
+      switchToTab('guided-souls');
 
-    // Show detail view if valid boss ID is present
-    if (bossIdStr !== null && bossIdStr !== '') {
-      const bossId = parseInt(bossIdStr);
-      if (!isNaN(bossId) && bossId >= 0 && bossId <= 9) {
-        showDetailView(bossId);
+      // Show detail view if valid boss ID is present
+      if (bossIdStr !== null && bossIdStr !== '') {
+        const bossId = parseInt(bossIdStr);
+        if (!isNaN(bossId) && bossId >= 0 && bossId <= 9) {
+          showDetailView(bossId);
+        } else {
+          // Invalid boss ID - log warning and show gallery instead
+          console.warn(`[Options] Invalid boss ID in URL: ${bossIdStr}`);
+        }
       }
     }
+  } catch (error) {
+    console.error('[Options] Error handling URL parameters:', error);
+    // Fail gracefully - page will show default view
   }
 }
 
@@ -135,49 +143,62 @@ function handleURLParameters(): void {
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7
  */
 function renderGalleryView(): void {
-  if (!currentState) {
-    console.error('[Options] Cannot render gallery: state not loaded');
-    return;
+  try {
+    if (!currentState) {
+      console.error('[Options] Cannot render gallery: state not loaded');
+      showErrorMessage('souls-gallery', 'Unable to load game state. Please refresh the page.');
+      return;
+    }
+
+    const gallery = document.getElementById('souls-gallery');
+    if (!gallery) {
+      console.error('[Options] Gallery container not found');
+      return;
+    }
+
+    // Clear existing content
+    gallery.innerHTML = '';
+
+    // Validate state data
+    if (!currentState.progression || !currentState.player) {
+      console.error('[Options] Missing required state data');
+      showErrorMessage('souls-gallery', 'Game data is incomplete. Please refresh the page.');
+      return;
+    }
+
+    const currentBossId = currentState.progression.currentBossIndex;
+    const defeatedBosses = currentState.progression.defeatedBosses || [];
+    const playerLevel = currentState.player.level || 1;
+
+    // Count boss states for screen reader announcement
+    let lockedCount = 0;
+    let unlockedCount = 0;
+    let defeatedCount = 0;
+
+    // Render each boss card
+    STUBBORN_SOULS.forEach((soul) => {
+      const isLocked = playerLevel < soul.unlockLevel;
+      const isCurrent = soul.id === currentBossId;
+      const isDefeated = defeatedBosses.includes(soul.id);
+
+      if (isLocked) lockedCount++;
+      else if (isDefeated) defeatedCount++;
+      else unlockedCount++;
+
+      const card = createSoulCard(soul, isLocked, isCurrent, isDefeated);
+      gallery.appendChild(card);
+    });
+
+    // Announce gallery state to screen readers
+    announceToScreenReader(
+      `Gallery loaded. ${defeatedCount} souls guided, ${unlockedCount} souls available, ${lockedCount} souls locked.`
+    );
+
+    console.log('[Options] Gallery view rendered');
+  } catch (error) {
+    console.error('[Options] Error rendering gallery view:', error);
+    showErrorMessage('souls-gallery', 'An error occurred while loading the gallery. Please refresh the page.');
   }
-
-  const gallery = document.getElementById('souls-gallery');
-  if (!gallery) {
-    console.error('[Options] Gallery container not found');
-    return;
-  }
-
-  // Clear existing content
-  gallery.innerHTML = '';
-
-  const currentBossId = currentState.progression.currentBossIndex;
-  const defeatedBosses = currentState.progression.defeatedBosses;
-  const playerLevel = currentState.player.level;
-
-  // Count boss states for screen reader announcement
-  let lockedCount = 0;
-  let unlockedCount = 0;
-  let defeatedCount = 0;
-
-  // Render each boss card
-  STUBBORN_SOULS.forEach((soul) => {
-    const isLocked = playerLevel < soul.unlockLevel;
-    const isCurrent = soul.id === currentBossId;
-    const isDefeated = defeatedBosses.includes(soul.id);
-
-    if (isLocked) lockedCount++;
-    else if (isDefeated) defeatedCount++;
-    else unlockedCount++;
-
-    const card = createSoulCard(soul, isLocked, isCurrent, isDefeated);
-    gallery.appendChild(card);
-  });
-
-  // Announce gallery state to screen readers
-  announceToScreenReader(
-    `Gallery loaded. ${defeatedCount} souls guided, ${unlockedCount} souls available, ${lockedCount} souls locked.`
-  );
-
-  console.log('[Options] Gallery view rendered');
 }
 
 /**
@@ -281,28 +302,47 @@ function createSoulCard(
  * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
  */
 function showDetailView(bossId: number): void {
-  if (!currentState) {
-    console.error('[Options] Cannot show detail view: state not loaded');
-    return;
-  }
+  try {
+    if (!currentState) {
+      console.error('[Options] Cannot show detail view: state not loaded');
+      showErrorMessage('soul-detail', 'Unable to load game state. Please refresh the page.');
+      return;
+    }
 
-  const soul = STUBBORN_SOULS.find(s => s.id === bossId);
-  if (!soul) {
-    console.error(`[Options] Boss not found: ${bossId}`);
-    return;
-  }
+    // Validate boss ID
+    if (typeof bossId !== 'number' || bossId < 0 || bossId > 9) {
+      console.error(`[Options] Invalid boss ID: ${bossId}`);
+      return;
+    }
 
-  const isDefeated = currentState.progression.defeatedBosses.includes(bossId);
+    const soul = STUBBORN_SOULS.find(s => s.id === bossId);
+    if (!soul) {
+      console.error(`[Options] Boss not found: ${bossId}`);
+      return;
+    }
 
-  // Hide gallery, show detail view
-  const gallery = document.getElementById('souls-gallery');
-  const detailView = document.getElementById('soul-detail');
-  
-  if (gallery) {
+    // Validate boss data completeness
+    if (!soul.name || !soul.backstory || !soul.sprite) {
+      console.error(`[Options] Boss ${bossId} has incomplete data`);
+      showErrorMessage('soul-detail', 'This soul\'s data is incomplete. Please contact support.');
+      return;
+    }
+
+    const defeatedBosses = currentState.progression?.defeatedBosses || [];
+    const isDefeated = defeatedBosses.includes(bossId);
+
+    // Hide gallery, show detail view
+    const gallery = document.getElementById('souls-gallery');
+    const detailView = document.getElementById('soul-detail');
+    
+    if (!gallery || !detailView) {
+      console.error('[Options] Required DOM elements not found');
+      return;
+    }
+
     gallery.style.display = 'none';
     gallery.setAttribute('aria-hidden', 'true');
-  }
-  if (detailView) {
+    
     detailView.style.display = 'block';
     detailView.removeAttribute('aria-hidden');
     renderDetailView(soul, isDefeated);
@@ -318,9 +358,13 @@ function showDetailView(bossId: number): void {
         backButton.focus();
       }
     }, 100);
-  }
 
-  console.log(`[Options] Detail view shown for boss: ${soul.name}`);
+    console.log(`[Options] Detail view shown for boss: ${soul.name}`);
+  } catch (error) {
+    console.error('[Options] Error showing detail view:', error);
+    // Try to recover by showing gallery
+    hideDetailView();
+  }
 }
 
 /**
@@ -328,113 +372,135 @@ function showDetailView(bossId: number): void {
  * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
  */
 function renderDetailView(soul: StubbornSoul, isDefeated: boolean): void {
-  const detailView = document.getElementById('soul-detail');
-  if (!detailView) {
-    console.error('[Options] Detail view container not found');
-    return;
-  }
-
-  // Clear existing content
-  detailView.innerHTML = '';
-  
-  // Set ARIA attributes for detail view
-  detailView.setAttribute('role', 'article');
-  detailView.setAttribute('aria-labelledby', 'detail-name');
-
-  // Create back button
-  const backButton = document.createElement('button');
-  backButton.id = 'back-to-gallery-btn';
-  backButton.className = 'btn btn-secondary';
-  backButton.innerHTML = '← Back to Gallery';
-  backButton.setAttribute('aria-label', 'Return to gallery');
-  backButton.addEventListener('click', () => {
-    hideDetailView();
-  });
-  // Add keyboard support for back button
-  backButton.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      hideDetailView();
+  try {
+    const detailView = document.getElementById('soul-detail');
+    if (!detailView) {
+      console.error('[Options] Detail view container not found');
+      return;
     }
-  });
-  detailView.appendChild(backButton);
 
-  // Create detail header
-  const header = document.createElement('div');
-  header.className = 'soul-detail-header';
+    // Clear existing content
+    detailView.innerHTML = '';
+    
+    // Set ARIA attributes for detail view
+    detailView.setAttribute('role', 'article');
+    detailView.setAttribute('aria-labelledby', 'detail-name');
 
-  const sprite = document.createElement('img');
-  sprite.id = 'detail-sprite';
-  sprite.className = 'soul-sprite-large';
-  sprite.src = `assets/sprites/${soul.sprite}`;
-  sprite.alt = soul.name;
-  header.appendChild(sprite);
+    // Create back button
+    const backButton = document.createElement('button');
+    backButton.id = 'back-to-gallery-btn';
+    backButton.className = 'btn btn-secondary';
+    backButton.innerHTML = '← Back to Gallery';
+    backButton.setAttribute('aria-label', 'Return to gallery');
+    backButton.addEventListener('click', () => {
+      hideDetailView();
+    });
+    // Add keyboard support for back button
+    backButton.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideDetailView();
+      }
+    });
+    detailView.appendChild(backButton);
 
-  const name = document.createElement('h2');
-  name.id = 'detail-name';
-  name.className = 'soul-name';
-  name.textContent = soul.name;
-  header.appendChild(name);
+    // Create detail header
+    const header = document.createElement('div');
+    header.className = 'soul-detail-header';
 
-  detailView.appendChild(header);
+    const sprite = document.createElement('img');
+    sprite.id = 'detail-sprite';
+    sprite.className = 'soul-sprite-large';
+    sprite.src = `assets/sprites/${soul.sprite}`;
+    sprite.alt = soul.name;
+    // Add error handler for missing sprite
+    sprite.onerror = () => {
+      console.warn(`[Options] Failed to load sprite: ${soul.sprite}`);
+      sprite.style.display = 'none';
+    };
+    header.appendChild(sprite);
 
-  // Create info grid
-  const infoGrid = document.createElement('div');
-  infoGrid.className = 'soul-info-grid';
+    const name = document.createElement('h2');
+    name.id = 'detail-name';
+    name.className = 'soul-name';
+    name.textContent = soul.name;
+    header.appendChild(name);
 
-  const resolveItem = document.createElement('div');
-  resolveItem.className = 'info-item';
-  resolveItem.innerHTML = `
-    <span class="info-label">Initial Resolve:</span>
-    <span id="detail-resolve" class="info-value">${soul.initialResolve}</span>
-  `;
-  infoGrid.appendChild(resolveItem);
+    detailView.appendChild(header);
 
-  const unlockItem = document.createElement('div');
-  unlockItem.className = 'info-item';
-  unlockItem.innerHTML = `
-    <span class="info-label">Unlock Level:</span>
-    <span id="detail-unlock-level" class="info-value">${soul.unlockLevel}</span>
-  `;
-  infoGrid.appendChild(unlockItem);
+    // Create info grid
+    const infoGrid = document.createElement('div');
+    infoGrid.className = 'soul-info-grid';
 
-  detailView.appendChild(infoGrid);
+    const resolveItem = document.createElement('div');
+    resolveItem.className = 'info-item';
+    resolveItem.innerHTML = `
+      <span class="info-label">Initial Resolve:</span>
+      <span id="detail-resolve" class="info-value">${soul.initialResolve || 'Unknown'}</span>
+    `;
+    infoGrid.appendChild(resolveItem);
 
-  // Create backstory section
-  const backstorySection = document.createElement('div');
-  backstorySection.className = 'soul-backstory-section';
-  backstorySection.innerHTML = `
-    <h3>Backstory</h3>
-    <p id="detail-backstory">${escapeHtml(soul.backstory)}</p>
-  `;
-  detailView.appendChild(backstorySection);
+    const unlockItem = document.createElement('div');
+    unlockItem.className = 'info-item';
+    unlockItem.innerHTML = `
+      <span class="info-label">Unlock Level:</span>
+      <span id="detail-unlock-level" class="info-value">${soul.unlockLevel || 'Unknown'}</span>
+    `;
+    infoGrid.appendChild(unlockItem);
 
-  // Create final conversation section
-  const conversationSection = document.createElement('div');
-  conversationSection.id = 'final-conversation-section';
-  conversationSection.className = 'narrative-section';
-  
-  if (isDefeated) {
-    renderConversation(conversationSection, soul.finalConversation);
-  } else {
-    renderLockedPlaceholder(conversationSection, 'Final Conversation');
+    detailView.appendChild(infoGrid);
+
+    // Create backstory section
+    const backstorySection = document.createElement('div');
+    backstorySection.className = 'soul-backstory-section';
+    backstorySection.innerHTML = `
+      <h3>Backstory</h3>
+      <p id="detail-backstory">${escapeHtml(soul.backstory || 'No backstory available.')}</p>
+    `;
+    detailView.appendChild(backstorySection);
+
+    // Create final conversation section
+    const conversationSection = document.createElement('div');
+    conversationSection.id = 'final-conversation-section';
+    conversationSection.className = 'narrative-section';
+    
+    if (isDefeated) {
+      // Validate conversation data exists
+      if (soul.finalConversation && Array.isArray(soul.finalConversation) && soul.finalConversation.length > 0) {
+        renderConversation(conversationSection, soul.finalConversation);
+      } else {
+        console.warn(`[Options] Missing conversation data for boss ${soul.id}`);
+        conversationSection.innerHTML = '<h3>Final Conversation</h3><p>Conversation data unavailable.</p>';
+      }
+    } else {
+      renderLockedPlaceholder(conversationSection, 'Final Conversation');
+    }
+    
+    detailView.appendChild(conversationSection);
+
+    // Create resolution section
+    const resolutionSection = document.createElement('div');
+    resolutionSection.id = 'resolution-section';
+    resolutionSection.className = 'narrative-section';
+    
+    if (isDefeated) {
+      // Validate resolution data exists
+      if (soul.resolution && typeof soul.resolution === 'string' && soul.resolution.trim().length > 0) {
+        renderResolution(resolutionSection, soul.resolution);
+      } else {
+        console.warn(`[Options] Missing resolution data for boss ${soul.id}`);
+        resolutionSection.innerHTML = '<h3>Resolution</h3><p>Resolution data unavailable.</p>';
+      }
+    } else {
+      renderLockedPlaceholder(resolutionSection, 'Resolution');
+    }
+    
+    detailView.appendChild(resolutionSection);
+
+    console.log(`[Options] Detail view rendered for: ${soul.name}, defeated: ${isDefeated}`);
+  } catch (error) {
+    console.error('[Options] Error rendering detail view:', error);
+    showErrorMessage('soul-detail', 'An error occurred while loading soul details.');
   }
-  
-  detailView.appendChild(conversationSection);
-
-  // Create resolution section
-  const resolutionSection = document.createElement('div');
-  resolutionSection.id = 'resolution-section';
-  resolutionSection.className = 'narrative-section';
-  
-  if (isDefeated) {
-    renderResolution(resolutionSection, soul.resolution);
-  } else {
-    renderLockedPlaceholder(resolutionSection, 'Resolution');
-  }
-  
-  detailView.appendChild(resolutionSection);
-
-  console.log(`[Options] Detail view rendered for: ${soul.name}, defeated: ${isDefeated}`);
 }
 
 /**
@@ -502,38 +568,49 @@ function renderLockedPlaceholder(container: HTMLElement, contentName: string): v
  * Requirements: 3.2
  */
 function hideDetailView(): void {
-  const gallery = document.getElementById('souls-gallery');
-  const detailView = document.getElementById('soul-detail');
-  
-  if (gallery) {
+  try {
+    const gallery = document.getElementById('souls-gallery');
+    const detailView = document.getElementById('soul-detail');
+    
+    if (!gallery || !detailView) {
+      console.error('[Options] Required DOM elements not found for navigation');
+      return;
+    }
+
     gallery.style.display = '';
     gallery.removeAttribute('aria-hidden');
-  }
-  if (detailView) {
+    
     detailView.style.display = 'none';
     detailView.setAttribute('aria-hidden', 'true');
-  }
-  
-  // Announce to screen readers
-  announceToScreenReader('Returned to gallery view.');
-  
-  // Focus management: Return focus to the gallery container
-  setTimeout(() => {
-    if (gallery) {
-      // Try to focus the first unlocked boss card
-      const firstUnlockedCard = gallery.querySelector('.soul-card:not(.locked)[tabindex="0"]') as HTMLElement;
-      if (firstUnlockedCard) {
-        firstUnlockedCard.focus();
-      } else {
-        // If no unlocked cards, focus the gallery itself
-        gallery.setAttribute('tabindex', '-1');
-        gallery.focus();
-        gallery.removeAttribute('tabindex');
+    
+    // Announce to screen readers
+    announceToScreenReader('Returned to gallery view.');
+    
+    // Focus management: Return focus to the gallery container
+    setTimeout(() => {
+      if (gallery) {
+        // Try to focus the first unlocked boss card
+        const firstUnlockedCard = gallery.querySelector('.soul-card:not(.locked)[tabindex="0"]') as HTMLElement;
+        if (firstUnlockedCard) {
+          firstUnlockedCard.focus();
+        } else {
+          // If no unlocked cards, focus the gallery itself
+          gallery.setAttribute('tabindex', '-1');
+          gallery.focus();
+          gallery.removeAttribute('tabindex');
+        }
       }
-    }
-  }, 100);
-  
-  console.log('[Options] Returned to gallery view');
+    }, 100);
+    
+    console.log('[Options] Returned to gallery view');
+  } catch (error) {
+    console.error('[Options] Error during navigation back to gallery:', error);
+    // Ensure UI is in a consistent state
+    const gallery = document.getElementById('souls-gallery');
+    const detailView = document.getElementById('soul-detail');
+    if (gallery) gallery.style.display = '';
+    if (detailView) detailView.style.display = 'none';
+  }
 }
 
 // ============================================================================
@@ -551,6 +628,13 @@ async function loadSettings(): Promise<void> {
       currentState = response.data;
       console.log("[Options] State loaded:", currentState);
 
+      // Validate state structure
+      if (!currentState || !currentState.settings || !currentState.player || !currentState.progression) {
+        console.error("[Options] State data is incomplete");
+        showErrorMessage('souls-gallery', 'Game data is incomplete. Please try reloading the extension.');
+        return;
+      }
+
       // Populate UI with current settings
       if (currentState) {
         populateSettings(currentState.settings);
@@ -560,9 +644,13 @@ async function loadSettings(): Promise<void> {
         applyTheme(currentState.player.cosmetics.activeTheme);
         applySprite(currentState.player.cosmetics.activeSprite);
       }
+    } else {
+      console.error("[Options] Failed to load state: Invalid response");
+      showErrorMessage('souls-gallery', 'Unable to load game state. Please refresh the page.');
     }
   } catch (error) {
     console.error("[Options] Failed to load settings:", error);
+    showErrorMessage('souls-gallery', 'An error occurred while loading settings. Please refresh the page.');
   }
 }
 
@@ -2175,6 +2263,35 @@ function applyTheme(themeId: string): void {
 }
 
 // ============================================================================
+// Error Handling Helper Functions
+// ============================================================================
+
+/**
+ * Display an error message in a container
+ */
+function showErrorMessage(containerId: string, message: string): void {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`[Options] Container not found: ${containerId}`);
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="error-message" role="alert" style="
+      padding: 20px;
+      text-align: center;
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid #f87171;
+      border-radius: 8px;
+      margin: 20px;
+    ">
+      <p style="margin: 0; font-weight: 500;">${escapeHtml(message)}</p>
+    </div>
+  `;
+}
+
+// ============================================================================
 // Accessibility Helper Functions
 // ============================================================================
 
@@ -2233,9 +2350,6 @@ function setupKeyboardShortcuts(): void {
       }
     }
   });
-}
-
-  console.log(`[Options] Theme applied: ${themeId}`);
 }
 
 // ============================================================================
