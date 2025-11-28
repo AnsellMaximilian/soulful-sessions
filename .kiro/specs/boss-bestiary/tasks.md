@@ -29,14 +29,20 @@
   - **Property 12: Boss data completeness - resolutions**
   - **Validates: Requirements 4.4, 4.5**
 
-- [ ] 3. Add info icon to popup interface
+- [x] 3. Add info icon to popup interface
+
+
+
+
 
   - Modify `popup.html` to add boss header container with info icon button
   - Update `popup.css` with info icon styles (circular button with ⓘ symbol)
   - Implement click handler in `popup.ts` to open options page with URL parameters
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 3.1 Write unit tests for popup info icon
+- [x] 3.1 Write unit tests for popup info icon
+
+
   - Test info icon is rendered when boss is displayed
   - Test click handler opens correct URL with boss ID parameter
   - _Requirements: 1.1, 1.2, 1.4_

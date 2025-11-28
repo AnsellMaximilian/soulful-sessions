@@ -973,7 +973,30 @@ function applySprite(spriteId: string): void {
 // Event Handlers
 // ============================================================================
 
+function openBossDetails(bossId: number): void {
+  const url = chrome.runtime.getURL(`options.html?tab=guided-souls&boss=${bossId}`);
+  chrome.tabs.create({ url });
+}
+
 function setupEventHandlers(): void {
+  // Boss info button - idle view
+  const bossInfoBtn = getElement<HTMLButtonElement>("boss-info-btn");
+  bossInfoBtn.addEventListener("click", () => {
+    if (currentState) {
+      const bossId = currentState.progression.currentBossIndex;
+      openBossDetails(bossId);
+    }
+  });
+
+  // Boss info button - break view
+  const breakBossInfoBtn = getElement<HTMLButtonElement>("break-boss-info-btn");
+  breakBossInfoBtn.addEventListener("click", () => {
+    if (currentState) {
+      const bossId = currentState.progression.currentBossIndex;
+      openBossDetails(bossId);
+    }
+  });
+
   // Task selector - update duration based on selection
   const taskSelector = getElement<HTMLSelectElement>("task-selector");
   const autoCompleteCheckbox = getElement<HTMLInputElement>("auto-complete-checkbox");

@@ -380,10 +380,49 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.boss-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 .boss-name {
   font-size: 18px;
   color: #ff6b6b;
-  margin-bottom: 8px;
+  margin-bottom: 0;
+}
+
+.boss-info-btn {
+  background: transparent;
+  border: 1px solid var(--theme-accent);
+  color: var(--theme-accent);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.boss-info-btn:hover {
+  background: var(--theme-accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.boss-info-btn:focus {
+  outline: 3px solid #ffd700;
+  outline-offset: 2px;
+}
+
+.boss-info-btn:active {
+  transform: scale(1);
 }
 
 .boss-backstory {
