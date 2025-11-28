@@ -1462,6 +1462,11 @@ h2 {
   
   .card-stats-row {
     width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-currencies-box {
+    padding: 20px;
   }
 }
 
