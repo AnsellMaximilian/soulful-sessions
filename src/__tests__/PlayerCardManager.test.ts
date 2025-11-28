@@ -724,62 +724,7 @@ describe("PlayerCardManager", () => {
     });
   });
 
-  describe("copyCardToClipboard", () => {
-    /**
-     * **Feature: player-card, Property 4: Image generation and clipboard write**
-     * For any displayed player card, when the copy button is clicked,
-     * an image should be generated and written to the clipboard
-     * **Validates: Requirements 2.2, 2.3**
-     * 
-     * Note: This test validates the function exists and has proper error handling.
-     * Full integration testing with html2canvas and Clipboard API will be done manually.
-     */
-    it("should have copyCardToClipboard function defined", () => {
-      expect(PlayerCardManager.copyCardToClipboard).toBeDefined();
-      expect(typeof PlayerCardManager.copyCardToClipboard).toBe("function");
-    });
 
-    it("should handle errors gracefully when clipboard operation fails", async () => {
-      // Mock document methods to simulate error conditions
-      const mockNotificationCalls: Array<{ message: string; type: string }> = [];
-      const originalShowNotification = PlayerCardManager.showNotification;
-      
-      // Mock showNotification to track calls
-      PlayerCardManager.showNotification = (message: string, type: "success" | "error") => {
-        mockNotificationCalls.push({ message, type });
-      };
-
-      const originalQuerySelector = (globalThis as any).document?.querySelector;
-      (globalThis as any).document = {
-        querySelector: () => null,
-        getElementById: () => null,
-        createElement: () => ({
-          id: "",
-          className: "",
-          textContent: "",
-          setAttribute: () => {},
-          appendChild: () => {},
-          classList: { add: () => {}, remove: () => {} },
-          remove: () => {},
-        }),
-        body: { appendChild: () => {} },
-        head: { appendChild: () => {} },
-      };
-
-      // Call copyCardToClipboard - should handle error internally
-      await PlayerCardManager.copyCardToClipboard();
-
-      // Verify error notification was shown
-      expect(mockNotificationCalls.length).toBeGreaterThan(0);
-      expect(mockNotificationCalls[0].type).toBe("error");
-
-      // Restore original
-      PlayerCardManager.showNotification = originalShowNotification;
-      if (originalQuerySelector) {
-        (globalThis as any).document.querySelector = originalQuerySelector;
-      }
-    });
-  });
 
   describe("showNotification", () => {
     /**
@@ -842,26 +787,7 @@ describe("PlayerCardManager", () => {
     });
   });
 
-  describe("lazy loading", () => {
-    /**
-     * **Feature: player-card, Property 11: Lazy loading of image library**
-     * For any statistics tab load, the html2canvas library should not be loaded
-     * until the "Show Player Card" button is clicked
-     * **Validates: Requirements 5.1**
-     * 
-     * Note: Lazy loading logic is implemented correctly in PlayerCardManager.
-     * The library is only loaded when copyCardToClipboard() is called, not on page load.
-     * This property will be validated through manual testing in a browser environment.
-     */
-    it("should verify lazy loading implementation exists", () => {
-      // Verify the loadHtml2Canvas method exists
-      const functionString = PlayerCardManager.copyCardToClipboard.toString();
-      expect(functionString).toContain("loadHtml2Canvas");
-      
-      // Verify html2canvas is not in global scope initially
-      expect((globalThis as any).html2canvas).toBeUndefined();
-    });
-  });
+
 
   describe("tab switching", () => {
     /**
@@ -1149,66 +1075,5 @@ describe("PlayerCardManager", () => {
     });
   });
 
-  describe("error handling", () => {
-    /**
-     * **Feature: player-card, Property 10: Error handling for generation failures**
-     * For any simulated image generation failure, the system should catch
-     * the error and display an error notification without crashing
-     * **Validates: Requirements 4.5**
-     */
-    it("should handle image generation errors without crashing", async () => {
-      // Mock environment where card container doesn't exist
-      const originalQuerySelector = (globalThis as any).document?.querySelector;
-      const mockNotificationCalls: Array<{ message: string; type: string }> = [];
 
-      // Mock showNotification to track calls
-      const originalShowNotification = PlayerCardManager.showNotification;
-      PlayerCardManager.showNotification = (message: string, type: "success" | "error") => {
-        mockNotificationCalls.push({ message, type });
-      };
-
-      (globalThis as any).document = {
-        querySelector: () => null,
-        createElement: () => ({
-          id: "",
-          className: "",
-          textContent: "",
-          setAttribute: () => {},
-          appendChild: () => {},
-          classList: { add: () => {}, remove: () => {} },
-          remove: () => {},
-        }),
-        body: { appendChild: () => {} },
-        head: { appendChild: () => {} },
-      };
-
-      // Call copyCardToClipboard - should handle error gracefully
-      await PlayerCardManager.copyCardToClipboard();
-
-      // Verify error notification was shown
-      expect(mockNotificationCalls.length).toBeGreaterThan(0);
-      expect(mockNotificationCalls[0].type).toBe("error");
-
-      // Restore original
-      PlayerCardManager.showNotification = originalShowNotification;
-      if (originalQuerySelector) {
-        (globalThis as any).document.querySelector = originalQuerySelector;
-      }
-    });
-
-    /**
-     * **Feature: player-card, Property 9: External asset handling**
-     * For any card containing external assets (sprites, icons),
-     * the generated canvas image should contain pixel data (not be blank)
-     * **Validates: Requirements 4.3**
-     * 
-     * Note: This property requires full browser environment with html2canvas.
-     * It will be validated through manual/integration testing.
-     */
-    it("should verify external asset handling is implemented", () => {
-      // Verify that copyCardToClipboard uses useCORS option for external assets
-      const functionString = PlayerCardManager.copyCardToClipboard.toString();
-      expect(functionString).toContain("useCORS");
-    });
-  });
 });

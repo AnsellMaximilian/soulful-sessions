@@ -311,25 +311,16 @@ export class PlayerCardManager {
 
       <div class="card-stats-section" role="region" aria-label="Character statistics">
         <div class="card-stat-item" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
-          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
-          <div class="card-stat-info">
-            <div class="card-stat-label">Spirit</div>
-            <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
-          </div>
+          <div class="card-stat-label">Spirit</div>
+          <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
         </div>
         <div class="card-stat-item" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
-          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
-          <div class="card-stat-info">
-            <div class="card-stat-label">Harmony</div>
-            <div class="card-stat-value">${harmonyPercent}%</div>
-          </div>
+          <div class="card-stat-label">Harmony</div>
+          <div class="card-stat-value">${harmonyPercent}%</div>
         </div>
         <div class="card-stat-item" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
-          <img src="assets/icons/soul_resolve.png" alt="" class="card-stat-icon" aria-hidden="true" />
-          <div class="card-stat-info">
-            <div class="card-stat-label">Soulflow</div>
-            <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
-          </div>
+          <div class="card-stat-label">Soulflow</div>
+          <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
         </div>
       </div>
 
