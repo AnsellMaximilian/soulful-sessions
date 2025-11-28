@@ -1190,6 +1190,14 @@ h2 {
   .card-level-badge-value {
     font-size: 20px;
   }
+  
+  .card-resources-section {
+    flex-direction: row;
+  }
+  
+  .card-achievement-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1235,8 +1243,8 @@ h2 {
 .player-card-content {
   padding: 20px;
   display: grid;
-  grid-template-columns: 280px 1fr;
-  grid-template-rows: auto auto auto auto;
+  grid-template-columns: 280px 1fr 1fr;
+  grid-template-rows: auto auto auto;
   gap: 15px;
   background: linear-gradient(180deg, rgba(138, 180, 248, 0.03) 0%, transparent 100%);
 }
@@ -1252,25 +1260,26 @@ h2 {
   grid-row: 2;
 }
 
-/* Right column: Stats, resources, and achievements stacked */
+/* Right side: Stats and resources side-by-side on row 1 */
 .card-stats-section {
   grid-column: 2;
   grid-row: 1;
 }
 
 .card-resources-section {
-  grid-column: 2;
-  grid-row: 2;
+  grid-column: 3;
+  grid-row: 1;
 }
 
+/* Achievements spans both right columns on row 2 */
 .card-achievements-section {
-  grid-column: 2;
-  grid-row: 3;
+  grid-column: 2 / 4;
+  grid-row: 2;
 }
 
 .card-footer {
   grid-column: 1 / -1;
-  grid-row: 4;
+  grid-row: 3;
 }
 
 /* Sprite Container - Compact box with animated background */
@@ -1600,10 +1609,10 @@ h2 {
   color: #ffd93d;
 }
 
-/* Resources Section - Compact */
+/* Resources Section - Vertical stack */
 .card-resources-section {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 12px;
   background: rgba(20, 20, 30, 0.7);
@@ -1657,9 +1666,9 @@ h2 {
   text-shadow: 0 1px 4px rgba(255, 215, 0, 0.4);
 }
 
-/* Achievements Section - Compact */
+/* Achievements Section - Expanded to fill space */
 .card-achievements-section {
-  padding: 12px;
+  padding: 15px;
   background: rgba(20, 20, 30, 0.7);
   border-radius: 10px;
   border: 2px solid rgba(138, 180, 248, 0.3);
@@ -1669,7 +1678,7 @@ h2 {
   font-size: 12px;
   color: #8ab4f8;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1677,8 +1686,8 @@ h2 {
 
 .card-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
 .card-achievement-item {
