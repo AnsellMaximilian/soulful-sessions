@@ -1240,7 +1240,7 @@ h2 {
   padding: 20px;
   display: grid;
   grid-template-columns: 280px 1fr;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: auto auto auto;
   gap: 15px;
   background: linear-gradient(180deg, rgba(138, 180, 248, 0.03) 0%, transparent 100%);
 }
@@ -1256,7 +1256,7 @@ h2 {
   grid-row: 2;
 }
 
-/* Right column: Stats, resources, and achievements stacked */
+/* Right column: Stats and resources stacked */
 .card-stats-section {
   grid-column: 2;
   grid-row: 1;
@@ -1267,8 +1267,9 @@ h2 {
   grid-row: 2;
 }
 
+/* Achievements spans both columns on row 3 */
 .card-achievements-section {
-  grid-column: 2;
+  grid-column: 1 / -1;
   grid-row: 3;
 }
 
@@ -1661,13 +1662,12 @@ h2 {
   text-shadow: 0 1px 4px rgba(255, 215, 0, 0.4);
 }
 
-/* Achievements Section - Expanded to fill space */
+/* Achievements Section - Spans full width */
 .card-achievements-section {
   padding: 15px;
   background: rgba(20, 20, 30, 0.7);
   border-radius: 10px;
   border: 2px solid rgba(138, 180, 248, 0.3);
-  min-height: 140px;
 }
 
 .card-section-title {
@@ -1682,7 +1682,7 @@ h2 {
 
 .card-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
