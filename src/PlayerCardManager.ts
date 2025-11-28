@@ -257,9 +257,8 @@ export class PlayerCardManager {
       return;
     }
 
-    // Calculate XP percentage for progress bar (handle edge case of 0 total XP)
-    const totalXP = data.currentXP + data.xpToNextLevel;
-    const xpPercentage = totalXP > 0 ? (data.currentXP / totalXP) * 100 : 0;
+    // Calculate XP percentage for progress bar (same as popup)
+    const xpPercentage = data.xpToNextLevel > 0 ? (data.currentXP / data.xpToNextLevel) * 100 : 0;
 
     // Format focus time
     const hours = Math.floor(data.achievements.totalFocusTime / 60);
@@ -288,17 +287,14 @@ export class PlayerCardManager {
           <div class="card-level-number">${data.level}</div>
         </div>
         
-        <!-- Title and XP bar wrapper -->
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
-          <!-- Character name -->
-          <div class="card-character-title">${data.characterName}</div>
-          
-          <!-- XP bar with overlap -->
-          <div class="card-xp-bar-wrapper" role="region" aria-label="Experience progress">
-            <div class="card-xp-bar-container">
-              <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
-              <div class="card-xp-text">${data.currentXP} / ${data.currentXP + data.xpToNextLevel} XP</div>
-            </div>
+        <!-- Character name -->
+        <div class="card-character-title">${data.characterName}</div>
+        
+        <!-- XP bar with overlap -->
+        <div class="card-xp-bar-wrapper" role="region" aria-label="Experience progress">
+          <div class="card-xp-bar-container">
+            <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
+            <div class="card-xp-text">${data.currentXP} / ${data.xpToNextLevel} XP</div>
           </div>
         </div>
       </div>
