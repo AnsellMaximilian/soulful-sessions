@@ -57,14 +57,21 @@
   - Update tab switching logic in `options.ts` to handle new tab
   - _Requirements: 2.1, 5.1_
 
-- [ ] 5. Implement URL parameter handling
+- [x] 5. Implement URL parameter handling
+
+
+
+
+
   - Add `handleURLParameters()` function in `options.ts`
   - Parse `tab` and `boss` query parameters on page load
   - Switch to Guided Souls tab if `tab=guided-souls`
   - Show detail view if valid `boss` parameter is present
   - _Requirements: 1.3, 1.4_
 
-- [ ] 5.1 Write unit tests for URL parameter handling
+- [x] 5.1 Write unit tests for URL parameter handling
+
+
   - Test valid boss IDs (0-9)
   - Test invalid boss IDs (negative, > 9, non-numeric)
   - Test missing parameters

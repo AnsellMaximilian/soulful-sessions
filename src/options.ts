@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Set up event listeners
   setupEventListeners();
 
+  // Handle URL parameters for deep linking
+  handleURLParameters();
+
   console.log("[Options] Options page initialized");
 });
 
@@ -89,6 +92,33 @@ function switchToTab(tabName: string): void {
   
   if (tabButton) {
     tabButton.click();
+  }
+}
+
+/**
+ * Handle URL parameters on page load
+ * Supports deep linking to specific tabs and boss detail views
+ * Requirements: 1.3, 1.4
+ */
+function handleURLParameters(): void {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  const bossIdStr = urlParams.get('boss');
+
+  // Switch to guided-souls tab if specified
+  if (tab === 'guided-souls') {
+    switchToTab('guided-souls');
+
+    // Show detail view if valid boss ID is present
+    if (bossIdStr !== null && bossIdStr !== '') {
+      const bossId = parseInt(bossIdStr);
+      if (!isNaN(bossId) && bossId >= 0 && bossId <= 9) {
+        // Note: showDetailView will be implemented in a future task
+        // For now, we just validate and prepare the boss ID
+        console.log(`[Options] URL parameter: boss=${bossId}`);
+        // TODO: Call showDetailView(bossId) when implemented
+      }
+    }
   }
 }
 
