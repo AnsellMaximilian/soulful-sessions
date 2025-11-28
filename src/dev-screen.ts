@@ -105,6 +105,7 @@ function createMockSession(
     isCompromised: isCompromised,
     idleTime: 0, // No idle time in simulations
     activeTime: duration * 60, // Full duration is active time (in seconds)
+    autoCompleteTask: false,
   };
 }
 

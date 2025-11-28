@@ -220,7 +220,12 @@
   - Test navigation error recovery
   - _Requirements: All requirements_
 
-- [ ] 12. Checkpoint - Ensure all tests pass
+- [x] 12. Checkpoint - Ensure all tests pass
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 13. Manual testing and polish

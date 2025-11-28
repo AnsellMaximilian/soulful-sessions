@@ -18,10 +18,15 @@ const mockNotifications = {
   create: jest.fn(),
 };
 
+const mockRuntime = {
+  getURL: jest.fn((path: string) => `chrome-extension://fake-id/${path}`),
+};
+
 // Setup global chrome mock
 (globalThis as any).chrome = {
   storage: mockStorage,
   notifications: mockNotifications,
+  runtime: mockRuntime,
 };
 
 describe("StateManager", () => {
@@ -88,6 +93,7 @@ describe("StateManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: {
           totalSessions: 10,
@@ -193,6 +199,7 @@ describe("StateManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: {
           totalSessions: 5,
@@ -361,6 +368,7 @@ describe("StateManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: {
           totalSessions: 0,
@@ -428,6 +436,7 @@ describe("StateManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: {
           totalSessions: 0,

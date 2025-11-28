@@ -1715,6 +1715,7 @@ describe("Dev Screen Property-Based Tests", () => {
             isCompromised: isCompromised,
             idleTime: 0,
             activeTime: duration * 60,
+            autoCompleteTask: false,
           };
 
           // Get result from production RewardCalculator

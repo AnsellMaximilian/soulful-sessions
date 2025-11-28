@@ -63,6 +63,7 @@ describe("PlayerCardManager", () => {
               notificationsEnabled: fc.boolean(),
               soundVolume: fc.float({ min: Math.fround(0), max: Math.fround(1) }),
               showSessionTimer: fc.boolean(),
+              autoCompleteTask: fc.boolean(),
             }),
             statistics: fc.record({
               totalSessions: fc.integer({ min: 0, max: 10000 }),
@@ -185,6 +186,7 @@ describe("PlayerCardManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: {
           totalSessions: 0,
@@ -247,6 +249,7 @@ describe("PlayerCardManager", () => {
           notificationsEnabled: true,
           soundVolume: 0.5,
           showSessionTimer: true,
+          autoCompleteTask: false,
         },
         statistics: null as any, // Missing statistics
       };
@@ -310,6 +313,7 @@ describe("PlayerCardManager", () => {
             notificationsEnabled: true,
             soundVolume: 0.5,
             showSessionTimer: true,
+            autoCompleteTask: false,
           },
           statistics: {
             totalSessions: 0,

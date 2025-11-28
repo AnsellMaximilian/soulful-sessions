@@ -19,6 +19,7 @@ describe("RewardCalculator", () => {
         isCompromised: false,
         idleTime: 0,
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
@@ -43,6 +44,7 @@ describe("RewardCalculator", () => {
         isCompromised: false,
         idleTime: 0,
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
@@ -67,6 +69,7 @@ describe("RewardCalculator", () => {
         isCompromised: false,
         idleTime: 0,
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
@@ -94,6 +97,7 @@ describe("RewardCalculator", () => {
         isCompromised: true,
         idleTime: 0,
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
@@ -123,6 +127,7 @@ describe("RewardCalculator", () => {
         isCompromised: false,
         idleTime: 0,
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
@@ -151,6 +156,7 @@ describe("RewardCalculator", () => {
         isCompromised: false,
         idleTime: 5 * 60, // 5 minutes idle
         activeTime: 25 * 60,
+        autoCompleteTask: false,
       };
 
       const stats: PlayerStats = {
