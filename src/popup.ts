@@ -199,11 +199,11 @@ async function requestState(): Promise<GameState> {
   }
 }
 
-async function startSession(duration: number, taskId: string): Promise<void> {
+async function startSession(duration: number, taskId: string, autoCompleteTask: boolean): Promise<void> {
   try {
     await sendMessage({
       type: "START_SESSION",
-      payload: { duration, taskId },
+      payload: { duration, taskId, autoCompleteTask },
     });
   } catch (error) {
     console.error("Failed to start session:", error);
@@ -328,6 +328,11 @@ function updateIdleView(state: GameState): void {
   // Update duration input with default
   const durationInput = getElement<HTMLInputElement>("duration-input");
   durationInput.value = state.settings.defaultSessionDuration.toString();
+
+  // Update auto-complete checkbox with default setting
+  const autoCompleteCheckbox = getElement<HTMLInputElement>("auto-complete-checkbox");
+  autoCompleteCheckbox.checked = state.settings.autoCompleteTask;
+  autoCompleteCheckbox.disabled = true; // Disabled until task is selected
 
   // Apply active theme
   applyTheme(state.player.cosmetics.activeTheme);
@@ -971,6 +976,8 @@ function applySprite(spriteId: string): void {
 function setupEventHandlers(): void {
   // Task selector - update duration based on selection
   const taskSelector = getElement<HTMLSelectElement>("task-selector");
+  const autoCompleteCheckbox = getElement<HTMLInputElement>("auto-complete-checkbox");
+  
   taskSelector.addEventListener("change", () => {
     if (!currentState) return;
     
@@ -978,10 +985,15 @@ function setupEventHandlers(): void {
     const selectedTaskId = taskSelector.value;
     
     if (!selectedTaskId) {
-      // No task selected - use default
+      // No task selected - use default, disable checkbox
       durationInput.value = currentState.settings.defaultSessionDuration.toString();
+      autoCompleteCheckbox.disabled = true;
+      autoCompleteCheckbox.checked = false;
       return;
     }
+    
+    // Enable checkbox when task is selected
+    autoCompleteCheckbox.disabled = false;
     
     // Find the selected task or subtask
     let foundDuration: number | null = null;
@@ -1023,9 +1035,11 @@ function setupEventHandlers(): void {
   startSessionBtn.addEventListener("click", async () => {
     const durationInput = getElement<HTMLInputElement>("duration-input");
     const taskSelector = getElement<HTMLSelectElement>("task-selector");
+    const autoCompleteCheckbox = getElement<HTMLInputElement>("auto-complete-checkbox");
 
     const duration = parseInt(durationInput.value, 10);
     const taskId = taskSelector.value;
+    const autoCompleteTask = autoCompleteCheckbox.checked;
 
     if (duration < 5 || duration > 120) {
       alert("Duration must be between 5 and 120 minutes");
@@ -1033,7 +1047,7 @@ function setupEventHandlers(): void {
     }
 
     try {
-      await startSession(duration, taskId);
+      await startSession(duration, taskId, autoCompleteTask);
       // State will be updated via message listener
     } catch (error) {
       console.error("Failed to start session:", error);

@@ -35,6 +35,7 @@ export interface SessionState {
   startTime: number; // Timestamp
   duration: number; // Minutes
   taskId: string;
+  autoCompleteTask: boolean; // Whether to mark task/subtask complete when session ends
   isActive: boolean;
   isPaused: boolean;
   isCompromised: boolean;
@@ -143,6 +144,7 @@ export interface SettingsState {
   defaultSessionDuration: number; // Minutes, default: 25
   defaultBreakDuration: number; // Minutes, default: 5
   autoStartNextSession: boolean; // Default: false
+  autoCompleteTask: boolean; // Default: false - Auto-check "Complete task when done" checkbox
   idleThreshold: number; // Seconds, default: 120
   strictMode: boolean; // Default: false
   discouragedSites: string[]; // Domains

@@ -15,6 +15,7 @@ export class SessionManager {
    * Start a new focus session
    * @param duration Session duration in minutes
    * @param taskId ID of the task being worked on
+   * @param autoCompleteTask Whether to mark task complete when session ends
    * @param currentSession Current session state (null if no active session)
    * @returns New session state
    * @throws Error if a session is already active
@@ -22,6 +23,7 @@ export class SessionManager {
   async startSession(
     duration: number,
     taskId: string,
+    autoCompleteTask: boolean,
     currentSession: SessionState | null
   ): Promise<SessionState> {
     // Validate no concurrent sessions
@@ -41,6 +43,7 @@ export class SessionManager {
       startTime: Date.now(),
       duration: duration,
       taskId: taskId,
+      autoCompleteTask: autoCompleteTask,
       isActive: true,
       isPaused: false,
       isCompromised: false,
@@ -52,7 +55,7 @@ export class SessionManager {
     await this.createSessionAlarm(duration);
 
     console.log(
-      `[SessionManager] Session started: ${duration} minutes, task: ${taskId}`
+      `[SessionManager] Session started: ${duration} minutes, task: ${taskId}, autoComplete: ${autoCompleteTask}`
     );
 
     return newSession;

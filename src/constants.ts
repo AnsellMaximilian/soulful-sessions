@@ -189,6 +189,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
   defaultSessionDuration: 25,
   defaultBreakDuration: 5,
   autoStartNextSession: false,
+  autoCompleteTask: false,
   idleThreshold: 120,
   strictMode: false,
   discouragedSites: [],

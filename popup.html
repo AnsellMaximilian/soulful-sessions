@@ -148,19 +148,34 @@
           <option value="">Select a task...</option>
         </select>
 
-        <label for="duration-input" class="control-label"
-          >Duration (minutes):</label
-        >
-        <input
-          id="duration-input"
-          type="number"
-          min="5"
-          max="120"
-          value="25"
-          class="duration-input"
-          aria-label="Session duration in minutes"
-          aria-required="true"
-        />
+        <div class="duration-row">
+          <div class="duration-input-group">
+            <label for="duration-input" class="control-label"
+              >Duration (minutes):</label
+            >
+            <input
+              id="duration-input"
+              type="number"
+              min="5"
+              max="120"
+              value="25"
+              class="duration-input"
+              aria-label="Session duration in minutes"
+              aria-required="true"
+            />
+          </div>
+          <div class="auto-complete-group">
+            <label for="auto-complete-checkbox" class="checkbox-label">
+              <input
+                id="auto-complete-checkbox"
+                type="checkbox"
+                class="auto-complete-checkbox"
+                aria-label="Mark task as complete when session ends"
+              />
+              <span class="checkbox-text">Complete when done</span>
+            </label>
+          </div>
+        </div>
 
         <button
           id="start-session-btn"

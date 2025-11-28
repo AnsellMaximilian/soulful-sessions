@@ -473,6 +473,19 @@ body {
   color: #e0e0e0;
 }
 
+.duration-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.duration-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .duration-input {
   width: 100%;
   padding: 8px;
@@ -487,6 +500,38 @@ body {
   outline: 3px solid #ffd700;
   outline-offset: 2px;
   border-color: #8ab4f8;
+}
+
+.auto-complete-group {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #a0a0a0;
+  user-select: none;
+}
+
+.auto-complete-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--theme-accent);
+}
+
+.auto-complete-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox-text {
+  white-space: nowrap;
 }
 
 /* Buttons */

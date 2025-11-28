@@ -127,6 +127,12 @@ function populateSettings(settings: SettingsState): void {
   if (breakDurationInput)
     breakDurationInput.value = settings.defaultBreakDuration.toString();
   if (autoStartInput) autoStartInput.checked = settings.autoStartNextSession;
+  
+  const autoCompleteTaskInput = document.getElementById(
+    "auto-complete-task"
+  ) as HTMLInputElement;
+  if (autoCompleteTaskInput) autoCompleteTaskInput.checked = settings.autoCompleteTask;
+  
   if (idleThresholdInput)
     idleThresholdInput.value = settings.idleThreshold.toString();
 
@@ -543,6 +549,10 @@ function setupEventListeners(): void {
 
   setupCheckboxListener("auto-start-next", (checked) => {
     updateSetting("autoStartNextSession", checked);
+  });
+
+  setupCheckboxListener("auto-complete-task", (checked) => {
+    updateSetting("autoCompleteTask", checked);
   });
 
   setupInputListener("idle-threshold", (value) => {

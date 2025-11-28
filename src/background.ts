@@ -14,6 +14,7 @@ import {
   SiteStatus,
   ProgressionState,
   StubbornSoul,
+  TaskState,
 } from "./types";
 import { FORMULAS, STUBBORN_SOULS } from "./constants";
 
@@ -464,9 +465,10 @@ async function handleUpdateState(partial: Partial<GameState>): Promise<void> {
 async function handleStartSession(payload: {
   duration: number;
   taskId: string;
+  autoCompleteTask: boolean;
 }): Promise<SessionState> {
   console.log(
-    `[Background] Starting session: ${payload.duration} minutes, task: ${payload.taskId}`
+    `[Background] Starting session: ${payload.duration} minutes, task: ${payload.taskId}, autoComplete: ${payload.autoCompleteTask}`
   );
 
   const currentState = stateManager.getState();
@@ -480,6 +482,7 @@ async function handleStartSession(payload: {
   const newSession = await sessionManager.startSession(
     payload.duration,
     payload.taskId,
+    payload.autoCompleteTask,
     currentState.session
   );
 
@@ -765,6 +768,18 @@ async function handleEndSession(): Promise<void> {
     updatedStatistics.longestStreak = 1;
   }
 
+  // Handle task completion if auto-complete is enabled
+  let updatedTasks = currentState.tasks;
+  if (currentState.session.autoCompleteTask && currentState.session.taskId) {
+    updatedTasks = completeTask(
+      currentState.tasks,
+      currentState.session.taskId
+    );
+    console.log(
+      `[Background] Task auto-completed: ${currentState.session.taskId}`
+    );
+  }
+
   // Start break timer
   const breakDuration = currentState.settings.defaultBreakDuration;
   const breakState: BreakState = {
@@ -787,6 +802,7 @@ async function handleEndSession(): Promise<void> {
     player: updatedPlayer,
     progression: updatedProgression,
     statistics: updatedStatistics,
+    tasks: updatedTasks,
   });
 
   // Send notification if enabled
@@ -2138,6 +2154,59 @@ async function checkForMissedTimersOnStartup(): Promise<void> {
   } catch (error) {
     console.error("[Background] Error checking for missed timers:", error);
   }
+}
+
+// ============================================================================
+// Task Completion Helper
+// ============================================================================
+
+/**
+ * Complete a task or subtask by ID
+ * Cascades completion to all subtasks if completing a task
+ */
+function completeTask(taskState: TaskState, taskId: string): TaskState {
+  const updatedGoals = taskState.goals.map((goal) => {
+    const updatedTasks = goal.tasks.map((task) => {
+      // Check if this is the task to complete
+      if (task.id === taskId) {
+        // Complete the task and cascade to all subtasks
+        return {
+          ...task,
+          isComplete: true,
+          subtasks: task.subtasks.map((subtask) => ({
+            ...subtask,
+            isComplete: true,
+          })),
+        };
+      }
+
+      // Check if this is a subtask to complete
+      const updatedSubtasks = task.subtasks.map((subtask) => {
+        if (subtask.id === taskId) {
+          return {
+            ...subtask,
+            isComplete: true,
+          };
+        }
+        return subtask;
+      });
+
+      return {
+        ...task,
+        subtasks: updatedSubtasks,
+      };
+    });
+
+    return {
+      ...goal,
+      tasks: updatedTasks,
+    };
+  });
+
+  return {
+    ...taskState,
+    goals: updatedGoals,
+  };
 }
 
 /**
