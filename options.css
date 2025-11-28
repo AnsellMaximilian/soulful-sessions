@@ -1191,7 +1191,6 @@ h2 {
 .card-xp-bar-container {
   width: 100%;
   height: 36px;
-  background: rgba(0, 0, 0, 0.3);
   border-radius: 18px 0 0 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1199,11 +1198,30 @@ h2 {
   position: relative;
 }
 
+/* Solid background layer to block header border - uses theme background color */
+.card-xp-bar-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--xp-bar-solid-bg, #1a1a2e);
+  z-index: 0;
+}
+
+/* Semi-transparent overlay for empty XP bar look */
+.card-xp-bar-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
 .card-xp-bar {
   height: 100%;
   background: linear-gradient(90deg, var(--theme-primary, #667eea) 0%, var(--theme-secondary, #764ba2) 100%);
   transition: width 0.5s ease;
   position: relative;
+  z-index: 2;
 }
 
 .card-xp-text {
@@ -1215,7 +1233,7 @@ h2 {
   font-weight: 900;
   color: #fff;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-  z-index: 1;
+  z-index: 3;
 }
 
 /* Row 1: Sprite + Achievements */

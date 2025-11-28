@@ -387,6 +387,9 @@ export class PlayerCardManager {
         cardContainer.style.background = themeColors.background;
       }
     }
+    
+    // Apply theme background to XP bar solid layer via CSS variable
+    document.documentElement.style.setProperty("--xp-bar-solid-bg", themeColors.background);
   }
 
   /**
