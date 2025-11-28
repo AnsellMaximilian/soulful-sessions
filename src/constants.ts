@@ -22,8 +22,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 100,
     sprite: "athlete.png",
     unlockLevel: 1,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "You've been running for so long. What are you chasing?"
+      },
+      {
+        speaker: 'soul',
+        text: "The finish line... I can see it, but I can never reach it. Every step forward, it moves further away."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Perhaps the race was never about the finish. What did you learn along the way?"
+      },
+      {
+        speaker: 'soul',
+        text: "I... I learned discipline. Perseverance. I inspired others to run their own races. Maybe that was enough."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then you've already crossed every finish line that mattered. Your journey inspired countless others to begin theirs."
+      }
+    ],
+    resolution: "The Restless Athlete finally stops running. They realize that their legacy wasn't in crossing a single finish line, but in the countless miles they ran and the inspiration they provided to others. With a peaceful smile, they take their final rest, their race complete.",
   },
   {
     id: 1,
@@ -33,8 +54,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 200,
     sprite: "scholar.png",
     unlockLevel: 3,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "Your research sits unfinished. What were you trying to prove?"
+      },
+      {
+        speaker: 'soul',
+        text: "Everything. I needed one more citation, one more experiment. My work was so close to completion."
+      },
+      {
+        speaker: 'shepherd',
+        text: "And what did your research teach you, even incomplete?"
+      },
+      {
+        speaker: 'soul',
+        text: "That knowledge builds upon itself. My notes, my methods—they became the foundation for others who came after."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then your work was never unfinished. You were part of something greater than any single publication."
+      }
+    ],
+    resolution: "The Unfinished Scholar closes their final book. They understand now that scholarship is not about individual glory, but about contributing to the endless pursuit of knowledge. Their research, though unpublished, lives on in the work of those who followed. They depart in peace, knowing their contribution mattered.",
   },
   {
     id: 2,
@@ -44,8 +86,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 350,
     sprite: "parent.png",
     unlockLevel: 5,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "You watch these families with such longing. What do you wish you could change?"
+      },
+      {
+        speaker: 'soul',
+        text: "I missed so much. First steps, first words, birthdays. I was always working, always busy. I thought I had time."
+      },
+      {
+        speaker: 'shepherd',
+        text: "What moments did you share with them?"
+      },
+      {
+        speaker: 'soul',
+        text: "Quiet mornings. Bedtime stories. The way they smiled when I came home. Small moments I took for granted."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Those small moments were everything. Your child remembers your love, not your absence."
+      }
+    ],
+    resolution: "The Regretful Parent finally leaves the playground. They realize that love isn't measured in milestones attended, but in the countless small moments of connection and care. Their child grew up knowing they were loved, and that is the greatest gift any parent can give. They find peace in the memories they did create.",
   },
   {
     id: 3,
@@ -55,8 +118,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 500,
     sprite: "artist.png",
     unlockLevel: 7,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "Your painting sits hidden away. Does art need an audience to have meaning?"
+      },
+      {
+        speaker: 'soul',
+        text: "I poured my soul into that canvas. If no one sees it, did I create anything at all?"
+      },
+      {
+        speaker: 'shepherd',
+        text: "What did the act of creation give you?"
+      },
+      {
+        speaker: 'soul',
+        text: "Purpose. Joy. A way to express what words couldn't capture. The painting changed me, even if it changed no one else."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then it was seen by the one person who needed to see it most—you. Art transforms the artist first."
+      }
+    ],
+    resolution: "The Forgotten Artist steps away from the galleries. They understand now that creation itself is the reward, not recognition. The act of bringing beauty into the world changed them profoundly, and that transformation was their true masterpiece. They depart with the quiet satisfaction of an artist who created for the right reasons.",
   },
   {
     id: 4,
@@ -66,8 +150,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 700,
     sprite: "musician.png",
     unlockLevel: 10,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "Your symphony remains unheard. What music did you hope to share?"
+      },
+      {
+        speaker: 'soul',
+        text: "A piece that captured the beauty of fleeting moments. Joy, sorrow, hope—all woven together. But silence is all that remains."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Did you hear it when you composed it?"
+      },
+      {
+        speaker: 'soul',
+        text: "Every note, every harmony. It played in my mind like a living thing. I heard it perfectly."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then it was performed, in the most intimate concert hall of all. Music exists first in the heart of its creator."
+      }
+    ],
+    resolution: "The Lonely Musician finally plays their symphony, not for an audience, but for themselves. They realize that music's power lies not in grand performances, but in its ability to express the inexpressible. Their symphony lived fully in their imagination and heart, and that was enough. They fade away with the final, perfect note still resonating.",
   },
   {
     id: 5,
@@ -77,8 +182,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 950,
     sprite: "gardener.png",
     unlockLevel: 13,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "You planted a seed that never bloomed in your lifetime. Was your work wasted?"
+      },
+      {
+        speaker: 'soul',
+        text: "I prepared the soil, provided water and care. But I never saw the flower. All that patience for nothing."
+      },
+      {
+        speaker: 'shepherd',
+        text: "What did you learn from tending the garden?"
+      },
+      {
+        speaker: 'soul',
+        text: "That growth takes time. That care matters even when results aren't immediate. That some seeds bloom long after the gardener is gone."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Your seed did bloom—just not in the way you expected. You cultivated patience, dedication, and hope. Those blooms never fade."
+      }
+    ],
+    resolution: "The Devoted Gardener sets down their tools. They understand now that a gardener's true legacy isn't in the flowers they see, but in the care they provide and the lessons they embody. Their rare seed may have bloomed years later, or perhaps it taught others the value of patient cultivation. Either way, their garden was never empty. They rest in peace, knowing they tended well.",
   },
   {
     id: 6,
@@ -88,8 +214,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 1250,
     sprite: "inventor.png",
     unlockLevel: 16,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "Your invention was taken from you. Does that erase what you created?"
+      },
+      {
+        speaker: 'soul',
+        text: "They claimed it as their own. My name was forgotten while they received all the credit. My life's work, stolen."
+      },
+      {
+        speaker: 'shepherd',
+        text: "But who truly invented it? Who solved the impossible problem?"
+      },
+      {
+        speaker: 'soul',
+        text: "I did. I know I did. The breakthrough was mine, even if the world doesn't know it."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then you carry something they never can—the knowledge that you were capable of greatness. That truth can never be stolen."
+      }
+    ],
+    resolution: "The Ambitious Inventor stops tinkering with their phantom machine. They realize that innovation lives in the mind that conceives it, not in the credit received. Their breakthrough changed the world, regardless of whose name was attached. The satisfaction of solving the unsolvable was always theirs to keep. They depart with the quiet pride of a true inventor.",
   },
   {
     id: 7,
@@ -99,8 +246,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 1600,
     sprite: "explorer.png",
     unlockLevel: 20,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "The summit remains just out of reach. Why do you keep climbing?"
+      },
+      {
+        speaker: 'soul',
+        text: "Because it's there. Because I came so close. One more step, one more day, and I would have made it."
+      },
+      {
+        speaker: 'shepherd',
+        text: "What did you see on your journey up the mountain?"
+      },
+      {
+        speaker: 'soul',
+        text: "Wonders I never imagined. Vistas that took my breath away. Challenges that made me stronger. Every step revealed something new."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then you've already reached countless summits. The peak was never the destination—the climb was the journey itself."
+      }
+    ],
+    resolution: "The Wandering Explorer stops climbing and looks back at the path they've traveled. They see now that exploration is not about reaching a single destination, but about the courage to venture into the unknown. Every step of their journey was a summit in its own right. They rest at last, content with the magnificent journey they completed.",
   },
   {
     id: 8,
@@ -110,8 +278,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 2000,
     sprite: "poet.png",
     unlockLevel: 24,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "Your words were destroyed before anyone could read them. Do they still exist?"
+      },
+      {
+        speaker: 'soul',
+        text: "They're gone. Ash and smoke. All those verses, all those truths I tried to capture—erased."
+      },
+      {
+        speaker: 'shepherd',
+        text: "But you remember them, don't you?"
+      },
+      {
+        speaker: 'soul',
+        text: "Every word. Every rhythm. They live in me, even if nowhere else."
+      },
+      {
+        speaker: 'shepherd',
+        text: "Then they were never destroyed. Words that change the writer have already fulfilled their purpose. You became the poem you wrote."
+      }
+    ],
+    resolution: "The Silent Poet stops whispering to the wind. They understand now that writing is an act of self-discovery, not just communication. Their verses shaped who they became, and that transformation was the true poetry. The words lived most fully in the heart that conceived them. They depart in peace, their greatest poem complete—the life they lived.",
   },
   {
     id: 9,
@@ -121,8 +310,29 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     initialResolve: 2500,
     sprite: "guardian.png",
     unlockLevel: 28,
-    finalConversation: [],
-    resolution: "",
+    finalConversation: [
+      {
+        speaker: 'shepherd',
+        text: "You guard ruins now. What are you protecting?"
+      },
+      {
+        speaker: 'soul',
+        text: "Nothing. I failed when it mattered most. I couldn't protect what I was sworn to defend."
+      },
+      {
+        speaker: 'shepherd',
+        text: "How many times did you succeed before that final moment?"
+      },
+      {
+        speaker: 'soul',
+        text: "Countless times. Years of vigilance. Decades of keeping them safe. But the one time I failed..."
+      },
+      {
+        speaker: 'shepherd',
+        text: "That one failure doesn't erase a lifetime of protection. You gave everything you had. That is what it means to be a guardian."
+      }
+    ],
+    resolution: "The Eternal Guardian finally lays down their watch. They understand now that true guardianship is measured not by the one time they fell, but by the countless times they stood strong. Their lifetime of protection mattered, and their final failure was simply the moment they gave everything they had left. They rest at last, their duty fulfilled with honor.",
   },
 ];
 

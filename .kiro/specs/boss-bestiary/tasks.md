@@ -10,19 +10,27 @@
   - Create `ConversationExchange` interface with `speaker` and `text` properties
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 2. Write narrative content for all 10 Stubborn Souls
+- [x] 2. Write narrative content for all 10 Stubborn Souls
+
+
+
+
+
   - Add `finalConversation` arrays (3-5 exchanges each) to all bosses in `constants.ts`
   - Add `resolution` strings to all bosses in `constants.ts`
   - Follow narrative arc: backstory → breakthrough → peace
   - Ensure thematic consistency with Soul Shepherd concept
   - _Requirements: 4.4, 4.5, 4.6, 5.3, 5.4_
 
-- [ ] 2.1 Write property test for boss data completeness
+- [x] 2.1 Write property test for boss data completeness
+
+
   - **Property 11: Boss data completeness - conversations**
   - **Property 12: Boss data completeness - resolutions**
   - **Validates: Requirements 4.4, 4.5**
 
 - [ ] 3. Add info icon to popup interface
+
   - Modify `popup.html` to add boss header container with info icon button
   - Update `popup.css` with info icon styles (circular button with ⓘ symbol)
   - Implement click handler in `popup.ts` to open options page with URL parameters
