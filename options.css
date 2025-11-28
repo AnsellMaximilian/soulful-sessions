@@ -1191,10 +1191,6 @@ h2 {
     font-size: 20px;
   }
   
-  .card-resources-section {
-    flex-direction: row;
-  }
-  
   .card-achievement-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1243,8 +1239,8 @@ h2 {
 .player-card-content {
   padding: 20px;
   display: grid;
-  grid-template-columns: 280px 1fr 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto auto auto auto;
   gap: 15px;
   background: linear-gradient(180deg, rgba(138, 180, 248, 0.03) 0%, transparent 100%);
 }
@@ -1260,26 +1256,25 @@ h2 {
   grid-row: 2;
 }
 
-/* Right side: Stats and resources side-by-side on row 1 */
+/* Right column: Stats, resources, and achievements stacked */
 .card-stats-section {
   grid-column: 2;
   grid-row: 1;
 }
 
 .card-resources-section {
-  grid-column: 3;
-  grid-row: 1;
+  grid-column: 2;
+  grid-row: 2;
 }
 
-/* Achievements spans both right columns on row 2 */
 .card-achievements-section {
-  grid-column: 2 / 4;
-  grid-row: 2;
+  grid-column: 2;
+  grid-row: 3;
 }
 
 .card-footer {
   grid-column: 1 / -1;
-  grid-row: 3;
+  grid-row: 4;
 }
 
 /* Sprite Container - Compact box with animated background */
@@ -1609,10 +1604,10 @@ h2 {
   color: #ffd93d;
 }
 
-/* Resources Section - Vertical stack */
+/* Resources Section - Horizontal */
 .card-resources-section {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   padding: 12px;
   background: rgba(20, 20, 30, 0.7);
@@ -1672,6 +1667,7 @@ h2 {
   background: rgba(20, 20, 30, 0.7);
   border-radius: 10px;
   border: 2px solid rgba(138, 180, 248, 0.3);
+  min-height: 140px;
 }
 
 .card-section-title {
@@ -1686,20 +1682,22 @@ h2 {
 
 .card-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .card-achievement-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
   background: rgba(138, 180, 248, 0.08);
   border-radius: 6px;
   border: 1px solid rgba(138, 180, 248, 0.2);
   transition: all 0.3s ease;
+  min-height: 70px;
 }
 
 .card-achievement-item:hover {
@@ -1718,10 +1716,11 @@ h2 {
 }
 
 .card-achievement-value {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #8ab4f8;
   text-shadow: 0 1px 4px rgba(138, 180, 248, 0.4);
+  line-height: 1;
 }
 
 /* Card Footer - Compact */
