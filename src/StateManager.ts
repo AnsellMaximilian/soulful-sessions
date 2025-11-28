@@ -547,6 +547,10 @@ export class StateManager {
         typeof settings.autoStartNextSession === "boolean"
           ? settings.autoStartNextSession
           : false,
+      autoCompleteTask:
+        typeof settings.autoCompleteTask === "boolean"
+          ? settings.autoCompleteTask
+          : false,
       idleThreshold:
         typeof settings.idleThreshold === "number"
           ? settings.idleThreshold

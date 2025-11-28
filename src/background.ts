@@ -770,13 +770,24 @@ async function handleEndSession(): Promise<void> {
 
   // Handle task completion if auto-complete is enabled
   let updatedTasks = currentState.tasks;
+  console.log(
+    `[Background] Checking task auto-complete: autoComplete=${currentState.session.autoCompleteTask}, taskId=${currentState.session.taskId}`
+  );
+  
   if (currentState.session.autoCompleteTask && currentState.session.taskId) {
+    console.log(
+      `[Background] Auto-completing task: ${currentState.session.taskId}`
+    );
     updatedTasks = completeTask(
       currentState.tasks,
       currentState.session.taskId
     );
     console.log(
-      `[Background] Task auto-completed: ${currentState.session.taskId}`
+      `[Background] Task auto-completed successfully: ${currentState.session.taskId}`
+    );
+  } else {
+    console.log(
+      `[Background] Task auto-complete skipped (not enabled or no task selected)`
     );
   }
 
@@ -2165,10 +2176,19 @@ async function checkForMissedTimersOnStartup(): Promise<void> {
  * Cascades completion to all subtasks if completing a task
  */
 function completeTask(taskState: TaskState, taskId: string): TaskState {
+  console.log(`[completeTask] Starting task completion for ID: ${taskId}`);
+  console.log(`[completeTask] Total goals: ${taskState.goals.length}`);
+  
+  let taskFound = false;
+  
   const updatedGoals = taskState.goals.map((goal) => {
     const updatedTasks = goal.tasks.map((task) => {
       // Check if this is the task to complete
       if (task.id === taskId) {
+        console.log(`[completeTask] Found matching task: ${task.name} (ID: ${task.id})`);
+        console.log(`[completeTask] Marking task and ${task.subtasks.length} subtasks as complete`);
+        taskFound = true;
+        
         // Complete the task and cascade to all subtasks
         return {
           ...task,
@@ -2183,6 +2203,9 @@ function completeTask(taskState: TaskState, taskId: string): TaskState {
       // Check if this is a subtask to complete
       const updatedSubtasks = task.subtasks.map((subtask) => {
         if (subtask.id === taskId) {
+          console.log(`[completeTask] Found matching subtask: ${subtask.name} (ID: ${subtask.id})`);
+          taskFound = true;
+          
           return {
             ...subtask,
             isComplete: true,
@@ -2202,6 +2225,12 @@ function completeTask(taskState: TaskState, taskId: string): TaskState {
       tasks: updatedTasks,
     };
   });
+
+  if (!taskFound) {
+    console.warn(`[completeTask] WARNING: Task/subtask with ID ${taskId} not found!`);
+  } else {
+    console.log(`[completeTask] Task completion successful`);
+  }
 
   return {
     ...taskState,
