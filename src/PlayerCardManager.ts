@@ -195,12 +195,12 @@ export class PlayerCardManager {
     // Set up focus trap
     this.setupFocusTrap();
 
-    // Focus the first focusable element (close button in header)
-    const closeButton = this.modalElement.querySelector("#player-card-close-btn") as HTMLElement;
-    if (closeButton) {
-      // Use setTimeout to ensure modal is fully rendered and animation started before focusing
-      setTimeout(() => closeButton.focus(), 100);
-    }
+    // Focus the modal container itself for screen reader announcement
+    setTimeout(() => {
+      if (this.modalElement) {
+        this.modalElement.focus();
+      }
+    }, 100);
   }
 
   /**
@@ -282,27 +282,30 @@ export class PlayerCardManager {
     const cardHTML = `
       <!-- Card Header with Level, Name, and XP Bar -->
       <div class="card-header-section">
-        <!-- Level badge with diagonal separator -->
+        <!-- Level badge -->
         <div class="card-level-circle" aria-label="Level ${data.level}">
           <div class="card-level-label">Level</div>
           <div class="card-level-number">${data.level}</div>
         </div>
         
-        <!-- Character name -->
-        <div class="card-character-title">${data.characterName}</div>
-        
-        <!-- XP bar with overlap -->
-        <div class="card-xp-bar-wrapper" role="region" aria-label="Experience progress">
-          <div class="card-xp-bar-container">
-            <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
+        <!-- Title and XP bar wrapper -->
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+          <!-- Character name -->
+          <div class="card-character-title">${data.characterName}</div>
+          
+          <!-- XP bar with overlap -->
+          <div class="card-xp-bar-wrapper" role="region" aria-label="Experience progress">
+            <div class="card-xp-bar-container">
+              <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
+              <div class="card-xp-text">${data.currentXP} / ${data.currentXP + data.xpToNextLevel} XP</div>
+            </div>
           </div>
-          <div class="card-xp-text">${data.currentXP} / ${data.currentXP + data.xpToNextLevel} XP</div>
         </div>
       </div>
       
-      <!-- Left Section: Sprite and Stats -->
-      <div class="card-left-section">
-        <!-- Sprite container -->
+      <!-- Row 1: Sprite and Achievements -->
+      <div class="card-row-1">
+        <!-- Sprite container (square) -->
         <div class="card-sprite-box" role="region" aria-label="Character sprite">
           <img 
             src="${data.cosmetics.spritePath}" 
@@ -312,29 +315,7 @@ export class PlayerCardManager {
           />
         </div>
         
-        <!-- Stats row -->
-        <div class="card-stats-row" role="region" aria-label="Character statistics">
-          <div class="card-stat-box" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
-            <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
-            <div class="card-stat-label">Spirit</div>
-          </div>
-          <div class="card-stat-box" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
-            <div class="card-stat-value">${harmonyPercent}%</div>
-            <div class="card-stat-label">Harmony</div>
-          </div>
-          <div class="card-stat-box" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
-            <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
-            <div class="card-stat-label">Soulflow</div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Vertical Separator -->
-      <div class="card-vertical-separator"></div>
-      
-      <!-- Right Section: Achievements and Currencies -->
-      <div class="card-right-section">
-        <!-- Achievements section (yellow area) -->
+        <!-- Achievements section -->
         <div class="card-achievements-box" role="region" aria-label="Achievements">
           <div class="card-achievement-item" role="group" aria-label="Total sessions: ${data.achievements.totalSessions}">
             <div class="card-achievement-value">${data.achievements.totalSessions}</div>
@@ -353,20 +334,39 @@ export class PlayerCardManager {
             <div class="card-achievement-label">Streak</div>
           </div>
         </div>
+      </div>
+      
+      <!-- Row 2: Stats and Currencies -->
+      <div class="card-row-2">
+        <!-- Stats row -->
+        <div class="card-stats-row" role="region" aria-label="Character statistics">
+          <div class="card-stat-box" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
+            <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
+            <div class="card-stat-label">Spirit</div>
+          </div>
+          <div class="card-stat-box" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
+            <div class="card-stat-value">${harmonyPercent}%</div>
+            <div class="card-stat-label">Harmony</div>
+          </div>
+          <div class="card-stat-box" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
+            <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
+            <div class="card-stat-label">Soulflow</div>
+          </div>
+        </div>
         
-        <!-- Currencies section (red area) -->
+        <!-- Currencies section -->
         <div class="card-currencies-box" role="region" aria-label="Currencies">
           <div class="card-currency-item" role="group" aria-label="Soul Insight: ${data.currentXP}">
             <img src="assets/icons/soul_insight.png" alt="" class="card-currency-icon" aria-hidden="true" />
             <div class="card-currency-info">
-              <div class="card-currency-label">Soul Insight</div>
+              <div class="card-currency-label">Insight</div>
               <div class="card-currency-value">${data.currentXP}</div>
             </div>
           </div>
           <div class="card-currency-item" role="group" aria-label="Soul Embers: ${data.soulEmbers}">
             <img src="assets/icons/soul_ember.png" alt="" class="card-currency-icon" aria-hidden="true" />
             <div class="card-currency-info">
-              <div class="card-currency-label">Soul Embers</div>
+              <div class="card-currency-label">Embers</div>
               <div class="card-currency-value">${data.soulEmbers}</div>
             </div>
           </div>
@@ -380,20 +380,9 @@ export class PlayerCardManager {
 
     this.cardContentElement.innerHTML = cardHTML;
 
-    // Apply theme colors to card with inline styles for html2canvas compatibility
-    if (this.modalElement) {
-      const cardContainer = this.modalElement.querySelector(".player-card-container") as HTMLElement;
-      if (cardContainer) {
-        // Set CSS custom properties for modern browsers
-        cardContainer.style.setProperty("--theme-primary", themeColors.primary);
-        cardContainer.style.setProperty("--theme-secondary", themeColors.secondary);
-        cardContainer.style.setProperty("--theme-accent", themeColors.accent);
-        
-        // Apply inline styles for html2canvas compatibility
-        // These override the hardcoded rgba values in CSS
-        this.applyThemeInlineStyles(cardContainer, themeColors);
-      }
-    }
+    // Apply theme colors to CSS variables (same as popup)
+    // The CSS variables are already set on document.documentElement by applyTheme()
+    // in options.ts, so the card will automatically use the current theme
   }
 
   /**
@@ -493,23 +482,7 @@ export class PlayerCardManager {
   private static setupEventListeners(): void {
     if (!this.modalElement) return;
 
-    // Close button in header
-    const closeButtonHeader = this.modalElement.querySelector("#player-card-close-btn") as HTMLElement;
-    if (closeButtonHeader) {
-      const closeHandler = () => this.hideCardModal();
-      closeButtonHeader.addEventListener("click", closeHandler);
-      this.eventListeners.push({ element: closeButtonHeader, event: "click", handler: closeHandler });
-    }
-
-    // Close button in footer
-    const closeButtonFooter = this.modalElement.querySelector("#player-card-close-btn-bottom") as HTMLElement;
-    if (closeButtonFooter) {
-      const closeHandler = () => this.hideCardModal();
-      closeButtonFooter.addEventListener("click", closeHandler);
-      this.eventListeners.push({ element: closeButtonFooter, event: "click", handler: closeHandler });
-    }
-
-    // Backdrop click
+    // Backdrop click to close
     const backdrop = this.modalElement.querySelector(".modal-backdrop") as HTMLElement;
     if (backdrop) {
       const backdropHandler = () => this.hideCardModal();
@@ -517,7 +490,7 @@ export class PlayerCardManager {
       this.eventListeners.push({ element: backdrop, event: "click", handler: backdropHandler });
     }
 
-    // ESC key
+    // ESC key to close
     const escHandler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         this.hideCardModal();
@@ -540,6 +513,7 @@ export class PlayerCardManager {
   /**
    * Set up focus trap to keep focus within modal
    * Implements keyboard navigation and prevents focus from leaving the modal
+   * Note: Since we removed close buttons, the modal itself is focusable for screen readers
    */
   private static setupFocusTrap(): void {
     if (!this.modalElement) return;
@@ -558,8 +532,9 @@ export class PlayerCardManager {
       this.modalElement.querySelectorAll(focusableSelectors)
     ) as HTMLElement[];
 
+    // If no focusable elements (no close buttons), modal itself is focusable
+    // This is fine - user can close with ESC or clicking backdrop
     if (this.focusableElements.length === 0) {
-      console.warn("[PlayerCardManager] No focusable elements found in modal");
       return;
     }
 

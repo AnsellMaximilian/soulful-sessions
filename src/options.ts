@@ -94,6 +94,7 @@ async function loadSettings(): Promise<void> {
         populateSettings(currentState.settings);
         populateStatistics(currentState.statistics);
         populateTaskManagement(currentState.tasks);
+        applyTheme(currentState.player.cosmetics.activeTheme);
         applySprite(currentState.player.cosmetics.activeSprite);
       }
     }
@@ -727,6 +728,7 @@ function setupEventListeners(): void {
       const themeId = themeSelector.value;
       updateCosmetic("activeTheme", themeId);
       updateThemePreview(themeId);
+      applyTheme(themeId);
     });
   }
 
@@ -1662,6 +1664,35 @@ async function updateCosmetic(key: string, value: string): Promise<void> {
   } catch (error) {
     console.error(`[Options] Failed to update cosmetic ${key}:`, error);
   }
+}
+
+// ============================================================================
+// Theme Application
+// ============================================================================
+
+function applyTheme(themeId: string): void {
+  const theme = COSMETIC_THEMES.find((t) => t.id === themeId);
+  if (!theme) return;
+
+  // Apply theme colors to CSS variables (same as popup)
+  document.documentElement.style.setProperty(
+    "--theme-primary",
+    theme.colors.primary
+  );
+  document.documentElement.style.setProperty(
+    "--theme-secondary",
+    theme.colors.secondary
+  );
+  document.documentElement.style.setProperty(
+    "--theme-accent",
+    theme.colors.accent
+  );
+  document.documentElement.style.setProperty(
+    "--theme-background",
+    theme.colors.background
+  );
+
+  console.log(`[Options] Theme applied: ${themeId}`);
 }
 
 // ============================================================================
