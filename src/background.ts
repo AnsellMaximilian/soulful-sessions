@@ -1923,10 +1923,12 @@ async function handleEmergencyEndSession(): Promise<void> {
  */
 async function updateBlockingRules(blockedSites: string[]): Promise<void> {
   try {
-    console.log("[Background] Updating blocking rules:", blockedSites);
+    console.log("[Background] ========== UPDATING BLOCKING RULES ==========");
+    console.log("[Background] Blocked sites:", blockedSites);
 
     // Remove all existing rules
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    console.log("[Background] Existing rules before removal:", existingRules);
     const ruleIdsToRemove = existingRules.map((rule) => rule.id);
 
     if (ruleIdsToRemove.length > 0) {
@@ -1941,44 +1943,73 @@ async function updateBlockingRules(blockedSites: string[]): Promise<void> {
     // If no sites to block, we're done
     if (blockedSites.length === 0) {
       console.log("[Background] No sites to block, rules cleared");
+      console.log("[Background] ========================================");
       return;
     }
 
     // Create new rules for blocked sites
-    const newRules: chrome.declarativeNetRequest.Rule[] = blockedSites.map(
-      (domain, index) => {
-        // Create URL filter patterns for the domain
-        const urlFilter = `*://*.${domain}/*`;
+    // We need TWO rules per domain to catch both bare domain and subdomains
+    const newRules: chrome.declarativeNetRequest.Rule[] = [];
+    let ruleId = 1;
 
-        return {
-          id: index + 1,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
-            redirect: {
-              url: chrome.runtime.getURL(
-                `blocked.html?url=${encodeURIComponent(domain)}`
-              ),
-            },
+    blockedSites.forEach((domain) => {
+      // Rule 1: Block bare domain (e.g., "x.com")
+      newRules.push({
+        id: ruleId++,
+        priority: 1,
+        action: {
+          type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+          redirect: {
+            url: chrome.runtime.getURL(
+              `blocked.html?url=${encodeURIComponent(domain)}`
+            ),
           },
-          condition: {
-            urlFilter: urlFilter,
-            resourceTypes: [
-              chrome.declarativeNetRequest.ResourceType.MAIN_FRAME,
-            ],
+        },
+        condition: {
+          urlFilter: `*://${domain}/*`,
+          resourceTypes: [
+            chrome.declarativeNetRequest.ResourceType.MAIN_FRAME,
+          ],
+        },
+      });
+
+      // Rule 2: Block subdomains (e.g., "www.x.com", "api.x.com")
+      newRules.push({
+        id: ruleId++,
+        priority: 1,
+        action: {
+          type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+          redirect: {
+            url: chrome.runtime.getURL(
+              `blocked.html?url=${encodeURIComponent(domain)}`
+            ),
           },
-        };
-      }
-    );
+        },
+        condition: {
+          urlFilter: `*://*.${domain}/*`,
+          resourceTypes: [
+            chrome.declarativeNetRequest.ResourceType.MAIN_FRAME,
+          ],
+        },
+      });
+    });
 
     // Add new rules
+    console.log("[Background] Creating rules:", JSON.stringify(newRules, null, 2));
+    
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: newRules,
     });
 
-    console.log(`[Background] Added ${newRules.length} blocking rules`);
+    console.log(`[Background] Successfully added ${newRules.length} blocking rules`);
+    
+    // Verify rules were added
+    const verifyRules = await chrome.declarativeNetRequest.getDynamicRules();
+    console.log("[Background] Active rules after update:", verifyRules);
+    console.log("[Background] ========================================");
   } catch (error) {
     console.error("[Background] Failed to update blocking rules:", error);
+    console.error("[Background] Error details:", error);
   }
 }
 

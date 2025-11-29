@@ -77,12 +77,33 @@ async function checkCurrentUrl(): Promise<void> {
         }
       }
     } else if (status === SiteStatus.BLOCKED) {
-      // Blocked sites are handled by declarativeNetRequest
-      // This shouldn't normally be reached, but notify background anyway
+      // Notify background of visit
       chrome.runtime.sendMessage({
         type: "SITE_VISITED",
         payload: { url: currentUrl },
       });
+
+      // Content script fallback for blocking (catches cached pages and SPA navigation)
+      // declarativeNetRequest handles most cases, but this catches edge cases
+      const stateResponse = await chrome.runtime.sendMessage({
+        type: "GET_STATE",
+      });
+
+      if (stateResponse?.success) {
+        const state = stateResponse.data;
+
+        // Only redirect if there's an active session with strict mode enabled
+        if (state.session?.isActive && state.settings.strictMode) {
+          console.log(
+            `[Content] Blocked site detected during active session with strict mode - redirecting to blocked page`
+          );
+
+          // Redirect to blocked page
+          window.location.href = chrome.runtime.getURL(
+            `blocked.html?url=${encodeURIComponent(domain || "unknown")}`
+          );
+        }
+      }
     }
   } catch (error) {
     console.error("[Content] Error checking URL:", error);
