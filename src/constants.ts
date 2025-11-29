@@ -510,7 +510,7 @@ export const COSMETIC_THEMES: CosmeticTheme[] = [
     id: "crimson-dusk",
     name: "Crimson Dusk",
     description: "A fiery theme for passionate shepherds",
-    cost: 100,
+    cost: 300,
     colors: {
       primary: "#ff6b6b",
       secondary: "#ee5a6f",
@@ -523,7 +523,7 @@ export const COSMETIC_THEMES: CosmeticTheme[] = [
     id: "emerald-grove",
     name: "Emerald Grove",
     description: "A natural theme for peaceful souls",
-    cost: 150,
+    cost: 650,
     colors: {
       primary: "#51cf66",
       secondary: "#37b24d",
@@ -536,7 +536,7 @@ export const COSMETIC_THEMES: CosmeticTheme[] = [
     id: "golden-dawn",
     name: "Golden Dawn",
     description: "A radiant theme for enlightened guides",
-    cost: 200,
+    cost: 1500,
     colors: {
       primary: "#ffd700",
       secondary: "#ffed4e",
@@ -549,7 +549,7 @@ export const COSMETIC_THEMES: CosmeticTheme[] = [
     id: "midnight-ocean",
     name: "Midnight Ocean",
     description: "A deep theme for contemplative shepherds",
-    cost: 250,
+    cost: 3750,
     colors: {
       primary: "#339af0",
       secondary: "#1c7ed6",
@@ -562,7 +562,7 @@ export const COSMETIC_THEMES: CosmeticTheme[] = [
     id: "violet-dream",
     name: "Violet Dream",
     description: "A mystical theme for spiritual guides",
-    cost: 300,
+    cost: 10000,
     colors: {
       primary: "#9775fa",
       secondary: "#845ef7",
@@ -585,21 +585,21 @@ export const COSMETIC_SPRITES: CosmeticSprite[] = [
     id: "hooded-guide",
     name: "Hooded Guide",
     description: "A mysterious shepherd cloaked in shadows",
-    cost: 150,
+    cost: 2000,
     imagePath: "assets/sprites/sprite_hooded_guide.png",
   },
   {
     id: "radiant-guardian",
     name: "Radiant Guardian",
     description: "A shepherd emanating gentle light",
-    cost: 200,
+    cost: 5000,
     imagePath: "assets/sprites/sprite_radiant_guardian.png",
   },
   {
     id: "ethereal-wanderer",
     name: "Ethereal Wanderer",
     description: "A shepherd who walks between worlds",
-    cost: 250,
+    cost: 15000,
     imagePath: "assets/sprites/sprite_ethereal_wanderer.png",
   },
 ];
