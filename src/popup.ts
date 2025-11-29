@@ -59,6 +59,13 @@ function setProgress(barId: string, percentage: number): void {
   bar.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
 }
 
+function formatNumber(value: number, maxDecimals: number = 3): string {
+  // Round to max decimals and convert to string
+  const rounded = Number(value.toFixed(maxDecimals));
+  // Convert back to string, which will automatically remove trailing zeros
+  return rounded.toString();
+}
+
 // ============================================================================
 // View Switching
 // ============================================================================
@@ -277,7 +284,7 @@ function updateIdleView(state: GameState): void {
   setText("stat-level", state.player.level.toString());
 
   // Update currency
-  setText("soul-embers", state.player.soulEmbers.toString());
+  setText("soul-embers", formatNumber(state.player.soulEmbers));
 
   // Update XP bar
   const xpPercentage =
@@ -294,7 +301,7 @@ function updateIdleView(state: GameState): void {
   setProgress("xp-bar", xpPercentage);
   setText(
     "xp-text",
-    `${state.player.soulInsight} / ${state.player.soulInsightToNextLevel}`
+    `${formatNumber(state.player.soulInsight)} / ${formatNumber(state.player.soulInsightToNextLevel)}`
   );
 
   // Update boss card
@@ -318,7 +325,7 @@ function updateIdleView(state: GameState): void {
     setProgress("resolve-bar", resolvePercentage);
     setText(
       "resolve-text",
-      `${state.progression.currentBossResolve} / ${boss.initialResolve}`
+      `${formatNumber(state.progression.currentBossResolve)} / ${formatNumber(boss.initialResolve)}`
     );
   }
 
@@ -352,7 +359,7 @@ function updateBreakView(state: GameState): void {
   setText("break-stat-level", state.player.level.toString());
 
   // Update Soul Embers display
-  setText("break-soul-embers", state.player.soulEmbers.toString());
+  setText("break-soul-embers", formatNumber(state.player.soulEmbers));
 
   // Update skill points display
   setText("skill-points-value", state.player.skillPoints.toString());
@@ -402,7 +409,7 @@ function updateBreakView(state: GameState): void {
     setProgress("break-resolve-bar", resolvePercentage);
     setText(
       "break-resolve-text",
-      `${state.progression.currentBossResolve} / ${boss.initialResolve}`
+      `${formatNumber(state.progression.currentBossResolve)} / ${formatNumber(boss.initialResolve)}`
     );
   }
 
@@ -502,7 +509,7 @@ function updateRewardView(result: SessionResult): void {
       setProgress("reward-xp-bar", xpPercentage);
       setText(
         "reward-xp-text",
-        `${currentState.player.soulInsight} / ${currentState.player.soulInsightToNextLevel}`
+        `${formatNumber(currentState.player.soulInsight)} / ${formatNumber(currentState.player.soulInsightToNextLevel)}`
       );
     }
   }
@@ -1271,7 +1278,7 @@ function setupMessageListeners(): void {
             if (currentView === ViewState.BREAK) {
               setText(
                 "break-soul-embers",
-                currentState.player.soulEmbers.toString()
+                formatNumber(currentState.player.soulEmbers)
               );
               // Show increment notification
               showEmbersIncrement(message.payload.embersEarned);
