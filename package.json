@@ -10,7 +10,8 @@
     "test:watch": "jest --watch",
     "test:unit": "jest --testPathIgnorePatterns=integration.test.ts",
     "test:integration": "jest integration.test.ts",
-    "dev-screen": "node scripts/dev-screen-server.js"
+    "dev-screen": "node scripts/dev-screen-server.js",
+    "package": "npm run build && node package-extension.js"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.270",
