@@ -311,7 +311,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.type) {
     case "SESSION_STARTED":
-      // Session started, check if we should show overlay
+      // Session started, check if we should show overlay or redirect
       isDismissed = false;
       checkCurrentUrl();
       break;
@@ -321,6 +321,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Session ended or break started, remove overlay
       removeOverlay();
       isDismissed = false;
+      break;
+
+    case "BREAK_ENDED":
+      // Break ended, check if current page should be blocked
+      // If auto-start is enabled, a new session will start automatically
+      if (message.payload?.autoStartEnabled) {
+        console.log(
+          "[Content] Break ended with auto-start enabled - checking current URL"
+        );
+        checkCurrentUrl();
+      }
       break;
 
     case "SHOW_WARNING":
