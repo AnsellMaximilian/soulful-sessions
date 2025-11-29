@@ -397,10 +397,10 @@ body {
   background: transparent;
   border: 1px solid var(--theme-accent);
   color: var(--theme-accent);
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
