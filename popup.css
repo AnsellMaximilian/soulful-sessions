@@ -144,6 +144,73 @@ body {
   color: #a0a0a0;
 }
 
+.stat-label-hover {
+  cursor: help;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.stat-label-hover:hover {
+  color: var(--theme-primary);
+}
+
+.stat-label-hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  transform: translateY(-8px);
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--theme-accent);
+}
+
+.stat-label-hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 12px;
+  transform: translateY(-2px);
+  border: 6px solid transparent;
+  border-top-color: var(--theme-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+
+.stat-label-hover:hover::after,
+.stat-label-hover:hover::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Centered tooltip variant for stats that need to be centered on popup */
+.stat-label-hover.tooltip-center::after {
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+.stat-label-hover.tooltip-center::before {
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.stat-label-hover.tooltip-center:hover::after,
+.stat-label-hover.tooltip-center:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .stat-value {
   font-size: 16px;
   font-weight: bold;
