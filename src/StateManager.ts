@@ -435,6 +435,10 @@ export class StateManager {
         typeof session.startTime === "number" ? session.startTime : Date.now(),
       duration: typeof session.duration === "number" ? session.duration : 25,
       taskId: typeof session.taskId === "string" ? session.taskId : "",
+      autoCompleteTask:
+        typeof session.autoCompleteTask === "boolean"
+          ? session.autoCompleteTask
+          : false,
       isActive:
         typeof session.isActive === "boolean" ? session.isActive : false,
       isPaused:

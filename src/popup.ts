@@ -208,6 +208,7 @@ async function requestState(): Promise<GameState> {
 
 async function startSession(duration: number, taskId: string, autoCompleteTask: boolean): Promise<void> {
   try {
+    console.log(`[Popup] sendMessage START_SESSION - payload: ${JSON.stringify({ duration, taskId, autoCompleteTask })}`);
     await sendMessage({
       type: "START_SESSION",
       payload: { duration, taskId, autoCompleteTask },
@@ -1070,6 +1071,8 @@ function setupEventHandlers(): void {
     const duration = parseInt(durationInput.value, 10);
     const taskId = taskSelector.value;
     const autoCompleteTask = autoCompleteCheckbox.checked;
+
+    console.log(`[Popup] Starting session - duration: ${duration}, taskId: ${taskId}, autoCompleteTask: ${autoCompleteTask}, checkbox.checked: ${autoCompleteCheckbox.checked}, checkbox.disabled: ${autoCompleteCheckbox.disabled}`);
 
     if (duration < 5 || duration > 120) {
       alert("Duration must be between 5 and 120 minutes");
