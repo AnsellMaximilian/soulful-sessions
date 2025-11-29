@@ -2119,15 +2119,31 @@ async function handleIdleStateChange(
 // ============================================================================
 
 /**
- * Send message to all connected clients (popup, options)
+ * Send message to all connected clients (popup, options, and content scripts)
  */
-function broadcastMessage(message: Message): void {
+async function broadcastMessage(message: Message): Promise<void> {
+  // Send to extension pages (popup, options)
   chrome.runtime.sendMessage(message).catch((error) => {
     // Ignore errors if no receivers are listening
     if (!error.message.includes("Receiving end does not exist")) {
       console.error("[Background] Broadcast error:", error);
     }
   });
+
+  // Send to all content scripts in open tabs
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (tab.id) {
+        chrome.tabs.sendMessage(tab.id, message).catch(() => {
+          // Silently ignore tabs without content script
+          // (e.g., chrome://, chrome-extension://, or pages that haven't loaded yet)
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[Background] Error broadcasting to tabs:", error);
+  }
 }
 
 /**
