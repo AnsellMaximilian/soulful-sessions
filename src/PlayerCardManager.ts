@@ -2,6 +2,18 @@ import { GameState } from "./types";
 import { STUBBORN_SOULS, COSMETIC_SPRITES, COSMETIC_THEMES } from "./constants";
 
 // ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Format number with max decimals, removing trailing zeros
+ */
+function formatNumber(value: number, maxDecimals: number = 3): string {
+  const rounded = Number(value.toFixed(maxDecimals));
+  return rounded.toString();
+}
+
+// ============================================================================
 // Player Card Data Types
 // ============================================================================
 
@@ -266,7 +278,7 @@ export class PlayerCardManager {
     const focusTimeFormatted = `${hours}h ${minutes}m`;
 
     // Format harmony as percentage
-    const harmonyPercent = (data.stats.harmony * 100).toFixed(1);
+    const harmonyPercent = formatNumber(data.stats.harmony * 100, 3);
 
     // Get theme colors
     const theme = COSMETIC_THEMES.find((t) => t.id === data.cosmetics.themeId);
@@ -294,7 +306,7 @@ export class PlayerCardManager {
         <div class="card-xp-bar-wrapper" role="region" aria-label="Experience progress">
           <div class="card-xp-bar-container">
             <div class="card-xp-bar" role="progressbar" aria-valuenow="${xpPercentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${xpPercentage}%"></div>
-            <div class="card-xp-text">${data.currentXP} / ${data.xpToNextLevel} XP</div>
+            <div class="card-xp-text">${formatNumber(data.currentXP, 3)} / ${formatNumber(data.xpToNextLevel, 3)} XP</div>
           </div>
         </div>
       </div>
@@ -336,34 +348,34 @@ export class PlayerCardManager {
       <div class="card-row-2">
         <!-- Stats row -->
         <div class="card-stats-row" role="region" aria-label="Character statistics">
-          <div class="card-stat-box" role="group" aria-label="Spirit stat: ${data.stats.spirit.toFixed(1)}">
-            <div class="card-stat-value">${data.stats.spirit.toFixed(1)}</div>
+          <div class="card-stat-box" role="group" aria-label="Spirit stat: ${formatNumber(data.stats.spirit, 3)}">
+            <div class="card-stat-value">${formatNumber(data.stats.spirit, 3)}</div>
             <div class="card-stat-label">Spirit</div>
           </div>
           <div class="card-stat-box" role="group" aria-label="Harmony stat: ${harmonyPercent} percent">
             <div class="card-stat-value">${harmonyPercent}%</div>
             <div class="card-stat-label">Harmony</div>
           </div>
-          <div class="card-stat-box" role="group" aria-label="Soulflow stat: ${data.stats.soulflow.toFixed(1)}">
-            <div class="card-stat-value">${data.stats.soulflow.toFixed(1)}</div>
+          <div class="card-stat-box" role="group" aria-label="Soulflow stat: ${formatNumber(data.stats.soulflow, 3)}">
+            <div class="card-stat-value">${formatNumber(data.stats.soulflow, 3)}</div>
             <div class="card-stat-label">Soulflow</div>
           </div>
         </div>
         
         <!-- Currencies section -->
         <div class="card-currencies-box" role="region" aria-label="Currencies">
-          <div class="card-currency-item" role="group" aria-label="Soul Insight: ${data.currentXP}">
+          <div class="card-currency-item" role="group" aria-label="Soul Insight: ${formatNumber(data.currentXP, 3)}">
             <img src="assets/icons/soul_insight.png" alt="" class="card-currency-icon" aria-hidden="true" />
             <div class="card-currency-info">
               <div class="card-currency-label">Insight</div>
-              <div class="card-currency-value">${data.currentXP}</div>
+              <div class="card-currency-value">${formatNumber(data.currentXP, 3)}</div>
             </div>
           </div>
-          <div class="card-currency-item" role="group" aria-label="Soul Embers: ${data.soulEmbers}">
+          <div class="card-currency-item" role="group" aria-label="Soul Embers: ${formatNumber(data.soulEmbers, 3)}">
             <img src="assets/icons/soul_ember.png" alt="" class="card-currency-icon" aria-hidden="true" />
             <div class="card-currency-info">
               <div class="card-currency-label">Embers</div>
-              <div class="card-currency-value">${data.soulEmbers}</div>
+              <div class="card-currency-value">${formatNumber(data.soulEmbers, 3)}</div>
             </div>
           </div>
         </div>

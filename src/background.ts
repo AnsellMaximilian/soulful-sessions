@@ -473,6 +473,13 @@ async function handleStartSession(payload: {
 
   const currentState = stateManager.getState();
 
+  // If there's an active break, clear it and its alarm
+  if (currentState.break?.isActive) {
+    console.log("[Background] Clearing active break to start new session");
+    await chrome.alarms.clear("soulShepherd_breakEnd");
+    await stateManager.updateState({ break: null });
+  }
+
   // Ensure navigation monitor is initialized
   if (!navigationMonitor) {
     navigationMonitor = new NavigationMonitor();
