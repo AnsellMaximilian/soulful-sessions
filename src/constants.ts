@@ -51,7 +51,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Unfinished Scholar",
     backstory:
       "A researcher who died before publishing their life's work. They haunt the library, searching for one more source.",
-    initialResolve: 200,
+    initialResolve: 250,
     sprite: "scholar.png",
     unlockLevel: 3,
     finalConversation: [
@@ -83,7 +83,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Regretful Parent",
     backstory:
       "A parent who missed their child's milestones. They linger at the playground, watching families.",
-    initialResolve: 350,
+    initialResolve: 600,
     sprite: "parent.png",
     unlockLevel: 5,
     finalConversation: [
@@ -115,7 +115,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Forgotten Artist",
     backstory:
       "A painter whose masterpiece was never seen. They wander galleries, invisible among the crowds.",
-    initialResolve: 500,
+    initialResolve: 1400,
     sprite: "artist.png",
     unlockLevel: 7,
     finalConversation: [
@@ -147,7 +147,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Lonely Musician",
     backstory:
       "A composer whose symphony was never performed. They sit at a silent piano, fingers hovering over keys.",
-    initialResolve: 700,
+    initialResolve: 3200,
     sprite: "musician.png",
     unlockLevel: 10,
     finalConversation: [
@@ -179,7 +179,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Devoted Gardener",
     backstory:
       "A botanist who never saw their rare seed bloom. They tend to a garden that exists only in memory.",
-    initialResolve: 950,
+    initialResolve: 7000,
     sprite: "gardener.png",
     unlockLevel: 13,
     finalConversation: [
@@ -211,7 +211,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Ambitious Inventor",
     backstory:
       "An engineer whose breakthrough was stolen. They tinker endlessly with a machine that will never work.",
-    initialResolve: 1250,
+    initialResolve: 15000,
     sprite: "inventor.png",
     unlockLevel: 16,
     finalConversation: [
@@ -243,7 +243,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Wandering Explorer",
     backstory:
       "A traveler who never reached the summit. They climb an endless mountain, always one step from the peak.",
-    initialResolve: 1600,
+    initialResolve: 32000,
     sprite: "explorer.png",
     unlockLevel: 20,
     finalConversation: [
@@ -275,7 +275,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Silent Poet",
     backstory:
       "A writer whose words were burned before being read. They whisper verses to the wind that carries them away.",
-    initialResolve: 2000,
+    initialResolve: 65000,
     sprite: "poet.png",
     unlockLevel: 24,
     finalConversation: [
@@ -307,7 +307,7 @@ export const STUBBORN_SOULS: StubbornSoul[] = [
     name: "The Eternal Guardian",
     backstory:
       "A protector who failed their final duty. They stand watch over ruins, guarding nothing but regret.",
-    initialResolve: 2500,
+    initialResolve: 130000,
     sprite: "guardian.png",
     unlockLevel: 28,
     finalConversation: [
