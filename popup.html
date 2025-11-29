@@ -142,14 +142,24 @@
         aria-label="Start Focus Session"
       >
         <label for="task-selector" class="control-label">Task:</label>
-        <select
-          id="task-selector"
-          class="task-selector"
-          aria-label="Select task to work on"
-          aria-required="false"
-        >
-          <option value="">Select a task...</option>
-        </select>
+        <div class="task-selector-row">
+          <select
+            id="task-selector"
+            class="task-selector"
+            aria-label="Select task to work on"
+            aria-required="false"
+          >
+            <option value="">Select a task...</option>
+          </select>
+          <button
+            id="open-options-btn"
+            class="gear-icon-btn"
+            aria-label="Open settings to manage tasks"
+            title="Manage tasks in settings"
+          >
+            <img src="assets/icons/gear_icon.png" alt="" class="gear-icon" aria-hidden="true" />
+          </button>
+        </div>
 
         <div class="duration-row">
           <div class="duration-input-group">

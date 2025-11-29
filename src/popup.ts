@@ -1061,6 +1061,12 @@ function setupEventHandlers(): void {
     }
   });
 
+  // Open Options button (gear icon)
+  const openOptionsBtn = getElement<HTMLButtonElement>("open-options-btn");
+  openOptionsBtn.addEventListener("click", () => {
+    chrome.runtime.openOptionsPage();
+  });
+
   // Start Session button
   const startSessionBtn = getElement<HTMLButtonElement>("start-session-btn");
   startSessionBtn.addEventListener("click", async () => {
