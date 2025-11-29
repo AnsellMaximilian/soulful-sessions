@@ -3,9 +3,20 @@
   "description": "Chrome Extension that combines productivity and fun game into a chimera product, made using Kiro",
   "version": "1.0",
   "manifest_version": 3,
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "assets/sprites/sprite_classic_shepherd.png"
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
   },
   "permissions": [
     "storage",
