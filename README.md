@@ -68,18 +68,49 @@ Each boss represents a soul with unfinished business. As you defeat them, you en
 ### From Chrome Web Store
 *(Coming soon - currently pending review)*
 
-### Manual Installation (Developer Mode)
+### From GitHub Releases (Recommended for Testing)
 
-1. Download or clone this repository
+1. **Download the latest release**
+   - Go to the [Releases page](https://github.com/AnsellMaximilian/soulful-sessions/releases/latest)
+   - Download `soulful-sessions.zip` from the Assets section
+
+2. **Extract the zip file**
+   - Right-click the downloaded zip file
+   - Select "Extract All..." (Windows) or double-click (Mac)
+   - Choose a permanent location (e.g., `Documents/ChromeExtensions/`)
+   - **Important**: Don't delete this folder - Chrome needs it to run the extension
+
+3. **Load into Chrome**
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" using the toggle in the top right corner
+   - Click "Load unpacked" button
+   - Navigate to and select the extracted `soulful-sessions` folder
+   - The extension icon should appear in your toolbar
+
+4. **Pin the extension** (optional but recommended)
+   - Click the puzzle piece icon in Chrome's toolbar
+   - Find "Soulful Sessions" and click the pin icon
+   - The extension icon will now always be visible
+
+### Manual Installation from Source (For Developers)
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/soulful-sessions.git
+   cd soulful-sessions
+   ```
+
 2. Install dependencies and build:
    ```bash
    npm install
    npm run build
    ```
-3. Open Chrome and navigate to `chrome://extensions/`
-4. Enable "Developer mode" (toggle in top right)
-5. Click "Load unpacked"
-6. Select the project root directory
+
+3. Load into Chrome:
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" (toggle in top right)
+   - Click "Load unpacked"
+   - Select the project root directory (not the `dist` folder)
 
 ## 🚀 Development
 
