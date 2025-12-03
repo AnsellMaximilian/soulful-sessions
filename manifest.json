@@ -23,7 +23,6 @@
     "alarms",
     "idle",
     "webNavigation",
-    "tabs",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
     "notifications"
